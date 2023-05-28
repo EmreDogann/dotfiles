@@ -13,9 +13,19 @@ setopt inc_append_history
 setopt correct
 setopt correct_all
 
+# Path Variables
+# append
+path+=("$HOME/.local/bin")
+# export to sub-processes (make it inherited by child processes)
+export PATH
+
+# fpath
+fpath=($ZDOTDIR/plugins/zsh-completions/src $fpath)
+
 # Load Vim config
 export MYVIMDIR="$XDG_CONFIG_HOME/vim"
 export MYVIMRC="$MYVIMDIR/.vimrc"
+export VIMINIT='source $MYVIMRC'
 
 # Set up the prompt
 autoload -Uz promptinit
@@ -98,3 +108,8 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# ----- Windows (WSL) -----
+# export PATH="$PATH:/mnt/c/Users/lesmo/AppData/Local/Microsoft/WindowsApps"
+# export PATH="$PATH:/mnt/c/WINDOWS"
