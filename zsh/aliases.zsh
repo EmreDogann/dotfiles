@@ -53,17 +53,19 @@ alias zshal="vim $ZDOTDIR/aliases.zsh"
 alias vimdr="cd $MYVIMDIR"
 alias vimrc="vim $MYVIMRC"
 
-# ----- Functions -----
+# ----- Searching -----
 if command -v fzf > /dev/null; then
-	vif() {
-		local fname
-		fname=$(fzf) || return
-		vim "$fname"
-	}
+	alias vimf="fzf --bind 'enter:become(vim {})'"
+	alias cdf="fd --type d --strip-cwd-prefix --hidden --follow --exclude .git | fzf --print0 | xargs --no-run-if-empty -0 -o cd"
+	# vif() {
+	# 	local fname
+	# 	fname=$(fzf) || return
+	# 	vim "$fname"
+	# }
 
-	fcd() {
-		local dirname
-		dirname=$(find -type d | fzf) || return
-		cd "$dirname"
-	}
+	# fcd() {
+	# 	local dirname
+	# 	dirname=$(fd --type d --strip-cwd-prefix --hidden --follow --exclude .git | fzf) || return
+	# 	cd "$dirname"
+	# }
 fi

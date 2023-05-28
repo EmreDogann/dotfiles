@@ -29,7 +29,52 @@ export PROMPT="%m"
 source $ZDOTDIR/aliases.zsh
 
 # fzf Options
-export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+# Use fd package if available
+if command -v fd >/dev/null 2>&1; then
+	export FZF_DEFAULT_COMMAND="fd --strip-cwd-prefix --hidden --follow --exclude .git"
+	export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+	export FZF_ALT_C_COMMAND="$FZF_DEFAULT_COMMAND --type d"
+
+	# Use ~~ as the trigger sequence instead of the default **
+	# export FZF_COMPLETION_TRIGGER='~~'
+
+	# Options to fzf command
+	export FZF_COMPLETION_OPTS='--border --info=inline'
+
+	# Use fd (https://github.com/sharkdp/fd) instead of the default find
+	# command for listing path candidates.
+	# - The first argument to the function ($1) is the base path to start traversal
+	# - See the source code (completion.{bash,zsh}) for the details.
+	_fzf_compgen_path() {
+	  fd --hidden --follow --exclude ".git" . "$1"
+	}
+
+	# Use fd to generate the list for directory completion
+	_fzf_compgen_dir() {
+	  fd --type d --hidden --follow --exclude ".git" . "$1"
+	}
+
+	# Advanced customization of fzf options via _fzf_comprun function
+	# - The first argument to the function is the name of the command.
+	# - You should make sure to pass the rest of the arguments to fzf.
+	_fzf_comprun() {
+	  local command=$1
+	  shift
+
+	  case "$command" in
+		cd)           fzf --preview 'tree -C {} | head -200'   "$@" ;;
+		export|unset) fzf --preview "eval 'echo \$'{}"         "$@" ;;
+		ssh)          fzf --preview 'dig {}'                   "$@" ;;
+		*)            fzf "$@"										;;
+	  esac
+	}
+fi
+# Print tree structure in the preview winodw
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --info=inline --header="<Find File> | Use CTRL-C or ESC to cancel"'
+export FZF_CTRL_T_OPTS='--header="<Paste File/Directory> | Use CTRL-C to cancel"'
+export FZF_ALT_C_OPTS='--header="<cd into Directory> | Use CTRL-C to cancel" --preview "tree -C {} | head -200" --info=inline'
+export FZF_CTRL_R_OPTS='--header="<Paste History> | Use CTRL-C to cancel"'
 
 # Use modern completion system
 autoload -Uz compinit && compinit
