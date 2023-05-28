@@ -1,0 +1,9 @@
+[core]
+	editor = vim
+
+[color "diff"]
+	whitespace = red reverse
+
+[user]
+	name = Emre Dogan
+	email = 48212096+EmreDogann@users.noreply.github.com

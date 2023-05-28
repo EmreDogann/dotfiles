@@ -1,0 +1,18 @@
+# Zsh files
+zsh/.zcompdump
+zsh/.zsh_history
+zsh/.zlogin
+zsh/.zlogout
+
+# Ignore fontforge package
+fontforge
+
+# Ignore installed plugins managed by vim-plug
+vim/plugged/**
+
+# Ignore other vim file
+vim/swap/**
+vim/backup/**
+vim/undo/**
+vim/.viminfo*
+vim/spell/*.add*
