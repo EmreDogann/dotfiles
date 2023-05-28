@@ -7,3 +7,9 @@
 [submodule "zsh/plugins/zsh-syntax-highlighting"]
 	path = zsh/plugins/zsh-syntax-highlighting
 	url = https://github.com/zsh-users/zsh-syntax-highlighting.git
+[submodule "zsh/colors/catppuccin/zsh-syntax-highlighting"]
+	path = zsh/colors/catppuccin/zsh-syntax-highlighting
+	url = https://github.com/catppuccin/zsh-syntax-highlighting.git
+[submodule "zsh/plugins/zsh-autosuggestions"]
+	path = zsh/plugins/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions

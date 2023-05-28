@@ -45,27 +45,31 @@ alias ll='ls -lh'
 alias la='ls -lAh'
 
 # ----- Other -----
-alias reload="source $ZDOTDIR/.zshrc && echo 'ZSH config reloaded from $ZDOTDIR/.zshrc'"
+alias reload="exec zsh"
 alias zshdr="cd $ZDOTDIR"
 alias zshrc="vim $ZDOTDIR/.zshrc"
-alias zshev="vim $HOME/.zshenv"
+alias zshev="vim $ZDOTDIR/.zshenv"
 alias zshal="vim $ZDOTDIR/aliases.zsh"
 alias vimdr="cd $MYVIMDIR"
 alias vimrc="vim $MYVIMRC"
+
+case "$(uname -s)" in
+
+	Darwin)
+		# echo 'Mac OS X'
+	;;
+
+	Linux)
+		alias ls='ls --color=auto'
+	;;
+
+	CYGWIN*|MINGW32*|MSYS*|MINGW*)
+		echo 'MS Windows'
+	;;
+esac
 
 # ----- Searching -----
 if command -v fzf > /dev/null; then
 	alias vimf="fzf --bind 'enter:become(vim {})'"
 	alias cdf="fd --type d --strip-cwd-prefix --hidden --follow --exclude .git | fzf --print0 | xargs --no-run-if-empty -0 -o cd"
-	# vif() {
-	# 	local fname
-	# 	fname=$(fzf) || return
-	# 	vim "$fname"
-	# }
-
-	# fcd() {
-	# 	local dirname
-	# 	dirname=$(fd --type d --strip-cwd-prefix --hidden --follow --exclude .git | fzf) || return
-	# 	cd "$dirname"
-	# }
 fi

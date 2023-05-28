@@ -276,7 +276,7 @@ augroup END
 
 " Set color scheme & settings
 set termguicolors
-colorscheme catppuccin_macchiato
+colorscheme catppuccin_$THEMEVARIANT
 
 " File Sourcing
 source $MYVIMDIR/statusline.vim
