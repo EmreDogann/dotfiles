@@ -11,14 +11,15 @@ stty stop undef
 bindkey -e
 
 # Source file if it exists.
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh	# fzf fuzzy search
 [ -f "$ZDOTDIR/prompt.zsh" ] && source "$ZDOTDIR/prompt.zsh"
 [ -f "$ZDOTDIR/exports.zsh" ] && source "$ZDOTDIR/exports.zsh"
 [ -f "$ZDOTDIR/theme.zsh" ] && source "$ZDOTDIR/theme.zsh"
 [ -f "$ZDOTDIR/aliases.zsh" ] && source "$ZDOTDIR/aliases.zsh"
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh	# fzf fuzzy search
 
 # Use fd package if available
-if command -v fd >/dev/null 2>&1; then
+if command -v fd >/dev/null 2>&1
+then
 	export FZF_DEFAULT_COMMAND="fd --strip-cwd-prefix --hidden --follow --exclude .git"
 	export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 	export FZF_ALT_C_COMMAND="$FZF_DEFAULT_COMMAND --type d"
@@ -53,7 +54,7 @@ fi
 
 export FZF_COMPLETION_OPTS='--border --info=inline'
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --height 40% --layout=reverse --border --info=inline --header='<Find File> | Use CTRL-C or ESC to cancel'"
-export FZF_CTRL_T_OPTS='--header="<Paste File/Directory> | Use CTRL-C or ESC to cancel"'
+export FZF_CTRL_T_OPTS='--header="<Paste File/Directory Path> | Use CTRL-C or ESC to cancel"'
 export FZF_ALT_C_OPTS='--header="<cd into Directory> | Use CTRL-C or ESC to cancel" --preview "tree -C {} | head -200" --info=inline'
 export FZF_CTRL_R_OPTS='--header="<Paste History> | Use CTRL-C or ESC to cancel"'
 
@@ -63,7 +64,7 @@ zmodload zsh/complist
 
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*:descriptions' format '%F{green}-- %d --%f'
-zstyle ':completion:*' completer _expand _complete _correct _approximate
+zstyle ':completion:*' completer _expand_alias _expand _complete _correct _approximate
 zstyle ':completion:*' group-name ''
 # zstyle ':completion:*' menu select
 eval "$(dircolors -b)"

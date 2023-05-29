@@ -53,6 +53,9 @@ alias zshal="vim $ZDOTDIR/aliases.zsh"
 alias vimdr="cd $MYVIMDIR"
 alias vimrc="vim $MYVIMRC"
 
+# Replace cat with bat 
+alias cat='bat --paging=never'
+
 case "$(uname -s)" in
 
 	Darwin)

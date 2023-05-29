@@ -10,7 +10,6 @@
 
 set encoding=utf-8
 scriptencoding utf-8
-" Deez
 " Disable vi compatibility, if for some reason it's on.
 if &compatible
 	set nocompatible
@@ -53,6 +52,11 @@ filetype indent on
 
 " Turn syntax highlighting on.
 syntax on
+
+if executable("rg")
+	set grepprg=rg\ --vimgrep\ --smart-case\ --hidden
+	set grepformat=%f:%l:%c:%m
+endif
 
 " Types of keyword completion to look for
 " kSpell - dictionary
@@ -161,6 +165,8 @@ autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
 " 	syntax on
 call plug#begin(data_dir . '/plugged')
 
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
 Plug 'matze/vim-move'
 Plug 'tpope/vim-surround'
 Plug 'junegunn/vim-peekaboo'
@@ -196,16 +202,42 @@ nnoremap \vs :e $MYVIMDIR/statusline.vim<CR>
 " Reload vimrc configuration file
 nnoremap \vr :source $MYVIMRC<CR>
 
+" Fzf file search
+nnoremap <C-P> :Files<CR>
+command! -bang -nargs=? -complete=dir Files
+			\ call fzf#vim#files(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline']}), <bang>0)
+command! -bang -nargs=* Rg
+			\ call fzf#vim#grep("rg --column --line-number --no-ignore --no-heading --hidden --follow --glob '!.git/*' --color=always --smart-case -- " . shellescape(<q-args>), 1, fzf#vim#with_preview(), <bang>0)
+
 " Toggle spell check.
 nnoremap <F5> :setlocal spell!<CR>
 inoremap <F5> <C-o>:setlocal spell!<CR>
 
 " Automatically fix the last misspelled word and jump back to where you were.
 "   Taken from this talk: https://www.youtube.com/watch?v=lwD8G1P52Sk
-nnoremap <leader>sp :normal! mz[s1z=`z<CR>
+nnoremap <Leader>sp :normal! mz[s1z=`z<CR>
 
 " Insert mode completion
 nnoremap \s a<C-X><C-S><C-P>
+
+" Press * to search for the term under the cursor or a visual selection and
+" then press a key below to replace all instances of it in the current file.
+" The extra 'c' at the end will ask for confirmation before replacing.
+nnoremap <Leader>r :%s///g<Left><Left>
+" nnoremap <Leader>rc :%s///gc<Left><Left><Left>
+
+" The same as above but instead of acting on the whole file it will be
+" restricted to the previously visually selected range. You can do that by
+" pressing *, visually selecting the range you want it to apply to and then
+" press a key below to replace all instances of it in the current selection.
+" The extra 'c' at the end will ask for confirmation before replacing.
+xnoremap <Leader>r :s///g<Left><Left>
+" xnoremap <Leader>rc :s///gc<Left><Left><Left>
+
+" Type a replacement term and press . to repeat the replacement again. Useful
+" for replacing few instances of the term (comparable to multiple cursors).
+nnoremap <silent> <Leader>* :let @/='\<'.expand('<cword>').'\>'<CR>cgn
+xnoremap <silent> <Leader>* "sy:let @/=@s<CR>cgn
 
 " <C-O> in insert mode - toggles in and out of insert to normal mode.
 " <C-U> in normal mode will clear the extra range/info after a : is pressed,
@@ -227,52 +259,6 @@ augroup filetype_vim
 augroup END
 
 " }}}
-
-" " STATUS LINE ------------------------------------------------------------ {{{
-
-" " Clear status line when vimrc is reloaded.
-" set statusline=
-
-" function! GitBranch()
-
-"   return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
-
-" endfunction
-
-" function! StatuslineGit()
-
-"   let l:branchname = GitBranch()
-
-"   return strlen(l:branchname) > 0?'  '.l:branchname.' ':''
-
-" endfunction
-
-" set statusline+=%#PmenuSel#
-
-" set statusline+=%{StatuslineGit()}
-
-" set statusline+=%#LineNr#
-
-" set statusline+=\ %F
-
-" set statusline+=%m\
-
-" set statusline+=%=
-
-" set statusline+=%#CursorColumn#
-
-" set statusline+=\ %y
-
-" set statusline+=\ %{&fileencoding?&fileencoding:&encoding}
-
-" set statusline+=\[%{&fileformat}\]
-
-" set statusline+=\ %l:%c
-
-" " ALways show the status. 
-" set laststatus=2
-
-" " }}}
 
 " Set color scheme & settings
 set termguicolors
