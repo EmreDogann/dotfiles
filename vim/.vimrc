@@ -42,9 +42,6 @@ filetype plugin on
 " Load an indent file for the detected file type.
 filetype indent on
 
-" Turn syntax highlighting on.
-syntax on
-
 " Change grepprg to use ripgrep.
 if executable("rg")
 	set grepprg=rg\ --vimgrep\ --smart-case\ --hidden
@@ -143,6 +140,10 @@ set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
 " Session options
 set ssop-=options
 
+" Open new split panes to right and bottom, more natural than defaults.
+set splitbelow
+set splitright
+
 " }}}
 
 " PLUGINS ----------------------------------------------------------------{{{
@@ -150,14 +151,14 @@ set ssop-=options
 " PLUGIN LOADER AUTOMATION -----------------------------------------------{{{
 let data_dir = has('nvim') ? stdpath('data') . '/site' : expand('$MYVIMDIR')
 if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+	silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+	autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
 " Run PlugInstall if there are missing plugins
 autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
-  \| PlugInstall --sync | source $MYVIMRC
-\| endif
+			\| PlugInstall --sync | source $MYVIMRC
+			\| endif
 
 " }}}
 
@@ -185,6 +186,14 @@ call plug#end()
 " }}}
 
 " PLUGIN SETTINGS --------------------------------------------------------{{{
+
+" Set color scheme & settings
+set termguicolors
+colorscheme catppuccin_$THEMEVARIANT
+
+" Turn syntax highlighting on.
+syntax on
+
 let g:move_key_modifier = 'S'
 let g:move_key_modifier_visualmode = 'S'
 
@@ -197,14 +206,14 @@ let g:fzf_preview_window = ['right,50%,<70(up,40%)', 'ctrl-/']
 " This is the default extra key bindings
 let g:fzf_action = {
 			\ 'ctrl-t': 'tab split',
-			\ 'ctrl-x': 'split',
-			\ 'ctrl-v': 'vsplit' }	
+			\ 'ctrl-h': 'split',
+			\ 'ctrl-x': 'vsplit' }	
 
 " Enable per-command history.
 " CTRL-N and CTRL-P will be automatically bound to next-history and
 " previous-history instead of down and up. If you don't like the change,
 " explicitly bind the keys to down and up in your $FZF_DEFAULT_OPTS.
-let g:fzf_history_dir = '~/.local/share/fzf-history'
+let g:fzf_history_dir = '$HOME/.local/share/fzf-history'
 
 let g:fzf_tags_command = 'ctags -R'
 
@@ -214,16 +223,16 @@ command! -bang -nargs=* Rg
 			\ call fzf#vim#grep("rg --line-number --no-ignore --no-heading --hidden --follow --glob='!.git/' --color=always --smart-case -- " . shellescape(<q-args>),
 			\ 1, fzf#vim#with_preview(), <bang>0)
 command! -bang -nargs=* Projfind
-            \ call fzf#vim#grep("rg --no-ignore --hidden --follow --smart-case --no-heading --line-number --color=always --glob='!.git/' -- " . shellescape(<q-args>)
-            \ . ' ' . (system('git status') =~ '^fatal' ? expand("%:p:h") : system("git rev-parse --show-toplevel")), 1, fzf#vim#with_preview(), <bang>0)
+			\ call fzf#vim#grep("rg --no-ignore --hidden --follow --smart-case --no-heading --line-number --color=always --glob='!.git/' -- " . shellescape(<q-args>)
+			\ . ' ' . (system('git status') =~ '^fatal' ? expand("%:p:h") : system("git rev-parse --show-toplevel")), 1, fzf#vim#with_preview(), <bang>0)
 
 function! RipgrepFzf(query, fullscreen)
-  let command_fmt = "rg --line-number --no-heading --follow --hidden --no-ignore --glob='!.git/' --color=always --smart-case -- %s || true"
-  let initial_command = printf(command_fmt, shellescape(a:query))
-  let reload_command = printf(command_fmt, '{q}')
-  let spec = {'options': ['--disabled', '--query', a:query, '--bind', 'change:reload:sleep 0.1;'.reload_command]}
-  let spec = fzf#vim#with_preview(spec, 'right', 'ctrl-/')
-  call fzf#vim#grep(initial_command, 1, spec, a:fullscreen)
+	let command_fmt = "rg --line-number --no-heading --follow --hidden --no-ignore --glob='!.git/' --color=always --smart-case -- %s || true"
+	let initial_command = printf(command_fmt, shellescape(a:query))
+	let reload_command = printf(command_fmt, '{q}')
+	let spec = {'options': ['--disabled', '--query', a:query, '--bind', 'change:reload:sleep 0.1;'.reload_command]}
+	let spec = fzf#vim#with_preview(spec, 'right', 'ctrl-/')
+	call fzf#vim#grep(initial_command, 1, spec, a:fullscreen)
 endfunction
 
 command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
@@ -234,19 +243,12 @@ command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
 " Set <space> as the leader key
 let mapleader = ' '
 
-" y - copy to unnamed register
-" cy - copy to unnamed register and clipboard.
-" p - paste from unnamed clipboard
-" cp - paste from clipboard
-" d.., x.. keys - delete but no copy (black hole register)
-" <leader>d.., <leader>x.. keys - delete and copy to register
-
 " Remap s to something else
 " :map s
 
 function! SaveAndReload()
 	let l:view = winsaveview()
-	
+
 	silent! exec "w"
 	exec "mksession! " . expand("%:p:h") . "/session.vim"
 	silent! normal \\vr
@@ -263,20 +265,38 @@ noremap <silent> <C-s> :call SaveAndReload()<CR>
 " Yank to end of line instead of whole line.
 nmap Y y$
 
+" Paste from "0 register by default unless a register other the default is specified.
+" From: https://stackoverflow.com/questions/18391573/how-make-vim-paste-to-always-paste-from-register-0-unless-its-specified
+nnoremap <expr> p (v:register ==# '"' ? '"0' : '') . 'p'
+nnoremap <expr> P (v:register ==# '"' ? '"0' : '') . 'P'
+xnoremap <expr> p (v:register ==# '"' ? '"0' : '') . 'p'
+xnoremap <expr> P (v:register ==# '"' ? '"0' : '') . 'P'
+
+" Paste from default register (used for deleted text as a for of cut & paste).
+nnoremap <leader>p ""p
+nnoremap <leader>P ""P
+xnoremap <leader>p ""p
+xnoremap <leader>P ""P
+
+" Paste from system clipboard
+" NOTE: vim must be compiled with clipboard support for this to work.
+nnoremap cp "+p
+nnoremap cP "+P
+xnoremap cp "+p
+xnoremap cP "+P
+
 " Clipboard bindings
 if has("win32")
 	" Windows options here
-	vnoremap <C-c> "+y
-	map <C-v> "+P
 elseif has("unix")
 	let s:uname = system("uname")
-    if s:uname == "Darwin\n"
-      	" Mac options here
+	if s:uname == "Darwin\n"
+		" Mac options here
 	else
 		" Other UNIX options here
 
 		" UNIX via WSL
-		if executable("clip.exe")
+		if system('uname -r') =~ "microsoft" && executable("clip.exe")
 			" From: https://vi.stackexchange.com/questions/24367/unexpected-behavior-with-feedkeys
 			function! YankFixedCursor(motionPrefix)
 				let g:myfixedcursor = getcurpos()
@@ -287,23 +307,28 @@ elseif has("unix")
 			" From: https://stackoverflow.com/a/58822884/10439539
 			function! SendToClip(type, ...)
 				if a:0
+					let g:myfixedcursor = getcurpos()
 					" Visual mode
-					normal! gv"0y
+					keepjumps silent! normal! gv"0y
 				elseif a:type ==# 'line'
-					normal! '[V']"0y
+					keepjumps silent! normal! '[V']"0y
 				elseif a:type ==# 'char'
-					normal! `[v`]"0y
+					keepjumps silent! normal! `[v`]"0y
 				endif
 
-				call system('clip.exe', @0)
+				" From: https://stackoverflow.com/a/20076502/10439539
+				let l:stripedOutput = substitute(@0, '\s\{2,}\|\n$', '', 'g')
+				" Yanking to + register does not work for some reason. So use
+				" System32/clip.exe instead.
+				call system('clip.exe', l:stripedOutput)
 				call setpos('.', g:myfixedcursor)
 			endfunction
 
 			nnoremap <silent> <expr> cy YankFixedCursor("")
 			nnoremap <silent> <expr> cyy YankFixedCursor("_")
-			xnoremap <silent> Y             :<C-U>call SendToClip(visualmode(),1)<CR>
+			xnoremap <silent> Y :<C-U>call SendToClip(visualmode(),1)<CR>
 		endif
-    endif
+	endif
 endif
 
 " Edit vimrc configuration file
@@ -312,6 +337,11 @@ nnoremap \ve :e $MYVIMRC<CR>
 nnoremap \vs :e $MYVIMDIR/statusline.vim<CR>
 " Reload vimrc configuration file
 nnoremap \vr :source $MYVIMRC<CR>
+
+noremap <Up> :echoerr "nono don be stopid"<CR>
+noremap <Down> :echoerr "nono don be stopid"<CR>
+noremap <Left> :echoerr "nono don be stopid"<CR>
+noremap <Right> :echoerr "nono don be stopid"<CR>
 
 " Fzf file search
 map <C-P> :Files<CR>
@@ -359,31 +389,37 @@ xnoremap <Leader>r :s///g<Left><Left>
 nnoremap <silent> <Leader>* :let @/='\<'.expand('<cword>').'\>'<CR>cgn
 xnoremap <silent> <Leader>* "sy:let @/=@s<CR>cgn
 
+" Copy line above/below
 " <C-O> in insert mode - toggles in and out of insert to normal mode.
 " <C-U> in normal mode will clear the extra range/info after a : is pressed,
 " (:'<,'> in visual mode) just leaving the : in the command line.
-nnoremap <silent> <expr> <M-Up> ":copy .-1<CR>==" .. (v:count1 - 1 == 0 ? "" : (v:count1 - 1) .. "k")
-nnoremap <silent> <expr> <M-Down> 'm`' .. v:count1 .. ':<C-U>copy .<CR>==``'
+nnoremap <silent> <expr> <M-Up> ":copy .-1<CR>==" . (v:count1 - 1 == 0 ? "" : (v:count1 - 1) . "k")
+nnoremap <silent> <expr> <M-Down> ":copy .<CR>=="
 vnoremap <silent> <M-Up>    :<C-U>exec "'<,'>copy '<-" . (1+v:count1)<CR>gv
 vnoremap <silent> <M-Down>  :<C-U>exec "'<,'>copy '>+" . (0+v:count1)<CR>gv
 
+" line text-objects
+" -----------------
+" il al
+xnoremap          il g_o^o
+onoremap <silent> il :<c-u>exe 'normal v' . v:count1 . 'il'<CR>
+xnoremap          al g_o0o
+onoremap <silent> al :<c-u>exe 'normal v' . v:count1 . 'al'<CR>
+
+" Easier split navigation.
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
 " }}}
 
 " VIMSCRIPT --------------------------------------------------------------{{{
 
-" WSL yank support
-" if executable("clip.exe")
-"     augroup WSLYank
-"         autocmd!
-"         autocmd TextYankPost * if v:event.operator ==# 'y' | call system("clip.exe", @0) | endif
-"     augroup END
-" endif
-
 " This will enable code folding.
 " Use the marker method of folding.
 augroup codeFolding
-    autocmd!
-    autocmd FileType vim setlocal foldmethod=marker
+	autocmd!
+	autocmd FileType vim setlocal foldmethod=marker
 augroup END
 
 " Cursor settings:
@@ -400,18 +436,13 @@ let &t_EI="\e[2 q" "EI = NORMAL mode (ELSE)
 
 augroup cursorStyle
 	autocmd!
+	" Set cursor on enter.
 	autocmd VimEnter * normal! :startinsert :stopinsert
-	" " Set cursor on enter.
-	" autocmd VimEnter * silent !echo -ne "\e[2 q"
 	" Restore terminal cursor on exit.
 	autocmd VimLeave * silent !echo -ne "\e[6 q"
 augroup END
 
 " }}}
-
-" Set color scheme & settings
-set termguicolors
-colorscheme catppuccin_$THEMEVARIANT
 
 " File Sourcing
 source $MYVIMDIR/statusline.vim
