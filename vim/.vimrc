@@ -242,15 +242,26 @@ let mapleader = ' '
 " <leader>d.., <leader>x.. keys - delete and copy to register
 
 " Remap s to something else
-" :map s 
+" :map s
+
+function! SaveAndReload()
+	let l:view = winsaveview()
+	
+	silent! exec "w"
+	exec "mksession! " . expand("%:p:h") . "/session.vim"
+	silent! normal \\vr
+	redraw
+	echom (v:shell_error > 0 ? ('Error: ' . v:shell_error) : 'Save & Reload Successful')
+
+	call winrestview(l:view)
+endfunction
 
 " Set mark, Save file, save session, reload, print status message, jump back
 " to mark (original cursor position).
-noremap <silent> <C-s> :exec "normal m`"<CR> \| :w<CR> \| :exec "mksession! " . expand("%:p:h") . "/session.vim"<CR>  \| :exec "silent! normal \\vr"<CR>
-			\ \| :echom (v:shell_error > 0 ? ('Error: ' . v:shell_error) : 'Save & Reload Successful')<CR> \| :exec "normal ``"<CR>
+noremap <silent> <C-s> :call SaveAndReload()<CR>
 
 " Yank to end of line instead of whole line.
-map Y y$
+nmap Y y$
 
 " Clipboard bindings
 if has("win32")
@@ -266,22 +277,30 @@ elseif has("unix")
 
 		" UNIX via WSL
 		if executable("clip.exe")
-			" From :help map-operator
-			function! SendToClip(type, ...) abort
+			" From: https://vi.stackexchange.com/questions/24367/unexpected-behavior-with-feedkeys
+			function! YankFixedCursor(motionPrefix)
+				let g:myfixedcursor = getcurpos()
+				set operatorfunc=SendToClip
+				return 'g@' . a:motionPrefix
+			endfunction
+
+			" From: https://stackoverflow.com/a/58822884/10439539
+			function! SendToClip(type, ...)
 				if a:0
 					" Visual mode
 					normal! gv"0y
 				elseif a:type ==# 'line'
-					normal! m`'[V']"0y``
+					normal! '[V']"0y
 				elseif a:type ==# 'char'
 					normal! `[v`]"0y
 				endif
 
 				call system('clip.exe', @0)
+				call setpos('.', g:myfixedcursor)
 			endfunction
 
-			nnoremap <silent> cy            :set operatorfunc=SendToClip<CR>g@
-			" nnoremap <silent> cyy           :set operatorfunc=SendToClip<CR>g@_
+			nnoremap <silent> <expr> cy YankFixedCursor("")
+			nnoremap <silent> <expr> cyy YankFixedCursor("_")
 			xnoremap <silent> Y             :<C-U>call SendToClip(visualmode(),1)<CR>
 		endif
     endif
@@ -362,7 +381,7 @@ vnoremap <silent> <M-Down>  :<C-U>exec "'<,'>copy '>+" . (0+v:count1)<CR>gv
 
 " This will enable code folding.
 " Use the marker method of folding.
-augroup filetype_vim
+augroup codeFolding
     autocmd!
     autocmd FileType vim setlocal foldmethod=marker
 augroup END
@@ -378,10 +397,15 @@ augroup END
 let &t_SI="\e[6 q" "SI = INSERT mode
 let &t_SR="\e[4 q" "SR = REPLACE mode
 let &t_EI="\e[2 q" "EI = NORMAL mode (ELSE)
-" Set cursor on enter.
-autocmd VimEnter * silent !echo -ne "\e[2 q"
-" Restore terminal cursor on exit.
-autocmd VimLeave * silent !echo -ne "\e[6 q"
+
+augroup cursorStyle
+	autocmd!
+	autocmd VimEnter * normal! :startinsert :stopinsert
+	" " Set cursor on enter.
+	" autocmd VimEnter * silent !echo -ne "\e[2 q"
+	" Restore terminal cursor on exit.
+	autocmd VimLeave * silent !echo -ne "\e[6 q"
+augroup END
 
 " }}}
 
