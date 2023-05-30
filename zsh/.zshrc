@@ -12,6 +12,7 @@ bindkey -e
 
 # Source file if it exists.
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh	# fzf fuzzy search
+
 [ -f "$ZDOTDIR/prompt.zsh" ] && source "$ZDOTDIR/prompt.zsh"
 [ -f "$ZDOTDIR/exports.zsh" ] && source "$ZDOTDIR/exports.zsh"
 [ -f "$ZDOTDIR/theme.zsh" ] && source "$ZDOTDIR/theme.zsh"

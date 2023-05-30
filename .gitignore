@@ -11,6 +11,7 @@ fontforge
 vim/plugged/**
 
 # Ignore other vim file
+vim/[Ss]ession*
 vim/swap/**
 vim/backup/**
 vim/undo/**

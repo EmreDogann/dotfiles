@@ -2,6 +2,9 @@
 typeset -U path PATH
 
 path+=("$HOME/.local/bin")
+if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+  path+=("/mnt/c/Windows/System32")
+fi
 export PATH
 
 # extra zsh completions
@@ -12,6 +15,3 @@ export MYVIMDIR="$XDG_CONFIG_HOME/vim"
 export MYVIMRC="$MYVIMDIR/.vimrc"
 export VIMINIT='source $MYVIMRC'
 
-# ----- Windows (WSL) -----
-# export PATH="$PATH:/mnt/c/Users/lesmo/AppData/Local/Microsoft/WindowsApps"
-# export PATH="$PATH:/mnt/c/WINDOWS"

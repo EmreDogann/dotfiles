@@ -51,7 +51,7 @@ alias zshrc="vim $ZDOTDIR/.zshrc"
 alias zshev="vim $ZDOTDIR/.zshenv"
 alias zshal="vim $ZDOTDIR/aliases.zsh"
 alias vimdr="cd $MYVIMDIR"
-alias vimrc="vim $MYVIMRC"
+alias vimrc="vim -S $MYVIMDIR/session.vim $MYVIMRC"
 
 # Replace cat with bat 
 alias cat='bat --paging=never'
@@ -67,7 +67,7 @@ case "$(uname -s)" in
 	;;
 
 	CYGWIN*|MINGW32*|MSYS*|MINGW*)
-		echo 'MS Windows'
+		echo 'zsh/aliases.zsh: MS Windows'
 	;;
 esac
 
