@@ -54,7 +54,7 @@ fi
 # export FZF_COMPLETION_TRIGGER='~~'
 
 export FZF_COMPLETION_OPTS='--border --info=inline'
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --height 40% --layout=reverse --border --info=inline --header='<Find File> | Use CTRL-C or ESC to cancel'"
+export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --multi --height 40% --layout=reverse --border --info=inline --header='<Find File> | Use CTRL-C or ESC to cancel'"
 export FZF_CTRL_T_OPTS='--header="<Paste File/Directory Path> | Use CTRL-C or ESC to cancel"'
 export FZF_ALT_C_OPTS='--header="<cd into Directory> | Use CTRL-C or ESC to cancel" --preview "tree -C {} | head -200" --info=inline'
 export FZF_CTRL_R_OPTS='--header="<Paste History> | Use CTRL-C or ESC to cancel"'

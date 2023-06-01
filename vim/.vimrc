@@ -1,6 +1,8 @@
 set encoding=utf-8
 scriptencoding utf-8
 
+let g:USING_WSL = has("unix") && system("uname -r") =~ "microsoft"
+
 " Disable vi compatibility, if for some reason it's on.
 if &compatible
 	set nocompatible
@@ -92,6 +94,15 @@ set shiftwidth=4
 " Set tab width to 4 columns.
 set tabstop=4
 
+" Keep indentation from previous line
+set autoindent
+
+" Automatically inserts indentation in some cases
+set smartindent
+
+" Like smartindent, but stricter and more customisable
+" set cindent
+
 " Do not let cursor scroll below or above N number of lines when scrolling.
 set scrolloff=2
 
@@ -116,10 +127,10 @@ set smartcase
 set showcmd
 
 " Show the mode you are on the last line.
-" set showmode
+set noshowmode
 
 " Show matching words during a search.
-set showmatch
+" set showmatch
 
 " Use highlighting when doing a search.
 set hlsearch
@@ -143,6 +154,12 @@ set ssop-=options
 " Open new split panes to right and bottom, more natural than defaults.
 set splitbelow
 set splitright
+
+" Status Line Options
+set laststatus=2
+
+" Must be set before clever-f is loaded
+let g:clever_f_mark_char_color='CustomCleverFCharColor'
 
 " }}}
 
@@ -177,8 +194,11 @@ Plug 'tpope/vim-commentary'
 Plug 'machakann/vim-highlightedyank'
 Plug 'andymass/vim-matchup'
 Plug 'junegunn/vim-slash'
+" Plug 'yggdroot/indentline'
+Plug 'rhysd/clever-f.vim'
 
 " ---- Theme/Colors ----
+Plug 'itchyny/lightline.vim'
 Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 
 call plug#end()
@@ -188,11 +208,20 @@ call plug#end()
 " PLUGIN SETTINGS --------------------------------------------------------{{{
 
 " Set color scheme & settings
+let g:lightline = {'colorscheme': 'catppuccin_' . $THEMEVARIANT}
 set termguicolors
 colorscheme catppuccin_$THEMEVARIANT
 
 " Turn syntax highlighting on.
 syntax on
+
+" Clever-f settings
+let g:clever_f_show_prompt=1
+" let g:clever_f_mark_direct=1
+let g:clever_f_smart_case=1
+let g:clever_f_across_no_line=1
+let g:clever_f_fix_key_direction=1
+call functions#ExtendHighlight('Error', 'CustomCleverFCharColor', 'cterm=underline')
 
 let g:move_key_modifier = 'S'
 let g:move_key_modifier_visualmode = 'S'
@@ -221,21 +250,13 @@ command! -bang -nargs=? -complete=dir Files
 			\ call fzf#vim#files(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline']}), <bang>0)
 command! -bang -nargs=* Rg
 			\ call fzf#vim#grep("rg --line-number --no-ignore --no-heading --hidden --follow --glob='!.git/' --color=always --smart-case -- " . shellescape(<q-args>),
-			\ 1, fzf#vim#with_preview(), <bang>0)
+			\ 1, fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}), <bang>0)
 command! -bang -nargs=* Projfind
 			\ call fzf#vim#grep("rg --no-ignore --hidden --follow --smart-case --no-heading --line-number --color=always --glob='!.git/' -- " . shellescape(<q-args>)
 			\ . ' ' . (system('git status') =~ '^fatal' ? expand("%:p:h") : system("git rev-parse --show-toplevel")), 1, fzf#vim#with_preview(), <bang>0)
 
-function! RipgrepFzf(query, fullscreen)
-	let command_fmt = "rg --line-number --no-heading --follow --hidden --no-ignore --glob='!.git/' --color=always --smart-case -- %s || true"
-	let initial_command = printf(command_fmt, shellescape(a:query))
-	let reload_command = printf(command_fmt, '{q}')
-	let spec = {'options': ['--disabled', '--query', a:query, '--bind', 'change:reload:sleep 0.1;'.reload_command]}
-	let spec = fzf#vim#with_preview(spec, 'right', 'ctrl-/')
-	call fzf#vim#grep(initial_command, 1, spec, a:fullscreen)
-endfunction
+command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
 
-command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
 " }}}
 
 " MAPPINGS ----------------------------------------------------------------{{{
@@ -246,44 +267,43 @@ let mapleader = ' '
 " Remap s to something else
 " :map s
 
-function! SaveAndReload()
-	let l:view = winsaveview()
-
-	silent! exec "w"
-	exec "mksession! " . expand("%:p:h") . "/session.vim"
-	silent! normal \\vr
-	redraw
-	echom (v:shell_error > 0 ? ('Error: ' . v:shell_error) : 'Save & Reload Successful')
-
-	call winrestview(l:view)
-endfunction
-
 " Set mark, Save file, save session, reload, print status message, jump back
 " to mark (original cursor position).
-noremap <silent> <C-s> :call SaveAndReload()<CR>
+noremap <silent> <C-s> :call functions#SaveAndReload()<CR>
 
 " Yank to end of line instead of whole line.
 nmap Y y$
 
-" Paste from "0 register by default unless a register other the default is specified.
+" Paste from "0 register by default unless a register other than the default is specified.
 " From: https://stackoverflow.com/questions/18391573/how-make-vim-paste-to-always-paste-from-register-0-unless-its-specified
-nnoremap <expr> p (v:register ==# '"' ? '"0' : '') . 'p'
-nnoremap <expr> P (v:register ==# '"' ? '"0' : '') . 'P'
-xnoremap <expr> p (v:register ==# '"' ? '"0' : '') . 'p'
-xnoremap <expr> P (v:register ==# '"' ? '"0' : '') . 'P'
+" nnoremap <silent> p :<C-U>call functions#FormatPaste(v:register, 'p', 1)<CR>
+nnoremap <silent> P :<C-U>call functions#FormatPaste(v:register, 'P', 1)<CR>
+xnoremap <silent> p :<C-U>call functions#FormatPaste(v:register, 'p', 1)<CR>
+xnoremap <silent> P :<C-U>call functions#FormatPaste(v:register, 'P', 1)<CR>
 
 " Paste from default register (used for deleted text as a for of cut & paste).
-nnoremap <leader>p ""p
-nnoremap <leader>P ""P
-xnoremap <leader>p ""p
-xnoremap <leader>P ""P
+nnoremap <silent> <leader>p :<C-U>call functions#FormatPaste('"', 'p')<CR>
+nnoremap <silent> <leader>P :<C-U>call functions#FormatPaste('"', 'P')<CR>
+xnoremap <silent> <leader>p :<C-U>call functions#FormatPaste('"', 'p')<CR>
+xnoremap <silent> <leader>P :<C-U>call functions#FormatPaste('"', 'P')<CR>
+
+" Select most recent pasted text
+nnoremap <expr> gV "`[".getregtype(v:register)[0]."`]"
 
 " Paste from system clipboard
 " NOTE: vim must be compiled with clipboard support for this to work.
-nnoremap cp "+p
-nnoremap cP "+P
-xnoremap cp "+p
-xnoremap cP "+P
+" If using WSL...
+if g:USING_WSL
+	nnoremap cp :<C-U>call functions#FixDOSLineEndings('"+p')<CR>
+	nnoremap cP :<C-U>call functions#FixDOSLineEndings('"+P')<CR>
+	xnoremap cp :<C-U>call functions#FixDOSLineEndings('"+p', visualmode())<CR>
+	xnoremap cP :<C-U>call functions#FixDOSLineEndings('"+P', visualmode())<CR>
+else
+	nnoremap cp "+p
+	nnoremap cP "+P
+	xnoremap cp "+p
+	xnoremap cP "+P
+endif
 
 " Clipboard bindings
 if has("win32")
@@ -293,40 +313,10 @@ elseif has("unix")
 	if s:uname == "Darwin\n"
 		" Mac options here
 	else
-		" Other UNIX options here
-
-		" UNIX via WSL
-		if system('uname -r') =~ "microsoft" && executable("clip.exe")
-			" From: https://vi.stackexchange.com/questions/24367/unexpected-behavior-with-feedkeys
-			function! YankFixedCursor(motionPrefix)
-				let g:myfixedcursor = getcurpos()
-				set operatorfunc=SendToClip
-				return 'g@' . a:motionPrefix
-			endfunction
-
-			" From: https://stackoverflow.com/a/58822884/10439539
-			function! SendToClip(type, ...)
-				if a:0
-					let g:myfixedcursor = getcurpos()
-					" Visual mode
-					keepjumps silent! normal! gv"0y
-				elseif a:type ==# 'line'
-					keepjumps silent! normal! '[V']"0y
-				elseif a:type ==# 'char'
-					keepjumps silent! normal! `[v`]"0y
-				endif
-
-				" From: https://stackoverflow.com/a/20076502/10439539
-				let l:stripedOutput = substitute(@0, '\s\{2,}\|\n$', '', 'g')
-				" Yanking to + register does not work for some reason. So use
-				" System32/clip.exe instead.
-				call system('clip.exe', l:stripedOutput)
-				call setpos('.', g:myfixedcursor)
-			endfunction
-
-			nnoremap <silent> <expr> cy YankFixedCursor("")
-			nnoremap <silent> <expr> cyy YankFixedCursor("_")
-			xnoremap <silent> Y :<C-U>call SendToClip(visualmode(),1)<CR>
+		if g:USING_WSL && executable("clip.exe")
+			nnoremap <silent> <expr> cy functions#YankFixedCursor("")
+			nnoremap <silent> <expr> cyy functions#YankFixedCursor("_")
+			xnoremap <silent> Y :<C-U>call functions#SendToClip(visualmode(),1)<CR>
 		endif
 	endif
 endif
@@ -338,22 +328,30 @@ nnoremap \vs :e $MYVIMDIR/statusline.vim<CR>
 " Reload vimrc configuration file
 nnoremap \vr :source $MYVIMRC<CR>
 
+" Turn off arrow keys
 noremap <Up> :echoerr "nono don be stopid"<CR>
 noremap <Down> :echoerr "nono don be stopid"<CR>
 noremap <Left> :echoerr "nono don be stopid"<CR>
 noremap <Right> :echoerr "nono don be stopid"<CR>
 
+inoremap <Up> <C-\><C-O>:exec 'echohl ErrorMsg \| echomsg "nono don be stopid" \| echohl None'<CR>
+inoremap <Down> <C-\><C-O>:exec 'echohl ErrorMsg \| echomsg "nono don be stopid" \| echohl None'<CR>
+inoremap <Left> <C-\><C-O>:exec 'echohl ErrorMsg \| echomsg "nono don be stopid" \| echohl None'<CR>
+inoremap <Right> <C-\><C-O>:exec 'echohl ErrorMsg \| echomsg "nono don be stopid" \| echohl None'<CR>
+
 " Fzf file search
-map <C-P> :Files<CR>
-map 'b :Buffers<CR>
-map 'g :Rg<CR>
-map 'g. :exec ':Rg ' . expand("%:p:h")<CR>
-map 't :Tags<CR>
-map 'm :Marks<CR>
-" Search for mapping
-nmap <leader>? <plug>(fzf-maps-n)
-xmap <leader>? <plug>(fzf-maps-x)
-omap <leader>? <plug>(fzf-maps-o)
+noremap <C-P> :Files<CR>
+noremap <leader>l :BLines<CR>
+noremap <leader>b :Buffers<CR>
+noremap <leader>/ :Rg<CR>
+" noremap <leader>/. :exec ':Rg ' . expand("%:p:h")<CR>
+noremap <leader>t :Tags<CR>
+noremap <leader>m :Marks<CR>
+" nnoremap <silent> <Leader>g :Commits<CR>
+nnoremap <silent> <Leader>? :Helptags<CR>
+nnoremap <silent> <Leader>hh :History<CR>
+nnoremap <silent> <Leader>h: :History:<CR>
+nnoremap <silent> <Leader>h/ :History/<CR> 
 
 imap <c-x><c-l> <plug>(fzf-complete-line)
 inoremap <expr> <c-x><c-f> fzf#vim#complete#path('fd')
@@ -393,10 +391,10 @@ xnoremap <silent> <Leader>* "sy:let @/=@s<CR>cgn
 " <C-O> in insert mode - toggles in and out of insert to normal mode.
 " <C-U> in normal mode will clear the extra range/info after a : is pressed,
 " (:'<,'> in visual mode) just leaving the : in the command line.
-nnoremap <silent> <expr> <M-Up> ":copy .-1<CR>==" . (v:count1 - 1 == 0 ? "" : (v:count1 - 1) . "k")
-nnoremap <silent> <expr> <M-Down> ":copy .<CR>=="
-vnoremap <silent> <M-Up>    :<C-U>exec "'<,'>copy '<-" . (1+v:count1)<CR>gv
-vnoremap <silent> <M-Down>  :<C-U>exec "'<,'>copy '>+" . (0+v:count1)<CR>gv
+" nnoremap <silent> <expr> <M-k> ":copy .-1<CR>==" . (v:count1 - 1 == 0 ? "" : (v:count1 - 1) . "k")
+" nnoremap <silent> <expr> <M-j> ":copy .<CR>=="
+" vnoremap <silent> <M-k>    :<C-U>exec "'<,'>copy '<-" . (1+v:count1)<CR>gv
+" vnoremap <silent> <M-j>  :<C-U>exec "'<,'>copy '>+" . (0+v:count1)<CR>gv
 
 " line text-objects
 " -----------------
@@ -411,6 +409,7 @@ nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
+
 " }}}
 
 " VIMSCRIPT --------------------------------------------------------------{{{
@@ -420,6 +419,11 @@ nnoremap <C-H> <C-W><C-H>
 augroup codeFolding
 	autocmd!
 	autocmd FileType vim setlocal foldmethod=marker
+augroup END
+
+augroup colorScheme
+	autocmd!
+	autocmd ColorScheme * call functions#ExtendHighlight('Error', 'CustomCleverFCharColor', 'cterm=underline')
 augroup END
 
 " Cursor settings:
@@ -445,5 +449,6 @@ augroup END
 " }}}
 
 " File Sourcing
-source $MYVIMDIR/statusline.vim
+" source $MYVIMDIR/statusline.vim
+
 
