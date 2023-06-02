@@ -1,8 +1,13 @@
+
 # Zsh files
 zsh/.zcompdump
 zsh/.zsh_history
 zsh/.zlogin
 zsh/.zlogout
+zsh/plugins/**
+
+# Other plugins
+tools/fzf/**
 
 # Ignore fontforge package
 fontforge
@@ -17,3 +22,4 @@ vim/backup/**
 vim/undo/**
 vim/.viminfo*
 vim/spell/*.add*
+vim/.netrwhist

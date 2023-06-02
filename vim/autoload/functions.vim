@@ -1,3 +1,4 @@
+" command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
 function! functions#RipgrepFzf(query, fullscreen)
 	let command_fmt = "rg --line-number --no-heading --follow --hidden --no-ignore --glob='!.git/' --color=always --smart-case -- %s || true"
 	let initial_command = printf(command_fmt, shellescape(a:query))
@@ -11,8 +12,8 @@ function! functions#SaveAndReload()
 	let l:view = winsaveview()
 
 	silent! exec "w"
-	exec "mksession! " . expand("%:p:h") . "/session.vim"
-	silent! normal \\vr
+	" exec "mksession! " . $MYVIMDIR . "/sessions/session.vim"
+	silent! normal \vr
 	redraw
 	echom (v:shell_error > 0 ? ('Error: ' . v:shell_error) : 'Save & Reload Successful')
 
@@ -38,8 +39,10 @@ if g:USING_WSL
 			silent execute 'keepjumps normal g' . visualmode() . a:command . '<C-O>gV'
 			silent! keepjumps lockmarks keeppatterns %s/\r//g
 		else
-			silent execute 'keepjumps normal ' . a:command . '<C-O>gV'
+			silent execute 'keepjumps normal ' . a:command . 'gV'
 			silent! keepjumps lockmarks keeppatterns %s/\r//g
+			call feedkeys("\<Esc>", 'x')
+			call feedkeys("gV=", 'x')
 		endif
 		call winrestview(l:save)
 	endfunction
@@ -82,7 +85,7 @@ function! functions#ExtendHighlight(base, group, add)
 	exec 'highlight' a:group grphi a:add
 endfunction
 
-function functions#FormatPaste(register, command, ...)
+function! functions#FormatPaste(register, command, ...)
 	if a:0
 		let l:register = a:register ==# '"' ? '"0' : '"' . a:register
 		exec 'normal! ' . l:register . a:command

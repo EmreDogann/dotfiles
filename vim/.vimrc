@@ -1,12 +1,12 @@
-set encoding=utf-8
-scriptencoding utf-8
-
-let g:USING_WSL = has("unix") && system("uname -r") =~ "microsoft"
-
 " Disable vi compatibility, if for some reason it's on.
 if &compatible
 	set nocompatible
 endif
+
+set encoding=utf-8
+scriptencoding utf-8
+
+let g:USING_WSL = has("unix") && system("uname -r") =~ "microsoft"
 
 " File Paths ----------------------------------------------------------------{{{
 " From -  https://github.com/z0rc/dotfiles/blob/main/vim/vimrc
@@ -17,6 +17,7 @@ let s:portable=expand('<sfile>:p:h')
 " Add the directory to 'runtimepath'
 let &runtimepath=printf('%s,%s,%s/after', s:portable, &runtimepath, s:portable)
 let &packpath=&runtimepath
+let g:session_dir = expand('$MYVIMDIR') . '/sessions'
 
 " Set directory for swap & backup files.
 " // - Ensures files created are uniquely named.
@@ -132,8 +133,9 @@ set noshowmode
 " Show matching words during a search.
 " set showmatch
 
-" Use highlighting when doing a search.
+" Highlight during a search. But not when sourcing .vimrc
 set hlsearch
+let @/ = ""
 
 " Set the commands to save in history default number is 20.
 set history=1000
@@ -142,7 +144,7 @@ set history=1000
 set wildmenu
 
 " Make wildmenu behave like similar to Bash completion.
-set wildmode=list:longest
+set wildmode=list:full
 
 " There are certain files that we would never want to edit with Vim.
 " Wildmenu will ignore files with these extensions.
@@ -157,6 +159,14 @@ set splitright
 
 " Status Line Options
 set laststatus=2
+
+" Netrw options
+let g:netrw_liststyle = 3
+let g:netrw_banner = 0
+let g:netrw_winsize = 25
+let g:netrw_browse_split = 4
+let g:netrw_altv = 1
+let g:netrw_list_hide = &wildignore
 
 " Must be set before clever-f is loaded
 let g:clever_f_mark_char_color='CustomCleverFCharColor'
@@ -194,8 +204,8 @@ Plug 'tpope/vim-commentary'
 Plug 'machakann/vim-highlightedyank'
 Plug 'andymass/vim-matchup'
 Plug 'junegunn/vim-slash'
-" Plug 'yggdroot/indentline'
 Plug 'rhysd/clever-f.vim'
+Plug 'tpope/vim-obsession'
 
 " ---- Theme/Colors ----
 Plug 'itchyny/lightline.vim'
@@ -208,7 +218,6 @@ call plug#end()
 " PLUGIN SETTINGS --------------------------------------------------------{{{
 
 " Set color scheme & settings
-let g:lightline = {'colorscheme': 'catppuccin_' . $THEMEVARIANT}
 set termguicolors
 colorscheme catppuccin_$THEMEVARIANT
 
@@ -223,27 +232,23 @@ let g:clever_f_across_no_line=1
 let g:clever_f_fix_key_direction=1
 call functions#ExtendHighlight('Error', 'CustomCleverFCharColor', 'cterm=underline')
 
+" matze/vim-move settings
 let g:move_key_modifier = 'S'
 let g:move_key_modifier_visualmode = 'S'
 
+" machakann/vim-highlightedyank settings
 let g:highlightedyank_highlight_duration = 300
 
-" Preview window is hidden by default. You can toggle it with ctrl-/.
-" It will show on the right with 50% width, but if the width is smaller
-" than 70 columns, it will show above the candidate list
 let g:fzf_preview_window = ['right,50%,<70(up,40%)', 'ctrl-/']
-" This is the default extra key bindings
 let g:fzf_action = {
 			\ 'ctrl-t': 'tab split',
-			\ 'ctrl-h': 'split',
+			\ 'ctrl-s': 'split',
 			\ 'ctrl-x': 'vsplit' }	
 
 " Enable per-command history.
 " CTRL-N and CTRL-P will be automatically bound to next-history and
-" previous-history instead of down and up. If you don't like the change,
-" explicitly bind the keys to down and up in your $FZF_DEFAULT_OPTS.
+" previous-history instead of down and up.
 let g:fzf_history_dir = '$HOME/.local/share/fzf-history'
-
 let g:fzf_tags_command = 'ctags -R'
 
 command! -bang -nargs=? -complete=dir Files
@@ -252,10 +257,52 @@ command! -bang -nargs=* Rg
 			\ call fzf#vim#grep("rg --line-number --no-ignore --no-heading --hidden --follow --glob='!.git/' --color=always --smart-case -- " . shellescape(<q-args>),
 			\ 1, fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}), <bang>0)
 command! -bang -nargs=* Projfind
-			\ call fzf#vim#grep("rg --no-ignore --hidden --follow --smart-case --no-heading --line-number --color=always --glob='!.git/' -- " . shellescape(<q-args>)
-			\ . ' ' . (system('git status') =~ '^fatal' ? expand("%:p:h") : system("git rev-parse --show-toplevel")), 1, fzf#vim#with_preview(), <bang>0)
+			\ call fzf#vim#grep("rg --hidden --follow --smart-case --no-heading --line-number --color=always --glob='!.git/' -- " . shellescape(<q-args>)
+			\ . ' ' . (system('git status') =~ '^fatal' ? expand("%:p:h") : system("git rev-parse --show-toplevel")), 1, fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}), <bang>0)
 
-command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
+"FZF Buffer Delete
+function! s:list_buffers()
+	redir => list
+	silent ls
+	redir END
+	return split(list, "\n")
+endfunction
+
+function! s:delete_buffers(lines)
+	execute 'bwipeout' join(map(a:lines, {_, line -> split(line)[0]}))
+endfunction
+
+command! BD call fzf#run(fzf#wrap({
+			\ 'source': s:list_buffers(),
+			\ 'sink*': { lines -> s:delete_buffers(lines) },
+			\ 'options': '--multi --reverse --bind ctrl-a:select-all+accept'
+			\ }))
+
+" Lightline settings
+let g:lightline = {
+			\ 'colorscheme': 'catppuccin_' . $THEMEVARIANT,
+			\ 'component' : {
+				\   'lineinfo': '%3l:%-2v%<',
+				\ },
+			\ 'component_function': {
+				\   'fileformat': 'LightlineFileformat',
+				\   'filetype': 'LightlineFiletype',
+				\   'readonly': 'LightlineReadonly',
+				\ },
+				\ }
+
+function! LightlineFileformat()
+  return winwidth(0) > 70 ? &fileformat : ''
+endfunction
+
+function! LightlineFiletype()
+  return winwidth(0) > 70 ? (&filetype !=# '' ? &filetype : 'no ft') : ''
+endfunction
+
+function! LightlineReadonly()
+  " return &readonly && &filetype !=# 'help' ? '' : ''
+  return &readonly ? '' : ''
+endfunction
 
 " }}}
 
@@ -271,12 +318,18 @@ let mapleader = ' '
 " to mark (original cursor position).
 noremap <silent> <C-s> :call functions#SaveAndReload()<CR>
 
+" Session management mappings
+exec 'nnoremap <Leader>ss :Obsession ' . g:session_dir . '/*.vim<C-D><BS><BS><BS><BS><BS>'
+exec 'nnoremap <Leader>sr :so ' . g:session_dir . '/*.vim<C-D><BS><BS><BS><BS><BS>'
+" Pause session recording
+nnoremap <Leader>sp :Obsession<CR>
+
 " Yank to end of line instead of whole line.
 nmap Y y$
 
 " Paste from "0 register by default unless a register other than the default is specified.
 " From: https://stackoverflow.com/questions/18391573/how-make-vim-paste-to-always-paste-from-register-0-unless-its-specified
-" nnoremap <silent> p :<C-U>call functions#FormatPaste(v:register, 'p', 1)<CR>
+nnoremap <silent> p :<C-U>call functions#FormatPaste(v:register, 'p', 1)<CR>
 nnoremap <silent> P :<C-U>call functions#FormatPaste(v:register, 'P', 1)<CR>
 xnoremap <silent> p :<C-U>call functions#FormatPaste(v:register, 'p', 1)<CR>
 xnoremap <silent> P :<C-U>call functions#FormatPaste(v:register, 'P', 1)<CR>
@@ -320,6 +373,9 @@ elseif has("unix")
 		endif
 	endif
 endif
+
+" Insert sleep [x]m for debugging purposes
+nnoremap <leader>sl :<C-U>normal Osleep <C-R>=v:count1<CR>m<C-O>Oredraw<Esc>^
 
 " Edit vimrc configuration file
 nnoremap \ve :e $MYVIMRC<CR>
@@ -388,9 +444,6 @@ nnoremap <silent> <Leader>* :let @/='\<'.expand('<cword>').'\>'<CR>cgn
 xnoremap <silent> <Leader>* "sy:let @/=@s<CR>cgn
 
 " Copy line above/below
-" <C-O> in insert mode - toggles in and out of insert to normal mode.
-" <C-U> in normal mode will clear the extra range/info after a : is pressed,
-" (:'<,'> in visual mode) just leaving the : in the command line.
 " nnoremap <silent> <expr> <M-k> ":copy .-1<CR>==" . (v:count1 - 1 == 0 ? "" : (v:count1 - 1) . "k")
 " nnoremap <silent> <expr> <M-j> ":copy .<CR>=="
 " vnoremap <silent> <M-k>    :<C-U>exec "'<,'>copy '<-" . (1+v:count1)<CR>gv
@@ -414,7 +467,6 @@ nnoremap <C-H> <C-W><C-H>
 
 " VIMSCRIPT --------------------------------------------------------------{{{
 
-" This will enable code folding.
 " Use the marker method of folding.
 augroup codeFolding
 	autocmd!
@@ -450,5 +502,4 @@ augroup END
 
 " File Sourcing
 " source $MYVIMDIR/statusline.vim
-
 

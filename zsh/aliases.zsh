@@ -53,13 +53,12 @@ alias zshal="vim $ZDOTDIR/aliases.zsh"
 alias vimdr="cd $MYVIMDIR"
 
 function vimrc() {
-	if [[ -f "$MYVIMDIR/session.vim" ]] then
-		vim -S "$MYVIMDIR/session.vim" $MYVIMRC
+	if [[ -f "$MYVIMDIR/sessions/vimrc_session.vim" ]] then
+		vim -S "$MYVIMDIR/sessions/vimrc_session.vim" $MYVIMRC
 	else
 		vim $MYVIMRC
 	fi
 }
-# alias vimrc="vim -S $MYVIMDIR/session.vim $MYVIMRC"
 
 # Replace cat with bat 
 alias cat='bat --paging=never'
