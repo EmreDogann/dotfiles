@@ -40,7 +40,7 @@ for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
 # List directory contents
 alias lsa='ls -lah'
-alias l='ls -lah'
+alias l='ls -lsah'
 alias ll='ls -lh'
 alias la='ls -lAh'
 

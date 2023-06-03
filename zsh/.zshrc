@@ -45,7 +45,7 @@ then
 		cd)           fzf --preview 'tree -C {} | head -200'   "$@" ;;
 		export|unset) fzf --preview "eval 'echo \$'{}"         "$@" ;;
 		ssh)          fzf --preview 'dig {}'                   "$@" ;;
-		*)            fzf "$@"										;;
+		*)            fzf --preview 'bat -n --color=always {}' "$@"	;;
 	  esac
 	}
 fi
@@ -59,7 +59,7 @@ printf -v fzfPreviewControls '%s' \
 	"ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down,"\
 	"shift-up:preview-top,shift-down:preview-bottom,"\
 	"alt-up:half-page-up,alt-down:half-page-down"
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --line-range :300 {}' --multi --height 40% --layout=reverse --border --info=inline --header='<Find File> | Use CTRL-C or ESC to cancel' $fzfPreviewControls"
+export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --line-range :300  --color=always {}' --multi --height 40% --layout=reverse --border --info=inline --header='<Find File> | Use CTRL-C or ESC to cancel' $fzfPreviewControls"
 export FZF_CTRL_T_OPTS='--header="<Paste File/Directory Path> | Use CTRL-C or ESC to cancel"'
 export FZF_ALT_C_OPTS='--header="<cd into Directory> | Use CTRL-C or ESC to cancel" --preview "tree -C {} | head -200" --info=inline'
 export FZF_CTRL_R_OPTS='--header="<Paste History> | Use CTRL-C or ESC to cancel"'

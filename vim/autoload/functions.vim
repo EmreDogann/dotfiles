@@ -1,6 +1,8 @@
+
+" FZF Functions --------------------------------------------------------{{{
 " command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
 function! functions#RipgrepFzf(query, fullscreen)
-	let command_fmt = "rg --line-number --no-heading --follow --hidden --no-ignore --glob='!.git/' --color=always --smart-case -- %s || true"
+	let command_fmt = "rg --line-number --no-heading --follow --hidden --ignore --glob='!.git/' --color=always --smart-case -- %s || true"
 	let initial_command = printf(command_fmt, shellescape(a:query))
 	let reload_command = printf(command_fmt, '{q}')
 	let spec = {'options': ['--disabled', '--query', a:query, '--bind', 'change:reload:sleep 0.1;'.reload_command]}
@@ -8,17 +10,80 @@ function! functions#RipgrepFzf(query, fullscreen)
 	call fzf#vim#grep(initial_command, 1, spec, a:fullscreen)
 endfunction
 
-function! functions#SaveAndReload()
-	let l:view = winsaveview()
+" ------------------------------------------------------------------
+" Buffers - Taken from fzf.vim/autoload/fzf/vim.vim
+" Changes:
+" 	- new s:openBufID function
+" 	- Modified bufopen() to allow for opening or deletion of 1 or more buffers.
+" ------------------------------------------------------------------
+let s:default_action = {
+			\ 'ctrl-t': 'tab split',
+			\ 'ctrl-x': 'split',
+			\ 'ctrl-v': 'vsplit' }
 
-	silent! exec "w"
-	" exec "mksession! " . $MYVIMDIR . "/sessions/session.vim"
-	silent! normal \vr
-	redraw
-	echom (v:shell_error > 0 ? ('Error: ' . v:shell_error) : 'Save & Reload Successful')
+let s:TYPE = {'dict': type({}), 'funcref': type(function('call')), 'string': type(''), 'list': type([])}
 
-	call winrestview(l:view)
+function! s:action_for(key, ...)
+	let default = a:0 ? a:1 : ''
+	let Cmd = get(get(g:, 'fzf_action', s:default_action), a:key, default)
+	return type(Cmd) == s:TYPE.string ? Cmd : default
 endfunction
+
+function! s:find_open_window(b)
+	let [tcur, tcnt] = [tabpagenr() - 1, tabpagenr('$')]
+	for toff in range(0, tabpagenr('$') - 1)
+		let t = (tcur + toff) % tcnt + 1
+		let buffers = tabpagebuflist(t)
+		for w in range(1, len(buffers))
+			let b = buffers[w - 1]
+			if b == a:b
+				return [t, w]
+			endif
+		endfor
+	endfor
+	return [0, 0]
+endfunction
+
+function! s:jump(t, w)
+	execute a:t.'tabnext'
+	execute a:w.'wincmd w'
+endfunction
+
+function! s:openBufID(action, ID)
+	if empty(a:action) && get(g:, 'fzf_buffers_jump')
+		let [t, w] = s:find_open_window(a:ID)
+		if t
+			call s:jump(t, w)
+			return
+		endif
+	endif
+	let cmd = s:action_for(a:action)
+	if !empty(cmd)
+		execute 'silent' cmd
+	endif
+	execute 'buffer' a:ID
+endfunction
+
+function! functions#bufopen(lines)
+	if len(a:lines) < 2
+		return
+	endif
+
+	if len(a:lines) == 2
+		let b = matchstr(a:lines[1], '\[\zs[0-9]*\ze\]')
+		call s:openBufID(a:lines[0], b)
+	else
+		let l:keybind = remove(a:lines, 0)
+		let l:splitLines = join(map(a:lines, {_, line -> split(line)[2]}))
+		let l:bufIDs = []
+		call substitute(l:splitLines, '\[\zs[0-9]*\ze\]', '\=add(l:bufIDs, submatch(0))', 'g')
+		for bufID in l:bufIDs
+			call s:openBufID(l:keybind, bufID)
+		endfor
+	endif
+endfunction
+
+" }}}
 
 if !exists('*Preserve')
 	function! functions#FixDOSLineEndings(command, ...)
@@ -90,7 +155,7 @@ function! functions#FormatPaste(register, command, ...)
 		let l:register = a:register ==# '"' ? '"0' : '"' . a:register
 		exec 'normal! ' . l:register . a:command
 	else
-		normal! p
+		exec 'normal! ' . a:command
 	endif
 
 	let l:mode = getregtype(v:register)[0]

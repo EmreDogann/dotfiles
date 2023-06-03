@@ -15,3 +15,4 @@ export MYVIMDIR="$XDG_CONFIG_HOME/vim"
 export MYVIMRC="$MYVIMDIR/.vimrc"
 export VIMINIT='source $MYVIMRC'
 
+# export COLORTERM=truecolor

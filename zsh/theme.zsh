@@ -1,6 +1,8 @@
 # Available variants from Catppuccin:
 # frappe | latte | macchiato | mocha
 export THEMEVARIANT="macchiato"
+
+# FZF color scheme config
 if [ $THEMEVARIANT = "frappe" ]
 then
 	export FZF_DEFAULT_OPTS=" \
@@ -29,3 +31,12 @@ else
 	echo "Theme Variant: $THEMEVARIANT not recognized."
 	export FZF_DEFAULT_OPTS=""
 fi
+
+# Bat color scheme config
+if [[ ! -f $(bat --config-dir)/themes/Catppuccin-$THEMEVARIANT.tmTheme ]] then
+	cd $(bat --config-dir)/themes
+	curl -Ls -O https://raw.githubusercontent.com/catppuccin/bat/main/Catppuccin-$THEMEVARIANT.tmTheme
+	cd - > /dev/null
+	bat cache --build
+fi
+export BAT_THEME="Catppuccin-$THEMEVARIANT"

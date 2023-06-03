@@ -4,22 +4,25 @@ zsh/.zcompdump
 zsh/.zsh_history
 zsh/.zlogin
 zsh/.zlogout
-zsh/plugins/**
+zsh/plugins/*
 
 # Other plugins
-tools/fzf/**
+tools/fzf/*
 
 # Ignore fontforge package
 fontforge
 
 # Ignore installed plugins managed by vim-plug
-vim/plugged/**
+vim/plugged/*
 
 # Ignore other vim file
 vim/[Ss]ession*
-vim/swap/**
-vim/backup/**
-vim/undo/**
+vim/swap/*
+vim/backup/*
+vim/undo/*
 vim/.viminfo*
 vim/spell/*.add*
 vim/.netrwhist
+
+# Cache files
+cache/*

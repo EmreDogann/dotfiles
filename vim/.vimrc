@@ -109,7 +109,7 @@ set scrolloff=2
 
 " Do not let cursor scroll past N number of columns when side scrolling.
 set sidescroll=1
-set sidescrolloff=2
+set sidescrolloff=5
 
 " Do not wrap lines. Allow long lines to extend as far as the line goes.
 set nowrap
@@ -239,11 +239,42 @@ let g:move_key_modifier_visualmode = 'S'
 " machakann/vim-highlightedyank settings
 let g:highlightedyank_highlight_duration = 300
 
+" FZF.vim settings
+function! s:BuffersSink(lines)
+	if a:lines[0] ==# 'alt-d'
+		call remove(a:lines, 0)
+		let l:splitLines = join(map(a:lines, {_, line -> split(line)[2]}))
+		let l:bufIDs = []
+		call substitute(l:splitLines, '\[\zs[0-9]*\ze\]', '\=add(l:bufIDs, submatch(0))', 'g')
+		execute 'bwipeout' join(l:bufIDs)
+	else
+		call functions#bufopen(a:lines)
+	endif
+endfunction
+
+function! s:BuffersDelete(...)
+	let [query, args] = (a:0 && type(a:1) == type('')) ?
+				\ [a:1, a:000[1:]] : ['', a:000]
+	let sorted = fzf#vim#_buflisted_sorted()
+	let header_lines = '--header-lines=' . (bufnr('') == get(sorted, 0, 0) ? 1 : 0)
+	let tabstop = len(max(sorted)) >= 4 ? 9 : 8
+	return fzf#run(fzf#vim#with_preview(fzf#wrap('Delete Buffers', {
+				\ 'source':  map(sorted, 'fzf#vim#_format_buffer(v:val)'),
+				\ 'sink*': { lines -> s:BuffersSink(lines) },
+				\ 'options': ['+m', '-x', '--tiebreak=index', header_lines, '--ansi', '-d', '\t',
+				\ '--with-nth', '3..', '-n', '2,1..2', '--prompt', 'Buf> ', '--query', query,
+				\ '--preview-window', '+{2}-/2', '--tabstop', tabstop, '--layout=reverse', '--info=inline', '--multi',
+				\ '--expect', 'ctrl-t,ctrl-x,ctrl-s,alt-d', '--bind', 'ctrl-a:select-all,ctrl-d:deselect-all'],
+				\ 'window': {'width': 0.45, 'height': 0.4, 'relative': v:false}
+				\}, args[0]), "right:55%:<50(up:40%)"))
+endfunction
+
 let g:fzf_preview_window = ['right,50%,<70(up,40%)', 'ctrl-/']
+" \ 'ctrl-d': function('<SID>delete_buffers'),
 let g:fzf_action = {
 			\ 'ctrl-t': 'tab split',
 			\ 'ctrl-s': 'split',
-			\ 'ctrl-x': 'vsplit' }	
+			\ 'ctrl-x': 'vsplit' }
 
 " Enable per-command history.
 " CTRL-N and CTRL-P will be automatically bound to next-history and
@@ -251,32 +282,34 @@ let g:fzf_action = {
 let g:fzf_history_dir = '$HOME/.local/share/fzf-history'
 let g:fzf_tags_command = 'ctags -R'
 
+" function! s:CustomBuffers(query, fullscreen)
+" 	let g:fzf_active_mode="Buffers"
+" 	" echo g:fzf_active_mode
+" 	" redraw
+" 	" sleep 1000m
+
+" 	" return call fzf#vim#buffers(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline', '--bind', 'start:execute(let g:fzf_active_mode="Buffers"; echo g:fzf_active_mode; sleep 1000m)'],
+" 	return fzf#vim#buffers(fzf#vim#with_preview({'options': ['--query', a:query, '--layout=reverse', '--info=inline'],
+" 			\ 'window': {'width': 0.45, 'height': 0.4, 'relative': v:false}}, "right:55%:<50(up:40%)"), a:fullscreen)
+" endfunction
+
 command! -bang -nargs=? -complete=dir Files
 			\ call fzf#vim#files(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline']}), <bang>0)
 command! -bang -nargs=* Rg
-			\ call fzf#vim#grep("rg --line-number --no-ignore --no-heading --hidden --follow --glob='!.git/' --color=always --smart-case -- " . shellescape(<q-args>),
-			\ 1, fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}), <bang>0)
+			\ call fzf#vim#grep("rg --line-number --no-heading --hidden --follow --glob='!.git/' --color=always --smart-case -- " . shellescape(<q-args>),
+			\ 1, fzf#vim#with_preview({'options': '--delimiter : --nth 3..'}), <bang>0)
 command! -bang -nargs=* Projfind
 			\ call fzf#vim#grep("rg --hidden --follow --smart-case --no-heading --line-number --color=always --glob='!.git/' -- " . shellescape(<q-args>)
-			\ . ' ' . (system('git status') =~ '^fatal' ? expand("%:p:h") : system("git rev-parse --show-toplevel")), 1, fzf#vim#with_preview({'options': '--delimiter : --nth 4..'}), <bang>0)
+			\ . ' ' . (system('git status') =~ '^fatal' ? expand("%:p:h") : system("git rev-parse --show-toplevel")), 1, fzf#vim#with_preview({'options': '--delimiter : --nth 3..'}), <bang>0)
+" command! -bang -nargs=? -complete=buffer Buffers
+" 			\ call fzf#vim#buffers(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline'],
+" 			\ 'window': {'width': 0.45, 'height': 0.4, 'relative': v:false}}, "right:55%:<50(up:40%)"), <bang>0)
+" command! -bang -nargs=? -complete=buffer Buffers call <SID>CustomBuffers(<q-args>, <bang>0)
 
-"FZF Buffer Delete
-function! s:list_buffers()
-	redir => list
-	silent ls
-	redir END
-	return split(list, "\n")
-endfunction
+command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
 
-function! s:delete_buffers(lines)
-	execute 'bwipeout' join(map(a:lines, {_, line -> split(line)[0]}))
-endfunction
-
-command! BD call fzf#run(fzf#wrap({
-			\ 'source': s:list_buffers(),
-			\ 'sink*': { lines -> s:delete_buffers(lines) },
-			\ 'options': '--multi --reverse --bind ctrl-a:select-all+accept'
-			\ }))
+command! -bang -nargs=? -complete=buffer Buffers call <SID>BuffersDelete(<q-args>, <bang>0)
+" command! -bang -nargs=? -complete=buffer BD call <SID>BuffersDelete(<q-args>, <bang>0)
 
 " Lightline settings
 let g:lightline = {
@@ -314,9 +347,21 @@ let mapleader = ' '
 " Remap s to something else
 " :map s
 
+function! s:SaveAndReload()
+	let l:view = winsaveview()
+
+	silent! exec "w"
+	" exec "mksession! " . $MYVIMDIR . "/sessions/session.vim"
+	silent! normal \vr
+	redraw
+	echom (v:shell_error > 0 ? ('Error: ' . v:shell_error) : 'Save & Reload Successful')
+
+	call winrestview(l:view)
+endfunction
+
 " Set mark, Save file, save session, reload, print status message, jump back
 " to mark (original cursor position).
-noremap <silent> <C-s> :call functions#SaveAndReload()<CR>
+noremap <silent> <C-s> :call <SID>SaveAndReload()<CR>
 
 " Session management mappings
 exec 'nnoremap <Leader>ss :Obsession ' . g:session_dir . '/*.vim<C-D><BS><BS><BS><BS><BS>'
@@ -383,6 +428,27 @@ nnoremap \ve :e $MYVIMRC<CR>
 nnoremap \vs :e $MYVIMDIR/statusline.vim<CR>
 " Reload vimrc configuration file
 nnoremap \vr :source $MYVIMRC<CR>
+
+nnoremap <silent> zh :call <SID>HorizontalScrollMode('h')<CR>
+nnoremap <silent> zl :call <SID>HorizontalScrollMode('l')<CR>
+nnoremap <silent> zH :call <SID>HorizontalScrollMode('H')<CR>
+nnoremap <silent> zL :call <SID>HorizontalScrollMode('L')<CR>
+
+function! s:HorizontalScrollMode( call_char )
+	if &wrap
+		return
+	endif
+
+	echohl Title
+	let typed_char = a:call_char
+	while index( [ 'h', 'l', 'H', 'L' ], typed_char ) != -1
+		execute 'normal! z'.typed_char
+		redraws
+		echon '-- Horizontal scrolling mode (h/l/H/L)'
+		let typed_char = nr2char(getchar())
+	endwhile
+	echohl None | echo '' | redraws
+endfunction
 
 " Turn off arrow keys
 noremap <Up> :echoerr "nono don be stopid"<CR>
