@@ -171,6 +171,13 @@ let g:netrw_list_hide = &wildignore
 " Must be set before clever-f is loaded
 let g:clever_f_mark_char_color='CustomCleverFCharColor'
 
+" Tabline
+set showtabline=2
+
+" Bufferline
+" From: https://www.reddit.com/r/vim/comments/11tdlx0/comment/jckkknq/?utm_source=share&utm_medium=web2x&context=3
+" source $MYVIMDIR/autoload/bufferline.vim
+
 " }}}
 
 " PLUGINS ----------------------------------------------------------------{{{
@@ -206,9 +213,11 @@ Plug 'andymass/vim-matchup'
 Plug 'junegunn/vim-slash'
 Plug 'rhysd/clever-f.vim'
 Plug 'tpope/vim-obsession'
+Plug 'tpope/vim-fugitive'
 
 " ---- Theme/Colors ----
 Plug 'itchyny/lightline.vim'
+Plug 'mengelbrecht/lightline-bufferline'
 Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 
 call plug#end()
@@ -223,6 +232,8 @@ colorscheme catppuccin_$THEMEVARIANT
 
 " Turn syntax highlighting on.
 syntax on
+" Change vertical split color
+highlight! link VertSplit SignColumn
 
 " Clever-f settings
 let g:clever_f_show_prompt=1
@@ -252,7 +263,7 @@ function! s:BuffersSink(lines)
 	endif
 endfunction
 
-function! s:BuffersDelete(...)
+function! s:BuffersCmd(...)
 	let [query, args] = (a:0 && type(a:1) == type('')) ?
 				\ [a:1, a:000[1:]] : ['', a:000]
 	let sorted = fzf#vim#_buflisted_sorted()
@@ -270,7 +281,6 @@ function! s:BuffersDelete(...)
 endfunction
 
 let g:fzf_preview_window = ['right,50%,<70(up,40%)', 'ctrl-/']
-" \ 'ctrl-d': function('<SID>delete_buffers'),
 let g:fzf_action = {
 			\ 'ctrl-t': 'tab split',
 			\ 'ctrl-s': 'split',
@@ -282,60 +292,90 @@ let g:fzf_action = {
 let g:fzf_history_dir = '$HOME/.local/share/fzf-history'
 let g:fzf_tags_command = 'ctags -R'
 
-" function! s:CustomBuffers(query, fullscreen)
-" 	let g:fzf_active_mode="Buffers"
-" 	" echo g:fzf_active_mode
-" 	" redraw
-" 	" sleep 1000m
-
-" 	" return call fzf#vim#buffers(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline', '--bind', 'start:execute(let g:fzf_active_mode="Buffers"; echo g:fzf_active_mode; sleep 1000m)'],
-" 	return fzf#vim#buffers(fzf#vim#with_preview({'options': ['--query', a:query, '--layout=reverse', '--info=inline'],
-" 			\ 'window': {'width': 0.45, 'height': 0.4, 'relative': v:false}}, "right:55%:<50(up:40%)"), a:fullscreen)
-" endfunction
-
 command! -bang -nargs=? -complete=dir Files
 			\ call fzf#vim#files(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline']}), <bang>0)
+command! -bang -nargs=? -complete=dir GFiles
+			\ call fzf#vim#gitfiles(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline']}), <bang>0)
 command! -bang -nargs=* Rg
 			\ call fzf#vim#grep("rg --line-number --no-heading --hidden --follow --glob='!.git/' --color=always --smart-case -- " . shellescape(<q-args>),
 			\ 1, fzf#vim#with_preview({'options': '--delimiter : --nth 3..'}), <bang>0)
-command! -bang -nargs=* Projfind
+command! -bang -nargs=* Rgl
 			\ call fzf#vim#grep("rg --hidden --follow --smart-case --no-heading --line-number --color=always --glob='!.git/' -- " . shellescape(<q-args>)
-			\ . ' ' . (system('git status') =~ '^fatal' ? expand("%:p:h") : system("git rev-parse --show-toplevel")), 1, fzf#vim#with_preview({'options': '--delimiter : --nth 3..'}), <bang>0)
-" command! -bang -nargs=? -complete=buffer Buffers
-" 			\ call fzf#vim#buffers(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline'],
-" 			\ 'window': {'width': 0.45, 'height': 0.4, 'relative': v:false}}, "right:55%:<50(up:40%)"), <bang>0)
-" command! -bang -nargs=? -complete=buffer Buffers call <SID>CustomBuffers(<q-args>, <bang>0)
+			\ . ' ' . expand("%:p:h"), 1, fzf#vim#with_preview({'options': '--delimiter : --nth 3..'}), <bang>0)
+" command! -bang -nargs=* Rgr
+" 			\ call fzf#vim#grep("rg --hidden --follow --smart-case --no-heading --line-number --color=always --glob='!.git/' -- " . shellescape(<q-args>)
+" 			\ . ' ' . (system('git status') =~ '^fatal' ? expand("%:p:h") : system("git rev-parse --show-toplevel")), 1, fzf#vim#with_preview({'options': '--delimiter : --nth 3..'}), <bang>0)
+command! -bang -nargs=? -complete=buffer Buffers call <SID>BuffersCmd(<q-args>, <bang>0)
 
-command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
-
-command! -bang -nargs=? -complete=buffer Buffers call <SID>BuffersDelete(<q-args>, <bang>0)
-" command! -bang -nargs=? -complete=buffer BD call <SID>BuffersDelete(<q-args>, <bang>0)
+" command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
 
 " Lightline settings
+" Colors taken from Catppuccin Vim Lightline color scheme file.
+let s:mauve = [ "#C6A0F6", 183 ]
+let s:red = [ "#ED8796", 211 ]
+let s:yellow = [ "#EED49F", 223 ]
+let s:teal = [ "#8BD5CA", 152 ]
+let s:blue = [ "#8AADF4", 117 ]
+let s:overlay0 = [ "#6E738D", 243 ]
+let s:surface1 = [ "#494D64", 240 ]
+let s:surface0 = [ "#363A4F", 236 ]
+let s:base = [ "#24273A", 235 ]
+let s:mantle = [ "#1E2030", 234 ]
+
 let g:lightline = {
-			\ 'colorscheme': 'catppuccin_' . $THEMEVARIANT,
-			\ 'component' : {
-				\   'lineinfo': '%3l:%-2v%<',
-				\ },
-			\ 'component_function': {
-				\   'fileformat': 'LightlineFileformat',
-				\   'filetype': 'LightlineFiletype',
-				\   'readonly': 'LightlineReadonly',
-				\ },
-				\ }
+	\ 'colorscheme': 'catppuccin_' . $THEMEVARIANT,
+	\ 'separator' : { 'left': "\ue0b4", 'right': "\ue0b6" },
+	\ 'component' : {
+		\   'lineinfo': '%3l:%-2v%<',
+		\ },
+	\ 'tabline': {
+		\   'left': [ ['buffers'] ],
+		\   'right': [ ['close'] ]
+		\ },
+	\ 'component_expand': {
+		\   'buffers': 'lightline#bufferline#buffers'
+		\ },
+	\ 'component_type': {
+		\   'buffers': 'tabsel'
+		\ },
+	\ 'component_function': {
+		\	'filename': 'functions#LightlineFilename',
+		\   'fileformat': 'functions#LightlineFileformat',
+		\   'filetype': 'functions#LightlineFiletype',
+		\   'readonly': 'functions#LightlineReadonly',
+		\   'gitbranch': 'functions#MyFugitiveHead',
+		\ },
+	\ 'active' : {
+		\   'right' : [['lineinfo', 'spell'], ['fileencoding', 'fileformat', 'filetype']],
+		\   'left': [['mode', 'paste'], ['gitbranch', 'readonly', 'filename', 'modified']]
+		\ },
+	\'inactive' : {
+		\ 'left': [['filename']],
+		\ 'right': []
+		\ }
+\ }
+let s:palette = g:lightline#colorscheme#{g:lightline.colorscheme}#palette
+let s:palette.normal.left = [[s:mantle[0], s:blue[0], s:mantle[1], s:blue[1]], [s:blue[0], s:surface0[0], s:blue[1], s:surface0[1]]]
+let s:palette.insert.left = [[s:mantle[0], s:teal[0], s:mantle[1], s:teal[1]], [s:teal[0], s:surface0[0], s:teal[1], s:surface0[1]]]
+let s:palette.replace.left = [[s:mantle[0], s:red[0], s:mantle[1], s:red[1]], [s:red[0], s:surface0[0], s:red[1], s:surface0[1]]]
+let s:palette.visual.left = [[s:mantle[0], s:mauve[0], s:mantle[1], s:mauve[1]], [s:mauve[0], s:surface0[0], s:mauve[1], s:surface0[1]]]
 
-function! LightlineFileformat()
-  return winwidth(0) > 70 ? &fileformat : ''
-endfunction
+let s:palette.normal.right = s:palette.normal.left
+let s:palette.insert.right = s:palette.insert.left
+let s:palette.replace.right = s:palette.replace.left
+let s:palette.visual.right = s:palette.visual.left
+let s:palette.normal.middle = [["#8AADF4", "#1E2030", 117, 234]]
+let s:palette.inactive.middle = [["#8AADF4", "#1E2030", 117, 234]]
+let s:palette.inactive.left = [["#8AADF4", "#1E2030", 117, 234]]
+let s:palette.inactive.right = [["#8AADF4", "#1E2030", 117, 234]]
 
-function! LightlineFiletype()
-  return winwidth(0) > 70 ? (&filetype !=# '' ? &filetype : 'no ft') : ''
-endfunction
+let g:lightline#bufferline#show_number = 1
+let g:lightline#bufferline#unicode_symbols = 1
+let g:lightline#bufferline#modified = ' +'
+let g:lightline#bufferline#read_only = " \uf023"
 
-function! LightlineReadonly()
-  " return &readonly && &filetype !=# 'help' ? '' : ''
-  return &readonly ? '' : ''
-endfunction
+call timer_start(10000, function('functions#GitFetch'), {'repeat': -1})
+call timer_start(10, function('functions#GitFetch')) " Run on startup
 
 " }}}
 
@@ -347,21 +387,9 @@ let mapleader = ' '
 " Remap s to something else
 " :map s
 
-function! s:SaveAndReload()
-	let l:view = winsaveview()
-
-	silent! exec "w"
-	" exec "mksession! " . $MYVIMDIR . "/sessions/session.vim"
-	silent! normal \vr
-	redraw
-	echom (v:shell_error > 0 ? ('Error: ' . v:shell_error) : 'Save & Reload Successful')
-
-	call winrestview(l:view)
-endfunction
-
 " Set mark, Save file, save session, reload, print status message, jump back
 " to mark (original cursor position).
-noremap <silent> <C-s> :call <SID>SaveAndReload()<CR>
+noremap <silent> <C-s> :call functions#SaveAndReload()<CR>
 
 " Session management mappings
 exec 'nnoremap <Leader>ss :Obsession ' . g:session_dir . '/*.vim<C-D><BS><BS><BS><BS><BS>'
@@ -429,26 +457,11 @@ nnoremap \vs :e $MYVIMDIR/statusline.vim<CR>
 " Reload vimrc configuration file
 nnoremap \vr :source $MYVIMRC<CR>
 
-nnoremap <silent> zh :call <SID>HorizontalScrollMode('h')<CR>
-nnoremap <silent> zl :call <SID>HorizontalScrollMode('l')<CR>
-nnoremap <silent> zH :call <SID>HorizontalScrollMode('H')<CR>
-nnoremap <silent> zL :call <SID>HorizontalScrollMode('L')<CR>
-
-function! s:HorizontalScrollMode( call_char )
-	if &wrap
-		return
-	endif
-
-	echohl Title
-	let typed_char = a:call_char
-	while index( [ 'h', 'l', 'H', 'L' ], typed_char ) != -1
-		execute 'normal! z'.typed_char
-		redraws
-		echon '-- Horizontal scrolling mode (h/l/H/L)'
-		let typed_char = nr2char(getchar())
-	endwhile
-	echohl None | echo '' | redraws
-endfunction
+" Horizontal Scrolling
+nnoremap <silent> zh :call functions#HorizontalScrollMode('h')<CR>
+nnoremap <silent> zl :call functions#HorizontalScrollMode('l')<CR>
+nnoremap <silent> zH :call functions#HorizontalScrollMode('H')<CR>
+nnoremap <silent> zL :call functions#HorizontalScrollMode('L')<CR>
 
 " Turn off arrow keys
 noremap <Up> :echoerr "nono don be stopid"<CR>
@@ -462,26 +475,29 @@ inoremap <Left> <C-\><C-O>:exec 'echohl ErrorMsg \| echomsg "nono don be stopid"
 inoremap <Right> <C-\><C-O>:exec 'echohl ErrorMsg \| echomsg "nono don be stopid" \| echohl None'<CR>
 
 " Fzf file search
-noremap <C-P> :Files<CR>
+" noremap <C-P> :Files<CR>
+nnoremap <expr> <C-P> (len(system('git rev-parse')) ? ':Files' : ':GFiles')."\<CR>"
 noremap <leader>l :BLines<CR>
 noremap <leader>b :Buffers<CR>
 noremap <leader>/ :Rg<CR>
+" <C-_> is CTRL-/
+noremap <leader><C-_> :Rgl<CR>
 " noremap <leader>/. :exec ':Rg ' . expand("%:p:h")<CR>
 noremap <leader>t :Tags<CR>
 noremap <leader>m :Marks<CR>
 " nnoremap <silent> <Leader>g :Commits<CR>
 nnoremap <silent> <Leader>? :Helptags<CR>
-nnoremap <silent> <Leader>hh :History<CR>
-nnoremap <silent> <Leader>h: :History:<CR>
-nnoremap <silent> <Leader>h/ :History/<CR> 
+" nnoremap <silent> <Leader>hh :History<CR>
+" nnoremap <silent> <Leader>h: :History:<CR>
+" nnoremap <silent> <Leader>h/ :History/<CR> 
 
 imap <c-x><c-l> <plug>(fzf-complete-line)
 inoremap <expr> <c-x><c-f> fzf#vim#complete#path('fd')
 inoremap <expr> <c-x><c-k> fzf#vim#complete#word('cat /usr/share/dict/words', {'window': { 'width': 0.2, 'height': 0.9, 'xoffset': 1 }})
 
 " Toggle spell check.
-nnoremap <F5> :setlocal spell!<CR>
-inoremap <F5> <C-o>:setlocal spell!<CR>
+nnoremap <silent> <F5> :setlocal spell!<CR>
+inoremap <silent> <F5> <C-o>:setlocal spell!<CR>
 
 " Automatically fix the last misspelled word and jump back to where you were.
 "   Taken from this talk: https://www.youtube.com/watch?v=lwD8G1P52Sk
@@ -541,7 +557,12 @@ augroup END
 
 augroup colorScheme
 	autocmd!
-	autocmd ColorScheme * call functions#ExtendHighlight('Error', 'CustomCleverFCharColor', 'cterm=underline')
+	autocmd ColorSchemePre * call functions#ExtendHighlight('Error', 'CustomCleverFCharColor', 'cterm=underline')
+augroup END
+
+augroup git
+	autocmd!
+	autocmd Filetype gitcommit setlocal spell textwidth=72
 augroup END
 
 " Cursor settings:
@@ -568,4 +589,3 @@ augroup END
 
 " File Sourcing
 " source $MYVIMDIR/statusline.vim
-

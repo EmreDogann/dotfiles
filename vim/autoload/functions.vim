@@ -85,17 +85,33 @@ endfunction
 
 " }}}
 
-if !exists('*Preserve')
-	function! functions#FixDOSLineEndings(command, ...)
-		try
-			let l:win_view = winsaveview()
-			"silent! keepjumps keeppatterns execute a:command
-			execute 'keepjumps keeppatterns ' . a:command
-		finally
-			call winrestview(l:win_view)
-		endtry
-	endfunction
-endif
+function! functions#SaveAndReload()
+	let l:view = winsaveview()
+
+	silent! exec "w"
+	" exec "mksession! " . $MYVIMDIR . "/sessions/session.vim"
+	silent! normal \vr
+	redraw
+	echom (v:shell_error > 0 ? ('Error: ' . v:shell_error) : 'Save & Reload Successful')
+
+	call winrestview(l:view)
+endfunction
+
+function! functions#HorizontalScrollMode( call_char )
+	if &wrap
+		return
+	endif
+
+	echohl Title
+	let typed_char = a:call_char
+	while index( [ 'h', 'l', 'H', 'L' ], typed_char ) != -1
+		execute 'normal! z'.typed_char
+		redraws
+		echon '-- Horizontal scrolling mode (h/l/H/L)'
+		let typed_char = nr2char(getchar())
+	endwhile
+	echohl None | echo '' | redraws
+endfunction
 
 if g:USING_WSL
 	function! functions#FixDOSLineEndings(command, ...)
@@ -172,3 +188,56 @@ function! functions#FormatPaste(register, command, ...)
 	endif
 endfunction
 
+" Lightline Settings ----------------------------------------------------------------{{{
+
+
+function! functions#LightlineFilename()
+	let root = fnamemodify(get(b:, 'git_dir'), ':h')
+	let path = expand('%:p')
+	if path[:len(root)-1] ==# root
+		return path[len(root)+1:]
+	endif
+	return expand('%')
+endfunction
+
+function! functions#LightlineFileformat()
+	return winwidth(0) > 70 ? &fileformat : ''
+endfunction
+
+function! functions#LightlineFiletype()
+	return winwidth(0) > 70 ? (&filetype !=# '' ? &filetype : 'no ft') : ''
+endfunction
+
+function! functions#LightlineReadonly()
+	" return &readonly && &filetype !=# 'help' ? '' : ''
+	return &readonly ? "\uf023" : ''
+endfunction
+
+function! functions#MyFugitiveHead()
+	let head = FugitiveHead()
+	if head != ""
+		let head = "\uf126 " .. head
+		let head = head . " [" . s:gitSyncData[0] . "\uea9a " . s:gitSyncData[1] . "\ueaa1]"
+	endif
+
+	return head
+endfunction
+
+let s:syncJob = -1
+let s:gitSyncData = ["?", "?"]
+function! functions#Receive(job, status)
+	let head = FugitiveHead()
+	if head == ""
+		let s:gitSyncData = ["?", "?"]
+	else
+		" Get count, awk to clean up output, then tr to remove trailing newline
+		let s:gitSyncData = system("git rev-list --left-right --count  origin/" . head . "..." . head . " | awk '{print $1 \" \" $2}' | tr -d '\\n'")
+		let s:gitSyncData = split(s:gitSyncData, ' ')
+	endif
+endfunction
+
+function! functions#GitFetch(time)
+	let s:syncJob = job_start('git fetch', {'exit_cb': 'functions#Receive'})
+endfunction
+
+" }}}
