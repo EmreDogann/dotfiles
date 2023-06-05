@@ -27,12 +27,12 @@ then
 
 	# - The first argument to the function ($1) is the base path to start traversal
 	_fzf_compgen_path() {
-	  fd --hidden --follow --exclude ".git" . "$1"
+	  fd --no-ignore --hidden --follow --exclude ".git" . "$1"
 	}
 
 	# Use fd to generate the list for directory completion
 	_fzf_compgen_dir() {
-	  fd --type d --hidden --follow --exclude ".git" . "$1"
+	  fd --type d --no-ignore --hidden --follow --exclude ".git" . "$1"
 	}
 
 	# - The first argument to the function is the name of the command.
@@ -58,7 +58,8 @@ printf -v fzfPreviewControls '%s' \
 	"ctrl-b:preview-page-up,ctrl-f:preview-page-down,"\
 	"ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down,"\
 	"shift-up:preview-top,shift-down:preview-bottom,"\
-	"alt-up:half-page-up,alt-down:half-page-down"
+	"alt-up:half-page-up,alt-down:half-page-down"\
+	# "ctrl-g:reload($FZF_DEFAULT_COMMAND --no-ignore-vcs)"
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --line-range :300  --color=always {}' --multi --height 40% --layout=reverse --border --info=inline --header='<Find File> | Use CTRL-C or ESC to cancel' $fzfPreviewControls"
 export FZF_CTRL_T_OPTS='--header="<Paste File/Directory Path> | Use CTRL-C or ESC to cancel"'
 export FZF_ALT_C_OPTS='--header="<cd into Directory> | Use CTRL-C or ESC to cancel" --preview "tree -C {} | head -200" --info=inline'
