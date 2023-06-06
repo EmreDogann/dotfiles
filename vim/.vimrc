@@ -641,7 +641,7 @@ function! NetrwMapping()
 	nmap <buffer> f! mx		" Run external command on marked files
 
 	" Recursive remove file or directory
-	nmap <buffer> RR :call NetrwRemoveRecursive()<CR>
+	nmap <buffer> RR :call functions#NetrwRemoveRecursive()<CR>
 endfunction
 
 " }}}

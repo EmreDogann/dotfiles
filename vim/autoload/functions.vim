@@ -188,7 +188,7 @@ function! functions#FormatPaste(register, command, ...)
 	endif
 endfunction
 
-function! NetrwRemoveRecursive()
+function! functions#NetrwRemoveRecursive()
 	if &filetype ==# 'netrw'
 		cnoremap <buffer> <CR> rm -r<CR>
 		normal mu
