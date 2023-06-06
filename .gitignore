@@ -1,4 +1,3 @@
-
 # Zsh files
 zsh/.zcompdump
 zsh/.zsh_history
@@ -23,6 +22,9 @@ vim/undo/*
 vim/.viminfo*
 vim/spell/*.add*
 vim/.netrwhist
+
+# COC.nvim config
+coc/*
 
 # Cache files
 cache/*
