@@ -1,6 +1,6 @@
 # Available variants from Catppuccin:
 # frappe | latte | macchiato | mocha
-export THEMEVARIANT="macchiato"
+export THEMEVARIANT="frappe"
 
 # FZF color scheme config
 if [ $THEMEVARIANT = "frappe" ]

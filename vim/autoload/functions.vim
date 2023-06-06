@@ -1,5 +1,5 @@
 
-" FZF Functions --------------------------------------------------------{{{
+" FZF --------------------------------------------------------{{{
 " command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
 function! functions#RipgrepFzf(query, fullscreen)
 	let command_fmt = "rg --line-number --no-heading --follow --hidden --ignore --glob='!.git/' --color=always --smart-case -- %s || true"
@@ -188,8 +188,23 @@ function! functions#FormatPaste(register, command, ...)
 	endif
 endfunction
 
-" Lightline Settings ----------------------------------------------------------------{{{
+function! NetrwRemoveRecursive()
+	if &filetype ==# 'netrw'
+		cnoremap <buffer> <CR> rm -r<CR>
+		normal mu
+		normal mf
 
+		try
+			normal mx
+		catch
+			echo "Canceled"
+		endtry
+
+		cunmap <buffer> <CR>
+	endif
+endfunction
+
+" LIGHTLINE ----------------------------------------------------------------{{{
 
 function! functions#LightlineFilename()
 	let root = fnamemodify(get(b:, 'git_dir'), ':h')

@@ -17,7 +17,7 @@ let s:portable=expand('<sfile>:p:h')
 " Add the directory to 'runtimepath'
 let &runtimepath=printf('%s,%s,%s/after', s:portable, &runtimepath, s:portable)
 let &packpath=&runtimepath
-let g:session_dir = expand('$MYVIMDIR') . '/sessions'
+let g:session_dir = expand('%:p:h') . '/sessions'
 
 " Set directory for swap & backup files.
 " // - Ensures files created are uniquely named.
@@ -36,10 +36,18 @@ set backup
 " Enable undo file
 set undofile
 
+" Having longer updatetime (default is 4000 ms = 4s) leads to noticeable
+" delays and poor user experience
+set updatetime=300
+
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved
+set signcolumn=yes
+
 " Enable type file detection. Vim will be able to try to detect the type of file is use.
 filetype on
 
-" Enable plugins and load plugin for the detected filec type.
+" Enable plugins and load plugin for the detected file type.
 filetype plugin on
 
 " Load an indent file for the detected file type.
@@ -150,6 +158,10 @@ set wildmode=list:full
 " Wildmenu will ignore files with these extensions.
 set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
 
+" Disable auto closing folds on buffer enter
+set nofoldenable
+set foldlevel=99
+
 " Session options
 set ssop-=options
 
@@ -161,6 +173,7 @@ set splitright
 set laststatus=2
 
 " Netrw options
+let g:netrw_keepdir = 0
 let g:netrw_liststyle = 3
 let g:netrw_banner = 0
 let g:netrw_winsize = 25
@@ -214,6 +227,10 @@ Plug 'junegunn/vim-slash'
 Plug 'rhysd/clever-f.vim'
 Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-fugitive'
+Plug 'sheerun/vim-polyglot'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'jiangmiao/auto-pairs'
+Plug 'Konfekt/FastFold'
 
 " ---- Theme/Colors ----
 Plug 'itchyny/lightline.vim'
@@ -231,7 +248,9 @@ set termguicolors
 colorscheme catppuccin_$THEMEVARIANT
 
 " Turn syntax highlighting on.
-syntax on
+if !exists("g:syntax_on")
+	syntax enable
+endif
 " Change vertical split color
 highlight! link VertSplit SignColumn
 
@@ -250,6 +269,7 @@ let g:move_key_modifier_visualmode = 'S'
 " machakann/vim-highlightedyank settings
 let g:highlightedyank_highlight_duration = 300
 
+" FZF.vim {{{
 " FZF.vim settings
 function! s:BuffersSink(lines)
 	if a:lines[0] ==# 'alt-d'
@@ -309,18 +329,34 @@ command! -bang -nargs=? -complete=buffer Buffers call <SID>BuffersCmd(<q-args>, 
 
 " command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
 
+" }}}
+
+" Lightline {{{
 " Lightline settings
 " Colors taken from Catppuccin Vim Lightline color scheme file.
-let s:mauve = [ "#C6A0F6", 183 ]
-let s:red = [ "#ED8796", 211 ]
-let s:yellow = [ "#EED49F", 223 ]
-let s:teal = [ "#8BD5CA", 152 ]
-let s:blue = [ "#8AADF4", 117 ]
-let s:overlay0 = [ "#6E738D", 243 ]
-let s:surface1 = [ "#494D64", 240 ]
-let s:surface0 = [ "#363A4F", 236 ]
-let s:base = [ "#24273A", 235 ]
-let s:mantle = [ "#1E2030", 234 ]
+" Maccihato
+" let s:mauve = [ "#C6A0F6", 183 ]
+" let s:red = [ "#ED8796", 211 ]
+" let s:yellow = [ "#EED49F", 223 ]
+" let s:teal = [ "#8BD5CA", 152 ]
+" let s:blue = [ "#8AADF4", 117 ]
+" let s:overlay0 = [ "#6E738D", 243 ]
+" let s:surface1 = [ "#494D64", 240 ]
+" let s:surface0 = [ "#363A4F", 236 ]
+" let s:base = [ "#24273A", 235 ]
+" let s:mantle = [ "#1E2030", 234 ]
+
+" Frappe
+let s:mauve = [ "#CA9EE6", 183 ]
+let s:red = [ "#E78284", 211 ]
+let s:yellow = [ "#E5C890", 223 ]
+let s:teal = [ "#81C8BE", 152 ]
+let s:blue = [ "#8CAAEE", 117 ]
+let s:overlay0 = [ "#737994", 243 ]
+let s:surface1 = [ "#51576D", 240 ]
+let s:surface0 = [ "#414559", 236 ]
+let s:base = [ "#303446", 235 ]
+let s:mantle = [ "#292C3C", 234 ]
 
 let g:lightline = {
 	\ 'colorscheme': 'catppuccin_' . $THEMEVARIANT,
@@ -364,10 +400,10 @@ let s:palette.normal.right = s:palette.normal.left
 let s:palette.insert.right = s:palette.insert.left
 let s:palette.replace.right = s:palette.replace.left
 let s:palette.visual.right = s:palette.visual.left
-let s:palette.normal.middle = [["#8AADF4", "#1E2030", 117, 234]]
-let s:palette.inactive.middle = [["#8AADF4", "#1E2030", 117, 234]]
-let s:palette.inactive.left = [["#8AADF4", "#1E2030", 117, 234]]
-let s:palette.inactive.right = [["#8AADF4", "#1E2030", 117, 234]]
+let s:palette.normal.middle = [[s:blue[0], s:mantle[0], s:blue[1], s:mantle[1]]]
+let s:palette.inactive.middle = [[s:blue[0], s:mantle[0], s:blue[1], s:mantle[1]]]
+let s:palette.inactive.left = s:palette.inactive.middle
+let s:palette.inactive.right = s:palette.inactive.middle
 
 let g:lightline#bufferline#show_number = 1
 let g:lightline#bufferline#unicode_symbols = 1
@@ -376,6 +412,36 @@ let g:lightline#bufferline#read_only = " \uf023"
 
 call timer_start(10000, function('functions#GitFetch'), {'repeat': -1})
 call timer_start(10, function('functions#GitFetch')) " Run on startup
+
+" }}}
+
+" COC.nvim {{{
+" use <tab> to trigger completion and navigate to the next complete item
+function! CheckBackspace() abort
+	let col = col('.') - 1
+	return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+inoremap <silent><expr> <Tab>
+			\ coc#pum#visible() ? coc#pum#next(1) :
+			\ CheckBackspace() ? "\<Tab>" :
+			\ coc#refresh()
+
+" }}}
+
+" FastFold {{{
+nmap <F4> <Plug>(FastFoldUpdate)
+let g:fastfold_force = 1
+let g:fastfold_minlines = 0
+let g:fastfold_savehook = 1
+let g:fastfold_fold_command_suffixes =  ['x','X','a','A','o','O','c','C']
+let g:fastfold_fold_movement_commands = [']z', '[z', 'zj', 'zk']
+let g:sh_fold_enabled = 7
+let g:zsh_fold_enable = 1
+let g:vimsyn_folding = 'af'
+let g:markdown_folding = 1
+
+" }}}
 
 " }}}
 
@@ -545,14 +611,48 @@ nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
+nnoremap <leader>ee :Lexplore %:p:h<CR>
+nnoremap <Leader>ea :Lexplore<CR>
+
+function! NetrwMapping()
+	" Navigation
+	nmap <buffer> H u	" Go back in history
+	nmap <buffer> h -^	" Go up one directory
+	nmap <buffer> l <CR>	" open file or directory
+
+	nmap <buffer> . gh		" Toggle dotfiles
+	nmap <buffer> P <C-w>z	" Close preview
+
+	nmap <buffer> L <CR>:Lexplore<CR>	" Open file and close Netrw
+	nmap <buffer> <Leader>dd :Lexplore<CR>	" Close Netrw
+
+	" Marks
+	nmap <buffer> <TAB> mf
+	nmap <buffer> <S-TAB> mF
+	nmap <buffer> <Leader><TAB> mu
+
+	" File Management
+	nmap <buffer> ff %:w<CR>:buffer #<CR>	" Create file
+	nmap <buffer> fr R	" Rename file
+	nmap <buffer> fc mc	" Copy marked file
+	nmap <buffer> fC mtmc	" After you mark your files, put the cursor in a directory and this will assign the target directory and copy.
+	nmap <buffer> fm mm		" Move marked file
+	nmap <buffer> fM mtmm	" Same as fC but for moving files
+	nmap <buffer> f! mx		" Run external command on marked files
+
+	" Recursive remove file or directory
+	nmap <buffer> RR :call NetrwRemoveRecursive()<CR>
+endfunction
+
 " }}}
 
-" VIMSCRIPT --------------------------------------------------------------{{{
+" AUTOCOMMANDS --------------------------------------------------------------{{{
 
 " Use the marker method of folding.
 augroup codeFolding
 	autocmd!
 	autocmd FileType vim setlocal foldmethod=marker
+	autocmd FileType c,cpp setlocal foldmethod=syntax
 augroup END
 
 augroup colorScheme
@@ -563,6 +663,16 @@ augroup END
 augroup git
 	autocmd!
 	autocmd Filetype gitcommit setlocal spell textwidth=72
+augroup END
+
+augroup netrw_mapping
+	autocmd!
+	autocmd filetype netrw call NetrwMapping()
+augroup END
+
+augroup commentFormatting
+	autocmd!
+	autocmd FileType * set formatoptions-=cro
 augroup END
 
 " Cursor settings:

@@ -80,6 +80,6 @@ esac
 
 # ----- Searching -----
 if command -v fzf > /dev/null; then
-	alias vimf="fzf --bind 'enter:become(vim {})'"
+	alias vimf="fzf --multi --bind 'enter:become(vim {+})'"
 	alias cdf="fd --no-ignore --type d --strip-cwd-prefix --hidden --follow --exclude .git | fzf --print0 | xargs --no-run-if-empty -0 -o cd"
 fi
