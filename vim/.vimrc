@@ -231,6 +231,7 @@ Plug 'sheerun/vim-polyglot'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'jiangmiao/auto-pairs'
 Plug 'Konfekt/FastFold'
+Plug 'airblade/vim-rooter'
 
 " ---- Theme/Colors ----
 Plug 'itchyny/lightline.vim'
@@ -268,6 +269,10 @@ let g:move_key_modifier_visualmode = 'S'
 
 " machakann/vim-highlightedyank settings
 let g:highlightedyank_highlight_duration = 300
+
+" airblade/vim-rooter settings
+let g:rooter_silent_chdir = 1
+let g:rooter_resolve_links = 1
 
 " FZF.vim {{{
 " FZF.vim settings
