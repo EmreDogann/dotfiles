@@ -1,5 +1,5 @@
 
-" FZF --------------------------------------------------------{{{
+" FZF {{{
 " command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
 function! functions#RipgrepFzf(query, fullscreen)
 	let command_fmt = "rg --line-number --no-heading --follow --hidden --ignore --glob='!.git/' --color=always --smart-case -- %s || true"
@@ -204,7 +204,7 @@ function! functions#NetrwRemoveRecursive()
 	endif
 endfunction
 
-" LIGHTLINE ----------------------------------------------------------------{{{
+" LIGHTLINE {{{
 
 function! functions#LightlineFilename()
 	let root = fnamemodify(get(b:, 'git_dir'), ':h')
@@ -226,6 +226,10 @@ endfunction
 function! functions#LightlineReadonly()
 	" return &readonly && &filetype !=# 'help' ? '' : ''
 	return &readonly ? "\uf023" : ''
+endfunction
+
+function! functions#MyObsessionStatus()
+	return ObsessionStatus("\Uf040a", "\Uf03e4")
 endfunction
 
 function! functions#MyFugitiveHead()

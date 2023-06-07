@@ -1,14 +1,9 @@
-" Disable vi compatibility, if for some reason it's on.
-if &compatible
-	set nocompatible
-endif
-
 set encoding=utf-8
 scriptencoding utf-8
 
 let g:USING_WSL = has("unix") && system("uname -r") =~ "microsoft"
 
-" File Paths ----------------------------------------------------------------{{{
+" File Paths {{{
 " From -  https://github.com/z0rc/dotfiles/blob/main/vim/vimrc
 " Set default 'runtimepath' without ~/.vim folders
 let &runtimepath=printf('%s/vimfiles,%s,%s/vimfiles/after', $VIM, $VIMRUNTIME, $VIM)
@@ -29,7 +24,7 @@ set spellfile=$MYVIMDIR/spell/en.utf-8.add
 
 " }}}
 
-" GENERAL ----------------------------------------------------------------{{{
+" GENERAL {{{
 " Enable backups
 set backup
 
@@ -97,11 +92,18 @@ set relativenumber
 " Highlight cursor line underneath the cursor horizontally.
 set cursorline
 
-" Set shift width to "4 spaces.
+" Set shift width to 4 spaces.
 set shiftwidth=4
 
 " Set tab width to 4 columns.
 set tabstop=4
+
+" Mix of tabs and space
+set softtabstop=4
+
+" Indent guides
+set list listchars=trail:·,extends:»,precedes:«,nbsp:×
+set listchars=tab:\\u258f\ 
 
 " Keep indentation from previous line
 set autoindent
@@ -156,11 +158,24 @@ set wildmode=list:full
 
 " There are certain files that we would never want to edit with Vim.
 " Wildmenu will ignore files with these extensions.
+set wildignore+=*.swp,*.bak
 set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
+set wildignore+=*/.git/**/*,*/.hg/**/*,*/.svn/**/*
 
-" Disable auto closing folds on buffer enter
-set nofoldenable
-set foldlevel=99
+" Case insensitive tab completion
+set wildignorecase
+
+" Start with all folds open
+set foldlevelstart=99
+
+" Keep changes to the buffer without writing them to the file.
+set hidden
+
+" Automatically save changed made to the buffer
+set autowrite
+
+" Don't redraw screen immediately if executing something that was not typed
+set lazyredraw
 
 " Session options
 set ssop-=options
@@ -193,9 +208,9 @@ set showtabline=2
 
 " }}}
 
-" PLUGINS ----------------------------------------------------------------{{{
+" PLUGINS {{{
 
-" PLUGIN LOADER AUTOMATION -----------------------------------------------{{{
+" PLUGIN LOADER AUTOMATION {{{
 let data_dir = has('nvim') ? stdpath('data') . '/site' : expand('$MYVIMDIR')
 if empty(glob(data_dir . '/autoload/plug.vim'))
 	silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
@@ -203,9 +218,12 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
 endif
 
 " Run PlugInstall if there are missing plugins
-autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
-			\| PlugInstall --sync | source $MYVIMRC
-			\| endif
+augroup Plug
+	autocmd!
+	autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+				\| PlugInstall --sync | source $MYVIMRC
+				\| endif
+augroup END
 
 " }}}
 
@@ -232,6 +250,7 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'jiangmiao/auto-pairs'
 Plug 'Konfekt/FastFold'
 Plug 'airblade/vim-rooter'
+Plug 'jrudess/vim-foldtext'
 
 " ---- Theme/Colors ----
 Plug 'itchyny/lightline.vim'
@@ -239,10 +258,11 @@ Plug 'mengelbrecht/lightline-bufferline'
 Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 
 call plug#end()
+filetype plugin indent on
 
 " }}}
 
-" PLUGIN SETTINGS --------------------------------------------------------{{{
+" PLUGIN SETTINGS {{{
 
 " Set color scheme & settings
 set termguicolors
@@ -252,8 +272,12 @@ colorscheme catppuccin_$THEMEVARIANT
 if !exists("g:syntax_on")
 	syntax enable
 endif
+
 " Change vertical split color
 highlight! link VertSplit SignColumn
+
+" Change indent guides and trailing spaces color
+highlight SpecialKey term=standout ctermfg=240 ctermbg=235 guifg=#40455d guibg=#303446
 
 " Clever-f settings
 let g:clever_f_show_prompt=1
@@ -274,8 +298,10 @@ let g:highlightedyank_highlight_duration = 300
 let g:rooter_silent_chdir = 1
 let g:rooter_resolve_links = 1
 
+" jiangmioa/auto-pairs settings
+let g:AutoPairsCenterLine = 0
+
 " FZF.vim {{{
-" FZF.vim settings
 function! s:BuffersSink(lines)
 	if a:lines[0] ==# 'alt-d'
 		call remove(a:lines, 0)
@@ -337,7 +363,40 @@ command! -bang -nargs=? -complete=buffer Buffers call <SID>BuffersCmd(<q-args>, 
 " }}}
 
 " Lightline {{{
-" Lightline settings
+let g:lightline = {
+	\ 'colorscheme': 'catppuccin_' . $THEMEVARIANT,
+	\ 'separator' : { 'left': "\ue0b4", 'right': "\ue0b6" },
+	\ 'component' : {
+		\   'lineinfo': '%3l:%-2v%<',
+		\ },
+	\ 'tabline': {
+		\   'left': [ ['buffers'] ],
+		\   'right': [ ['close'] ]
+		\ },
+	\ 'component_expand': {
+		\   'buffers': 'lightline#bufferline#buffers'
+		\ },
+	\ 'component_type': {
+		\   'buffers': 'tabsel'
+		\ },
+	\ 'component_function': {
+		\	'filename': 'functions#LightlineFilename',
+		\   'fileformat': 'functions#LightlineFileformat',
+		\   'filetype': 'functions#LightlineFiletype',
+		\   'readonly': 'functions#LightlineReadonly',
+		\   'gitbranch': 'functions#MyFugitiveHead',
+		\ 	'obsession': 'functions#MyObsessionStatus'
+		\ },
+	\ 'active' : {
+		\   'right' : [['lineinfo', 'spell'], ['obsession', 'fileencoding', 'fileformat', 'filetype']],
+		\   'left': [['mode', 'paste'], ['gitbranch', 'readonly', 'filename', 'modified']]
+		\ },
+	\'inactive' : {
+		\ 'left': [['filename']],
+		\ 'right': []
+		\ }
+\ }
+
 " Colors taken from Catppuccin Vim Lightline color scheme file.
 " Maccihato
 " let s:mauve = [ "#C6A0F6", 183 ]
@@ -363,38 +422,6 @@ let s:surface0 = [ "#414559", 236 ]
 let s:base = [ "#303446", 235 ]
 let s:mantle = [ "#292C3C", 234 ]
 
-let g:lightline = {
-	\ 'colorscheme': 'catppuccin_' . $THEMEVARIANT,
-	\ 'separator' : { 'left': "\ue0b4", 'right': "\ue0b6" },
-	\ 'component' : {
-		\   'lineinfo': '%3l:%-2v%<',
-		\ },
-	\ 'tabline': {
-		\   'left': [ ['buffers'] ],
-		\   'right': [ ['close'] ]
-		\ },
-	\ 'component_expand': {
-		\   'buffers': 'lightline#bufferline#buffers'
-		\ },
-	\ 'component_type': {
-		\   'buffers': 'tabsel'
-		\ },
-	\ 'component_function': {
-		\	'filename': 'functions#LightlineFilename',
-		\   'fileformat': 'functions#LightlineFileformat',
-		\   'filetype': 'functions#LightlineFiletype',
-		\   'readonly': 'functions#LightlineReadonly',
-		\   'gitbranch': 'functions#MyFugitiveHead',
-		\ },
-	\ 'active' : {
-		\   'right' : [['lineinfo', 'spell'], ['fileencoding', 'fileformat', 'filetype']],
-		\   'left': [['mode', 'paste'], ['gitbranch', 'readonly', 'filename', 'modified']]
-		\ },
-	\'inactive' : {
-		\ 'left': [['filename']],
-		\ 'right': []
-		\ }
-\ }
 let s:palette = g:lightline#colorscheme#{g:lightline.colorscheme}#palette
 let s:palette.normal.left = [[s:mantle[0], s:blue[0], s:mantle[1], s:blue[1]], [s:blue[0], s:surface0[0], s:blue[1], s:surface0[1]]]
 let s:palette.insert.left = [[s:mantle[0], s:teal[0], s:mantle[1], s:teal[1]], [s:teal[0], s:surface0[0], s:teal[1], s:surface0[1]]]
@@ -450,7 +477,27 @@ let g:markdown_folding = 1
 
 " }}}
 
-" MAPPINGS ----------------------------------------------------------------{{{
+" MAPPINGS {{{
+
+" Fix Alt key mappings not working in WSL
+" From: https://github.com/vim/vim/issues/8726#issuecomment-894640707
+" if g:USING_WSL
+" 	execute "set <M-}>=\<Esc>}"
+" 	execute "set <M-]>=\<Esc>]"
+" 	execute "set <M-)>=\<Esc>)"
+" 	execute "set <M-\'>=\<Esc>\'"
+" 	" execute "set <M-e>=\<Esc>e"
+" 	" <M-">
+" 	execute "set <M-" . '\"' . ">=\<Esc>" . '\"'
+
+" 	" From: https://stackoverflow.com/a/10216459/10439539
+" 	let c='a'
+" 	while c <= 'z'
+" 		exec "set <M-".c.">=\<Esc>".c
+" 		exec "imap \<ESC>".c." <M-".c.">"
+" 		let c = nr2char(1+char2nr(c))
+" 	endw
+" endif
 
 " Set <space> as the leader key
 let mapleader = ' '
@@ -519,7 +566,7 @@ elseif has("unix")
 endif
 
 " Insert sleep [x]m for debugging purposes
-nnoremap <leader>sl :<C-U>normal Osleep <C-R>=v:count1<CR>m<C-O>Oredraw<Esc>^
+" nnoremap <leader>sl :<C-U>normal Osleep <C-R>=v:count1<CR>m<C-O>Oredraw<Esc>^
 
 " Edit vimrc configuration file
 nnoremap \ve :e $MYVIMRC<CR>
@@ -546,14 +593,13 @@ inoremap <Left> <C-\><C-O>:exec 'echohl ErrorMsg \| echomsg "nono don be stopid"
 inoremap <Right> <C-\><C-O>:exec 'echohl ErrorMsg \| echomsg "nono don be stopid" \| echohl None'<CR>
 
 " Fzf file search
-" noremap <C-P> :Files<CR>
 nnoremap <expr> <C-P> (len(system('git rev-parse')) ? ':Files' : ':GFiles')."\<CR>"
 noremap <leader>l :BLines<CR>
-noremap <leader>b :Buffers<CR>
+noremap <silent> <expr> <leader>b (v:count ? ':buf ' . v:count : ':Buffers') . "\<CR>"
+noremap <silent> <leader><leader>b :buf #<CR>
 noremap <leader>/ :Rg<CR>
 " <C-_> is CTRL-/
 noremap <leader><C-_> :Rgl<CR>
-" noremap <leader>/. :exec ':Rg ' . expand("%:p:h")<CR>
 noremap <leader>t :Tags<CR>
 noremap <leader>m :Marks<CR>
 " nnoremap <silent> <Leader>g :Commits<CR>
@@ -572,7 +618,7 @@ inoremap <silent> <F5> <C-o>:setlocal spell!<CR>
 
 " Automatically fix the last misspelled word and jump back to where you were.
 "   Taken from this talk: https://www.youtube.com/watch?v=lwD8G1P52Sk
-nnoremap <Leader>sp :normal! mz[s1z=`z<CR>
+" nnoremap <Leader>sp :normal! mz[s1z=`z<CR>
 
 " Insert mode completion
 nnoremap \s a<C-X><C-S><C-P>
@@ -609,6 +655,10 @@ xnoremap          il g_o^o
 onoremap <silent> il :<c-u>exe 'normal v' . v:count1 . 'il'<CR>
 xnoremap          al g_o0o
 onoremap <silent> al :<c-u>exe 'normal v' . v:count1 . 'al'<CR>
+
+" Buffer navigation
+nnoremap <Tab> :bnext<CR>
+nnoremap <S-Tab> :bprevious<CR>
 
 " Easier split navigation.
 nnoremap <C-J> <C-W><C-J>
@@ -651,7 +701,7 @@ endfunction
 
 " }}}
 
-" AUTOCOMMANDS --------------------------------------------------------------{{{
+" AUTOCOMMANDS {{{
 
 " Use the marker method of folding.
 augroup codeFolding
