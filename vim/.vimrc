@@ -354,7 +354,8 @@ function! s:BuffersSink(lines)
 	elseif a:lines[0] ==# 'alt-r'
 		call remove(a:lines, 0)
 		let l:splitLines = join(map(a:lines, {_, line -> split(line)[2]}))
-		let l:bufIDs = []
+		" Add the current buffer to the list of buffers we want to keep.
+		let l:bufIDs = [string(bufnr("%"))]
 		call substitute(l:splitLines, '\[\zs[0-9]*\ze\]', '\=add(l:bufIDs, submatch(0))', 'g')
 
 		let l:buffersToRemove = filter(map(copy(getbufinfo()), 'v:val.bufnr'), 'index(l:bufIDs, string(v:val)) == -1')
