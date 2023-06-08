@@ -229,6 +229,7 @@ function! functions#LightlineReadonly()
 endfunction
 
 function! functions#MyObsessionStatus()
+	" NOTE: Uppercase U is needed for unicode codepoints longer than 4 characters
 	return ObsessionStatus("\Uf040a", "\Uf03e4")
 endfunction
 

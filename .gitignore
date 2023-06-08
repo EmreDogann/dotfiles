@@ -15,9 +15,10 @@ fontforge
 vim/plugged/*
 
 # Ignore other vim file
-vim/[Ss]ession*
+vim/[Ss]essions/*
 vim/swap/*
 vim/backup/*
+vim/views/*
 vim/undo/*
 vim/.viminfo*
 vim/spell/*.add*
@@ -25,6 +26,7 @@ vim/.netrwhist
 
 # COC.nvim config
 coc/*
+vim/node_modules
 
 # Cache files
 cache/*

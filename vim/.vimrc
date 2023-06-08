@@ -18,6 +18,7 @@ let g:session_dir = expand('%:p:h') . '/sessions'
 " // - Ensures files created are uniquely named.
 set directory=$MYVIMDIR/swap//
 set viminfo='50,<1000,s100,:100,h,n$MYVIMDIR/.viminfo
+set viewdir=$MYVIMDIR/views//
 set backupdir=$MYVIMDIR/backup//
 set undodir=$MYVIMDIR/undo//
 set spellfile=$MYVIMDIR/spell/en.utf-8.add
@@ -65,7 +66,7 @@ set spellsuggest+=10
 " Configure timeout duration.
 set ttimeout
 set timeoutlen=1000
-set ttimeoutlen=10	" Under 10 causes cursor glitching when exiting insert mode.
+set ttimeoutlen=10 " Under 10 causes cursor glitching when exiting insert mode.
 set ttyfast
 
 " Allow backspace to work over various features in insert mode.
@@ -177,8 +178,10 @@ set autowrite
 " Don't redraw screen immediately if executing something that was not typed
 set lazyredraw
 
-" Session options
-set ssop-=options
+" Session & View options
+set sessionoptions-=options
+" set sessionoptions-=folds
+set viewoptions=cursor,folds,slash,unix
 
 " Open new split panes to right and bottom, more natural than defaults.
 set splitbelow
@@ -243,14 +246,19 @@ Plug 'machakann/vim-highlightedyank'
 Plug 'andymass/vim-matchup'
 Plug 'junegunn/vim-slash'
 Plug 'rhysd/clever-f.vim'
-Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-fugitive'
-Plug 'sheerun/vim-polyglot'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'jiangmiao/auto-pairs'
-Plug 'Konfekt/FastFold'
+Plug 'tmsvg/pear-tree'
 Plug 'airblade/vim-rooter'
 Plug 'jrudess/vim-foldtext'
+
+" ---- Session Management ----
+Plug 'tpope/vim-obsession'
+" Plug 'zhimsel/vim-stay'
+" Plug 'Konfekt/FastFold'
+
+" ---- Code Completion/Semantic Highlighting ----
+Plug 'sheerun/vim-polyglot'
+Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
 
 " ---- Theme/Colors ----
 Plug 'itchyny/lightline.vim'
@@ -258,7 +266,6 @@ Plug 'mengelbrecht/lightline-bufferline'
 Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 
 call plug#end()
-filetype plugin indent on
 
 " }}}
 
@@ -279,6 +286,9 @@ highlight! link VertSplit SignColumn
 " Change indent guides and trailing spaces color
 highlight SpecialKey term=standout ctermfg=240 ctermbg=235 guifg=#40455d guibg=#303446
 
+" More subtle folded text highlighting
+highlight Folded term=reverse ctermbg=236 guibg=#3c4052
+
 " Clever-f settings
 let g:clever_f_show_prompt=1
 " let g:clever_f_mark_direct=1
@@ -293,13 +303,39 @@ let g:move_key_modifier_visualmode = 'S'
 
 " machakann/vim-highlightedyank settings
 let g:highlightedyank_highlight_duration = 300
+let g:highlightedyank_highlight_in_visual = 0
 
 " airblade/vim-rooter settings
 let g:rooter_silent_chdir = 1
 let g:rooter_resolve_links = 1
 
-" jiangmioa/auto-pairs settings
-let g:AutoPairsCenterLine = 0
+" tmsvg/pear-tree settings
+let g:pear_tree_smart_openers = 1
+let g:pear_tree_smart_closers = 1
+let g:pear_tree_smart_backspace = 1
+" Disable automapping so we can fix Coc mapping.
+let g:pear_tree_map_special_keys = 0
+
+" Default mappings:
+imap <BS> <Plug>(PearTreeBackspace)
+" Prevent <Esc> mapping from breaking cursor keys and Shift-Tab in insert mode
+" From: https://github.com/tmsvg/pear-tree/blob/4b29b87a5020b51e65febb477581555cdc4d629e/plugin/pear-tree.vim#L177
+imap <buffer> <Esc><Esc> <Plug>(PearTreeFinishExpansion)
+imap <buffer> <nowait> <Esc> <Plug>(PearTreeFinishExpansion)
+
+function! CustomCR() abort
+	" Make <CR> to accept selected completion item or notify coc.nvim to format.
+	if coc#pum#visible()
+		return coc#_select_confirm()
+	else
+		" Undo each individual enter action as opposed to undo in blocks.
+		" call feedkeys("\<C-g>u")
+		call coc#on_enter()
+		return "\<Plug>(PearTreeExpand)"
+endfunction
+
+" Get PearTreeExpand working with coc.nvim
+imap <silent><expr> <CR> CustomCR()
 
 " FZF.vim {{{
 function! s:BuffersSink(lines)
@@ -385,11 +421,12 @@ let g:lightline = {
 		\   'filetype': 'functions#LightlineFiletype',
 		\   'readonly': 'functions#LightlineReadonly',
 		\   'gitbranch': 'functions#MyFugitiveHead',
-		\ 	'obsession': 'functions#MyObsessionStatus'
+		\ 	'obsession': 'functions#MyObsessionStatus',
+		\   'cocstatus': 'coc#status'
 		\ },
 	\ 'active' : {
 		\   'right' : [['lineinfo', 'spell'], ['obsession', 'fileencoding', 'fileformat', 'filetype']],
-		\   'left': [['mode', 'paste'], ['gitbranch', 'readonly', 'filename', 'modified']]
+		\   'left': [['mode', 'paste'], ['gitbranch', 'cocstatus', 'readonly', 'filename', 'modified']]
 		\ },
 	\'inactive' : {
 		\ 'left': [['filename']],
@@ -448,30 +485,163 @@ call timer_start(10, function('functions#GitFetch')) " Run on startup
 " }}}
 
 " COC.nvim {{{
+" Extensions to install if not already installed
+let g:coc_global_extensions = ['coc-json', 'coc-clangd', 'coc-clang-format-style-options']
+
+augroup CocStatus
+	" Use autocmd to force lightline update.
+	autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
+augroup END
+
+highlight! link CocSearch Special
+highlight! link CocInlayHint Character
+" highlight! link CocSemVariable Normal
+
 " use <tab> to trigger completion and navigate to the next complete item
+inoremap <silent><expr> <Tab>
+			\ coc#pum#visible() ? coc#pum#next(1) :
+			\ CheckBackspace() ? "\<Tab>" :
+			\ coc#refresh()
+inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<C-H>"
+
 function! CheckBackspace() abort
 	let col = col('.') - 1
 	return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-inoremap <silent><expr> <Tab>
-			\ coc#pum#visible() ? coc#pum#next(1) :
-			\ CheckBackspace() ? "\<Tab>" :
-			\ coc#refresh()
+" Use <c-space> to trigger completion
+if has('nvim')
+	inoremap <silent><expr> <c-space> coc#refresh()
+else
+	inoremap <silent><expr> <c-@> coc#refresh()
+endif
+
+" Use `[g` and `]g` to navigate diagnostics
+" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+" GoTo code navigation
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Use K to show documentation in preview window
+nnoremap <silent> K :call ShowDocumentation()<CR>
+
+function! ShowDocumentation()
+	if CocAction('hasProvider', 'hover')
+		call CocActionAsync('doHover')
+	else
+		call feedkeys('K', 'in')
+	endif
+endfunction
+
+" Highlight the symbol and its references when holding the cursor
+" autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Symbol renaming
+nmap <leader>rn <Plug>(coc-rename)
+
+" Formatting selected code
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+augroup CocGroup
+	autocmd!
+	" Setup formatexpr specified filetype(s)
+	autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+	" Update signature help on jump placeholder
+	autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+
+" Applying code actions to the selected code block
+" Example: `<leader>aap` for current paragraph
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
+
+" Remap keys for applying code actions at the cursor position
+nmap <leader>ac  <Plug>(coc-codeaction-cursor)
+" Remap keys for apply code actions affect whole buffer
+nmap <leader>as  <Plug>(coc-codeaction-source)
+" Apply the most preferred quickfix action to fix diagnostic on the current line
+nmap <leader>qf  <Plug>(coc-fix-current)
+
+" Remap keys for applying refactor code actions
+nmap <silent> <leader>re <Plug>(coc-codeaction-refactor)
+xmap <silent> <leader>r  <Plug>(coc-codeaction-refactor-selected)
+nmap <silent> <leader>r  <Plug>(coc-codeaction-refactor-selected)
+
+" Run the Code Lens action on the current line
+nmap <leader>cl  <Plug>(coc-codelens-action)
+
+" Map function and class text objects
+" NOTE: Requires 'textDocument.documentSymbol' support from the language server
+xmap if <Plug>(coc-funcobj-i)
+omap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap af <Plug>(coc-funcobj-a)
+xmap ic <Plug>(coc-classobj-i)
+omap ic <Plug>(coc-classobj-i)
+xmap ac <Plug>(coc-classobj-a)
+omap ac <Plug>(coc-classobj-a)
+
+" Remap <C-f> and <C-b> to scroll float windows/popups
+if has('nvim-0.4.0') || has('patch-8.2.0750')
+	nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+	nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+	inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+	inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+	vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+	vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+endif
+
+" Use CTRL-S for selections ranges
+" Requires 'textDocument/selectionRange' support of language server
+nmap <silent> <C-s> <Plug>(coc-range-select)
+xmap <silent> <C-s> <Plug>(coc-range-select)
+
+" Add `:Format` command to format current buffer
+command! -nargs=0 Format :call CocActionAsync('format')
+
+" Add `:Fold` command to fold current buffer
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+
+" Add `:OR` command for organize imports of the current buffer
+command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
+
+" Mappings for CoCList
+" Show all diagnostics
+nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+" Manage extensions
+nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
+" Show commands
+nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
+" Find symbol of current document
+nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+" Search workspace symbols
+nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+" Do default action for next item
+nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
+" Do default action for previous item
+nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
+" Resume latest coc list
+nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
 " }}}
 
 " FastFold {{{
-nmap <F4> <Plug>(FastFoldUpdate)
-let g:fastfold_force = 1
-let g:fastfold_minlines = 0
-let g:fastfold_savehook = 1
-let g:fastfold_fold_command_suffixes =  ['x','X','a','A','o','O','c','C']
-let g:fastfold_fold_movement_commands = [']z', '[z', 'zj', 'zk']
-let g:sh_fold_enabled = 7
-let g:zsh_fold_enable = 1
-let g:vimsyn_folding = 'af'
-let g:markdown_folding = 1
+" nmap <F4> <Plug>(FastFoldUpdate)
+" let g:fastfold_force = 1
+" let g:fastfold_minlines = 0
+" let g:fastfold_savehook = 1
+" let g:fastfold_fold_command_suffixes =  ['x','X','a','A','o','O','c','C']
+" let g:fastfold_fold_movement_commands = [']z', '[z', 'zj', 'zk']
+" let g:sh_fold_enabled = 7
+" let g:zsh_fold_enable = 1
+" let g:vimsyn_folding = 'af'
+" let g:markdown_folding = 1
 
 " }}}
 
@@ -542,27 +712,18 @@ if g:USING_WSL
 	nnoremap cP :<C-U>call functions#FixDOSLineEndings('"+P')<CR>
 	xnoremap cp :<C-U>call functions#FixDOSLineEndings('"+p', visualmode())<CR>
 	xnoremap cP :<C-U>call functions#FixDOSLineEndings('"+P', visualmode())<CR>
+
+	" Clipboard copy bindings
+	if executable("clip.exe")
+		nnoremap <silent> <expr> cy functions#YankFixedCursor("")
+		nnoremap <silent> <expr> cyy functions#YankFixedCursor("_")
+		xnoremap <silent> Y :<C-U>call functions#SendToClip(visualmode(),1)<CR>
+	endif
 else
 	nnoremap cp "+p
 	nnoremap cP "+P
 	xnoremap cp "+p
 	xnoremap cP "+P
-endif
-
-" Clipboard bindings
-if has("win32")
-	" Windows options here
-elseif has("unix")
-	let s:uname = system("uname")
-	if s:uname == "Darwin\n"
-		" Mac options here
-	else
-		if g:USING_WSL && executable("clip.exe")
-			nnoremap <silent> <expr> cy functions#YankFixedCursor("")
-			nnoremap <silent> <expr> cyy functions#YankFixedCursor("_")
-			xnoremap <silent> Y :<C-U>call functions#SendToClip(visualmode(),1)<CR>
-		endif
-	endif
 endif
 
 " Insert sleep [x]m for debugging purposes
@@ -594,14 +755,14 @@ inoremap <Right> <C-\><C-O>:exec 'echohl ErrorMsg \| echomsg "nono don be stopid
 
 " Fzf file search
 nnoremap <expr> <C-P> (len(system('git rev-parse')) ? ':Files' : ':GFiles')."\<CR>"
-noremap <leader>l :BLines<CR>
-noremap <silent> <expr> <leader>b (v:count ? ':buf ' . v:count : ':Buffers') . "\<CR>"
-noremap <silent> <leader><leader>b :buf #<CR>
-noremap <leader>/ :Rg<CR>
+nnoremap <leader>l :BLines<CR>
+nnoremap <silent> <expr> <leader>b (v:count ? ':buf ' . v:count : ':Buffers') . "\<CR>"
+nnoremap <silent> <leader><leader>b :buf #<CR>
+nnoremap <leader>/ :Rg<CR>
 " <C-_> is CTRL-/
-noremap <leader><C-_> :Rgl<CR>
-noremap <leader>t :Tags<CR>
-noremap <leader>m :Marks<CR>
+nnoremap <leader><C-_> :Rgl<CR>
+nnoremap <leader>t :Tags<CR>
+nnoremap <leader>m :Marks<CR>
 " nnoremap <silent> <Leader>g :Commits<CR>
 nnoremap <silent> <Leader>? :Helptags<CR>
 " nnoremap <silent> <Leader>hh :History<CR>
@@ -754,3 +915,4 @@ augroup END
 
 " File Sourcing
 " source $MYVIMDIR/statusline.vim
+
