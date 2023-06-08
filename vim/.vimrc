@@ -12,7 +12,8 @@ let s:portable=expand('<sfile>:p:h')
 " Add the directory to 'runtimepath'
 let &runtimepath=printf('%s,%s,%s/after', s:portable, &runtimepath, s:portable)
 let &packpath=&runtimepath
-let g:session_dir = expand('%:p:h') . '/sessions'
+" let g:session_dir = expand('%:p:h') . '/sessions'
+let g:session_dir = $MYVIMDIR . '/sessions'
 
 " Set directory for swap & backup files.
 " // - Ensures files created are uniquely named.
@@ -138,7 +139,7 @@ set smartcase
 " Show partial command you type in the last line of the screen.
 set showcmd
 
-" Show the mode you are on the last line.
+" Don't show the mode you are on the last line.
 set noshowmode
 
 " Show matching words during a search.
@@ -258,7 +259,11 @@ Plug 'tpope/vim-obsession'
 
 " ---- Code Completion/Semantic Highlighting ----
 Plug 'sheerun/vim-polyglot'
-Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
+Plug 'neoclide/coc.nvim', {'for': ['zig','cmake','rust',
+			\'java','json', 'haskell', 'ts','sh', 'cs',
+			\'yaml', 'c', 'cpp', 'd', 'go',
+			\'python', 'dart', 'javascript', 'vim'], 'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
+Plug 'ilyachur/cmake4vim'
 
 " ---- Theme/Colors ----
 Plug 'itchyny/lightline.vim'
@@ -495,7 +500,7 @@ augroup END
 
 highlight! link CocSearch Special
 highlight! link CocInlayHint Character
-" highlight! link CocSemVariable Normal
+highlight! link CocSemVariable Normal
 
 " use <tab> to trigger completion and navigate to the next complete item
 inoremap <silent><expr> <Tab>
@@ -732,7 +737,7 @@ endif
 " Edit vimrc configuration file
 nnoremap \ve :e $MYVIMRC<CR>
 " Edit statusline configuration file
-nnoremap \vs :e $MYVIMDIR/statusline.vim<CR>
+nnoremap \vcoc :CocConfig<CR>
 " Reload vimrc configuration file
 nnoremap \vr :source $MYVIMRC<CR>
 
