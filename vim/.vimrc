@@ -344,12 +344,21 @@ imap <silent><expr> <CR> CustomCR()
 
 " FZF.vim {{{
 function! s:BuffersSink(lines)
-	if a:lines[0] ==# 'alt-d'
+	if a:lines[0] ==# 'ctrl-r'
 		call remove(a:lines, 0)
 		let l:splitLines = join(map(a:lines, {_, line -> split(line)[2]}))
 		let l:bufIDs = []
 		call substitute(l:splitLines, '\[\zs[0-9]*\ze\]', '\=add(l:bufIDs, submatch(0))', 'g')
+
 		execute 'bwipeout' join(l:bufIDs)
+	elseif a:lines[0] ==# 'alt-r'
+		call remove(a:lines, 0)
+		let l:splitLines = join(map(a:lines, {_, line -> split(line)[2]}))
+		let l:bufIDs = []
+		call substitute(l:splitLines, '\[\zs[0-9]*\ze\]', '\=add(l:bufIDs, submatch(0))', 'g')
+
+		let l:buffersToRemove = filter(map(copy(getbufinfo()), 'v:val.bufnr'), 'index(l:bufIDs, string(v:val)) == -1')
+		execute 'bwipeout' join(l:buffersToRemove)
 	else
 		call functions#bufopen(a:lines)
 	endif
@@ -367,7 +376,7 @@ function! s:BuffersCmd(...)
 				\ 'options': ['+m', '-x', '--tiebreak=index', header_lines, '--ansi', '-d', '\t',
 				\ '--with-nth', '3..', '-n', '2,1..2', '--prompt', 'Buf> ', '--query', query,
 				\ '--preview-window', '+{2}-/2', '--tabstop', tabstop, '--layout=reverse', '--info=inline', '--multi',
-				\ '--expect', 'ctrl-t,ctrl-x,ctrl-s,alt-d', '--bind', 'ctrl-a:select-all,ctrl-d:deselect-all'],
+				\ '--expect', 'ctrl-t,ctrl-x,ctrl-s,ctrl-r,alt-r', '--bind', 'ctrl-a:select-all,ctrl-d:deselect-all'],
 				\ 'window': {'width': 0.45, 'height': 0.4, 'relative': v:false}
 				\}, args[0]), "right:55%:<50(up:40%)"))
 endfunction
