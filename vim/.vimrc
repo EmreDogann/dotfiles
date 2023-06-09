@@ -253,6 +253,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'tmsvg/pear-tree'
 Plug 'airblade/vim-rooter'
 Plug 'jrudess/vim-foldtext'
+Plug 'tommcdo/vim-exchange'
 
 " ---- Session Management ----
 Plug 'tpope/vim-obsession'
@@ -832,6 +833,7 @@ nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
 " Zoom
+" From: https://www.reddit.com/r/vim/comments/ad52j9/comment/ede12uq/?utm_source=share&utm_medium=web2x&context=3
 function! s:zoom()
 	if winnr('$') > 1
 		tab split
