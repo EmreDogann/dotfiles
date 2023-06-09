@@ -1,6 +1,8 @@
 set encoding=utf-8
 scriptencoding utf-8
 
+set nocompatible
+
 let g:USING_WSL = has("unix") && system("uname -r") =~ "microsoft"
 
 " File Paths {{{
@@ -35,6 +37,12 @@ set undofile
 " Having longer updatetime (default is 4000 ms = 4s) leads to noticeable
 " delays and poor user experience (this is needed for CoC.nvim)
 set updatetime=300
+
+" Give more space for displaying messages.
+set cmdheight=2
+
+" Don’t pass messages to |ins-completion-menu|.
+set shortmess+=c
 
 " Always show the signcolumn, otherwise it would shift the text each time
 " diagnostics appear/become resolved
@@ -103,8 +111,7 @@ set tabstop=4
 set softtabstop=4
 
 " Indent guides
-set list listchars=trail:·,extends:»,precedes:«,nbsp:×
-set listchars=tab:\\u258f\ 
+set list listchars=tab:\\u258f\ ,trail:·,extends:»,precedes:«,nbsp:×
 
 " Keep indentation from previous line
 set autoindent
@@ -253,7 +260,6 @@ Plug 'tpope/vim-obsession'
 " Plug 'Konfekt/FastFold'
 
 " ---- Code Completion/Semantic Highlighting ----
-Plug 'sheerun/vim-polyglot'
 Plug 'neoclide/coc.nvim', {'for': ['zig','cmake','rust',
 			\'java','json', 'haskell', 'ts','sh', 'cs',
 			\'yaml', 'c', 'cpp', 'd', 'go',
@@ -303,6 +309,12 @@ nmap <leader>cb :CMakeBuild
 " Quickscope settings
 " Trigger a highlight in the appropriate direction when pressing these keys:
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
+
+" vim-commentary settings
+augroup Commentary
+	autocmd!
+	autocmd FileType cpp,hpp,ts,js,json,java,cs,groovy setlocal commentstring=//\ %s
+augroup END
 
 " matze/vim-move settings
 let g:move_key_modifier = 'S'
@@ -513,9 +525,10 @@ call timer_start(10, function('functions#GitFetch')) " Run on startup
 let g:coc_global_extensions = ['coc-json', 'coc-clangd', 'coc-clang-format-style-options']
 
 augroup Coc
+	autocmd!
 	" Use autocmd to force lightline update.
 	autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
-	" disable coc in git commits
+	" Disable coc in git commits
 	autocmd BufRead,BufNewFile COMMIT_EDITMSG let b:coc_enabled=0
 augroup END
 
@@ -554,13 +567,13 @@ nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
 " Use K to show documentation in preview window
-nnoremap <silent> K :call ShowDocumentation()<CR>
+nnoremap <silent> <F1> :call ShowDocumentation()<CR>
 
 function! ShowDocumentation()
 	if CocAction('hasProvider', 'hover')
 		call CocActionAsync('doHover')
 	else
-		call feedkeys('K', 'in')
+		call feedkeys('F1', 'in')
 	endif
 endfunction
 
@@ -576,8 +589,6 @@ nmap <leader>f  <Plug>(coc-format-selected)
 
 augroup CocGroup
 	autocmd!
-	" Setup formatexpr specified filetype(s)
-	autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
 	" Update signature help on jump placeholder
 	autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
 augroup end
@@ -819,6 +830,17 @@ nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
+
+" Zoom
+function! s:zoom()
+	if winnr('$') > 1
+		tab split
+	elseif len(filter(map(range(tabpagenr('$')), 'tabpagebuflist(v:val + 1)'),
+				\ 'index(v:val, '.bufnr('').') >= 0')) > 1
+		tabclose
+	endif
+endfunction
+nnoremap <silent> <leader>z :call <sid>zoom()<cr>
 
 nnoremap <leader>ee :Lexplore %:p:h<CR>
 nnoremap <Leader>ea :Lexplore<CR>
