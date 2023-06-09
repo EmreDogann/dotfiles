@@ -53,17 +53,17 @@ fi
 # Use ~~ as the trigger sequence instead of the default **
 # export FZF_COMPLETION_TRIGGER='~~'
 export FZF_COMPLETION_OPTS='--border --info=inline'
+export FZF_HEADER_MSG='| Use CTRL-C or ESC to cancel'
 printf -v fzfPreviewControls '%s' \
-	"--bind ctrl-y:preview-up,ctrl-e:preview-down,"\
+	"--bind 'ctrl-y:preview-up,ctrl-e:preview-down,"\
 	"ctrl-b:preview-page-up,ctrl-f:preview-page-down,"\
-	"ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down,"\
-	"shift-up:preview-top,shift-down:preview-bottom,"\
-	"alt-up:half-page-up,alt-down:half-page-down"\
-	# "ctrl-g:reload($FZF_DEFAULT_COMMAND --no-ignore-vcs)"
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --line-range :300  --color=always {}' --multi --height 40% --layout=reverse --border --info=inline --header='<Find File> | Use CTRL-C or ESC to cancel' $fzfPreviewControls"
-export FZF_CTRL_T_OPTS='--header="<Paste File/Directory Path> | Use CTRL-C or ESC to cancel"'
-export FZF_ALT_C_OPTS='--header="<cd into Directory> | Use CTRL-C or ESC to cancel" --preview "tree -C {} | head -200" --info=inline'
-export FZF_CTRL_R_OPTS='--header="<Paste History> | Use CTRL-C or ESC to cancel"'
+	"ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down'"
+	# "shift-up:preview-top,shift-down:preview-bottom,"\
+	# "alt-up:half-page-up,alt-down:half-page-down,"\
+export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --line-range :300  --color=always {}' --multi --height 40% --layout=reverse --border --info=inline --header='<Find File> $FZF_HEADER_MSG' $fzfPreviewControls"
+export FZF_CTRL_T_OPTS="--header='<Paste File/Directory Path> $FZF_HEADER_MSG'"
+export FZF_ALT_C_OPTS="--header='<cd into Directory> $FZF_HEADER_MSG' --preview 'tree -C {} | head -200' --info=inline"
+export FZF_CTRL_R_OPTS="--header='<Paste History> $FZF_HEADER_MSG'"
 
 # Use modern completion system
 autoload -Uz compinit && compinit

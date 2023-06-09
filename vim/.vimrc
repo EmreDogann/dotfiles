@@ -12,7 +12,6 @@ let s:portable=expand('<sfile>:p:h')
 " Add the directory to 'runtimepath'
 let &runtimepath=printf('%s,%s,%s/after', s:portable, &runtimepath, s:portable)
 let &packpath=&runtimepath
-" let g:session_dir = expand('%:p:h') . '/sessions'
 let g:session_dir = $MYVIMDIR . '/sessions'
 
 " Set directory for swap & backup files.
@@ -34,7 +33,7 @@ set backup
 set undofile
 
 " Having longer updatetime (default is 4000 ms = 4s) leads to noticeable
-" delays and poor user experience
+" delays and poor user experience (this is needed for CoC.nvim)
 set updatetime=300
 
 " Always show the signcolumn, otherwise it would shift the text each time
@@ -191,6 +190,9 @@ set splitright
 " Status Line Options
 set laststatus=2
 
+" Tabline
+set showtabline=2
+
 " Netrw options
 let g:netrw_keepdir = 0
 let g:netrw_liststyle = 3
@@ -200,15 +202,8 @@ let g:netrw_browse_split = 4
 let g:netrw_altv = 1
 let g:netrw_list_hide = &wildignore
 
-" Must be set before clever-f is loaded
-let g:clever_f_mark_char_color='CustomCleverFCharColor'
-
-" Tabline
-set showtabline=2
-
-" Bufferline
-" From: https://www.reddit.com/r/vim/comments/11tdlx0/comment/jckkknq/?utm_source=share&utm_medium=web2x&context=3
-" source $MYVIMDIR/autoload/bufferline.vim
+" Set <space> as the leader key
+let mapleader = ' '
 
 " }}}
 
@@ -246,7 +241,7 @@ Plug 'tpope/vim-commentary'
 Plug 'machakann/vim-highlightedyank'
 Plug 'andymass/vim-matchup'
 Plug 'junegunn/vim-slash'
-Plug 'rhysd/clever-f.vim'
+Plug 'unblevable/quick-scope'
 Plug 'tpope/vim-fugitive'
 Plug 'tmsvg/pear-tree'
 Plug 'airblade/vim-rooter'
@@ -263,7 +258,8 @@ Plug 'neoclide/coc.nvim', {'for': ['zig','cmake','rust',
 			\'java','json', 'haskell', 'ts','sh', 'cs',
 			\'yaml', 'c', 'cpp', 'd', 'go',
 			\'python', 'dart', 'javascript', 'vim'], 'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
-Plug 'ilyachur/cmake4vim'
+" Plug 'ilyachur/cmake4vim'
+Plug 'cdelledonne/vim-cmake'
 
 " ---- Theme/Colors ----
 Plug 'itchyny/lightline.vim'
@@ -276,6 +272,13 @@ call plug#end()
 
 " PLUGIN SETTINGS {{{
 
+" This needs to go before colorscheme is set
+augroup QuickScopeColors
+	autocmd!
+	autocmd ColorScheme * call functions#ExtendHighlight("String", "QuickScopePrimary", "cterm=underline")
+	autocmd ColorScheme * call functions#ExtendHighlight("Error", "QuickScopeSecondary", "cterm=underline")
+augroup END
+
 " Set color scheme & settings
 set termguicolors
 colorscheme catppuccin_$THEMEVARIANT
@@ -287,20 +290,19 @@ endif
 
 " Change vertical split color
 highlight! link VertSplit SignColumn
-
 " Change indent guides and trailing spaces color
 highlight SpecialKey term=standout ctermfg=240 ctermbg=235 guifg=#40455d guibg=#303446
-
 " More subtle folded text highlighting
 highlight Folded term=reverse ctermbg=236 guibg=#3c4052
 
-" Clever-f settings
-let g:clever_f_show_prompt=1
-" let g:clever_f_mark_direct=1
-let g:clever_f_smart_case=1
-let g:clever_f_across_no_line=1
-let g:clever_f_fix_key_direction=1
-call functions#ExtendHighlight('Error', 'CustomCleverFCharColor', 'cterm=underline')
+" vim-cmake settings
+let g:cmake_link_compile_commands = 1
+nmap <leader>cg :CMakeGenerate
+nmap <leader>cb :CMakeBuild
+
+" Quickscope settings
+" Trigger a highlight in the appropriate direction when pressing these keys:
+let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
 
 " matze/vim-move settings
 let g:move_key_modifier = 'S'
@@ -314,7 +316,7 @@ let g:highlightedyank_highlight_in_visual = 0
 let g:rooter_silent_chdir = 1
 let g:rooter_resolve_links = 1
 
-" tmsvg/pear-tree settings
+" Pear-tree {{{
 let g:pear_tree_smart_openers = 1
 let g:pear_tree_smart_closers = 1
 let g:pear_tree_smart_backspace = 1
@@ -342,6 +344,8 @@ endfunction
 " Get PearTreeExpand working with coc.nvim
 imap <silent><expr> <CR> CustomCR()
 
+" }}}
+
 " FZF.vim {{{
 function! s:BuffersSink(lines)
 	if a:lines[0] ==# 'ctrl-r'
@@ -355,7 +359,8 @@ function! s:BuffersSink(lines)
 		call remove(a:lines, 0)
 		let l:splitLines = join(map(a:lines, {_, line -> split(line)[2]}))
 		" Add the current buffer to the list of buffers we want to keep.
-		let l:bufIDs = [string(bufnr("%"))]
+		" let l:bufIDs = [string(bufnr("%"))]
+		let l:bufIDs = []
 		call substitute(l:splitLines, '\[\zs[0-9]*\ze\]', '\=add(l:bufIDs, submatch(0))', 'g')
 
 		let l:buffersToRemove = filter(map(copy(getbufinfo()), 'v:val.bufnr'), 'index(l:bufIDs, string(v:val)) == -1')
@@ -369,17 +374,17 @@ function! s:BuffersCmd(...)
 	let [query, args] = (a:0 && type(a:1) == type('')) ?
 				\ [a:1, a:000[1:]] : ['', a:000]
 	let sorted = fzf#vim#_buflisted_sorted()
-	let header_lines = '--header-lines=' . (bufnr('') == get(sorted, 0, 0) ? 1 : 0)
+	" let header_lines = '--header-lines=' . (bufnr('') == get(sorted, 0, 0) ? 1 : 0)
 	let tabstop = len(max(sorted)) >= 4 ? 9 : 8
-	return fzf#run(fzf#vim#with_preview(fzf#wrap('Delete Buffers', {
+	return fzf#run(fzf#wrap('Delete Buffers', {
 				\ 'source':  map(sorted, 'fzf#vim#_format_buffer(v:val)'),
 				\ 'sink*': { lines -> s:BuffersSink(lines) },
-				\ 'options': ['+m', '-x', '--tiebreak=index', header_lines, '--ansi', '-d', '\t',
+				\ 'options': ['+m', '-x', '--tiebreak=index', '--header=<Select Buffer>', '--ansi', '-d', '\t',
 				\ '--with-nth', '3..', '-n', '2,1..2', '--prompt', 'Buf> ', '--query', query,
-				\ '--preview-window', '+{2}-/2', '--tabstop', tabstop, '--layout=reverse', '--info=inline', '--multi',
+				\ '--no-preview', '--tabstop', tabstop, '--layout=reverse', '--info=inline', '--multi',
 				\ '--expect', 'ctrl-t,ctrl-x,ctrl-s,ctrl-r,alt-r', '--bind', 'ctrl-a:select-all,ctrl-d:deselect-all'],
-				\ 'window': {'width': 0.45, 'height': 0.4, 'relative': v:false}
-				\}, args[0]), "right:55%:<50(up:40%)"))
+				\ 'window': {'width': 0.35, 'height': 0.4, 'relative': v:false}
+				\}, args[0]))
 endfunction
 
 let g:fzf_preview_window = ['right,50%,<70(up,40%)', 'ctrl-/']
@@ -395,7 +400,10 @@ let g:fzf_history_dir = '$HOME/.local/share/fzf-history'
 let g:fzf_tags_command = 'ctags -R'
 
 command! -bang -nargs=? -complete=dir Files
-			\ call fzf#vim#files(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline']}), <bang>0)
+			\ call fzf#vim#files(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline',
+			\ "--header=<Find File> | Ignore " . $FZF_HEADER_MSG, '--bind=f1:reload(' . $FZF_DEFAULT_COMMAND .
+			\ ' --ignore)+change-header(<Find File> | Ignore ' . $FZF_HEADER_MSG . '),f2:reload(' . $FZF_DEFAULT_COMMAND .
+			\ ' --no-ignore)+change-header(<Find File> | No Ignore ' . $FZF_HEADER_MSG . ')']}), <bang>0)
 command! -bang -nargs=? -complete=dir GFiles
 			\ call fzf#vim#gitfiles(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline']}), <bang>0)
 command! -bang -nargs=* Rg
@@ -437,10 +445,11 @@ let g:lightline = {
 		\   'readonly': 'functions#LightlineReadonly',
 		\   'gitbranch': 'functions#MyFugitiveHead',
 		\ 	'obsession': 'functions#MyObsessionStatus',
-		\   'cocstatus': 'coc#status'
+		\   'cocstatus': 'coc#status',
+		\	'cmakeInfo': 'functions#cmakeInfo'
 		\ },
 	\ 'active' : {
-		\   'right' : [['lineinfo', 'spell'], ['obsession', 'fileencoding', 'fileformat', 'filetype']],
+		\   'right' : [['lineinfo', 'spell'], ['cmakeInfo', 'obsession', 'fileencoding', 'fileformat', 'filetype']],
 		\   'left': [['mode', 'paste'], ['gitbranch', 'cocstatus', 'readonly', 'filename', 'modified']]
 		\ },
 	\'inactive' : {
@@ -503,9 +512,11 @@ call timer_start(10, function('functions#GitFetch')) " Run on startup
 " Extensions to install if not already installed
 let g:coc_global_extensions = ['coc-json', 'coc-clangd', 'coc-clang-format-style-options']
 
-augroup CocStatus
+augroup Coc
 	" Use autocmd to force lightline update.
 	autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
+	" disable coc in git commits
+	autocmd BufRead,BufNewFile COMMIT_EDITMSG let b:coc_enabled=0
 augroup END
 
 highlight! link CocSearch Special
@@ -664,32 +675,6 @@ nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
 " MAPPINGS {{{
 
-" Fix Alt key mappings not working in WSL
-" From: https://github.com/vim/vim/issues/8726#issuecomment-894640707
-" if g:USING_WSL
-" 	execute "set <M-}>=\<Esc>}"
-" 	execute "set <M-]>=\<Esc>]"
-" 	execute "set <M-)>=\<Esc>)"
-" 	execute "set <M-\'>=\<Esc>\'"
-" 	" execute "set <M-e>=\<Esc>e"
-" 	" <M-">
-" 	execute "set <M-" . '\"' . ">=\<Esc>" . '\"'
-
-" 	" From: https://stackoverflow.com/a/10216459/10439539
-" 	let c='a'
-" 	while c <= 'z'
-" 		exec "set <M-".c.">=\<Esc>".c
-" 		exec "imap \<ESC>".c." <M-".c.">"
-" 		let c = nr2char(1+char2nr(c))
-" 	endw
-" endif
-
-" Set <space> as the leader key
-let mapleader = ' '
-
-" Remap s to something else
-" :map s
-
 " Set mark, Save file, save session, reload, print status message, jump back
 " to mark (original cursor position).
 noremap <silent> <C-s> :call functions#SaveAndReload()<CR>
@@ -741,9 +726,6 @@ else
 	xnoremap cP "+P
 endif
 
-" Insert sleep [x]m for debugging purposes
-" nnoremap <leader>sl :<C-U>normal Osleep <C-R>=v:count1<CR>m<C-O>Oredraw<Esc>^
-
 " Edit vimrc configuration file
 nnoremap \ve :e $MYVIMRC<CR>
 " Edit statusline configuration file
@@ -792,25 +774,21 @@ inoremap <expr> <c-x><c-k> fzf#vim#complete#word('cat /usr/share/dict/words', {'
 nnoremap <silent> <F5> :setlocal spell!<CR>
 inoremap <silent> <F5> <C-o>:setlocal spell!<CR>
 
-" Automatically fix the last misspelled word and jump back to where you were.
-"   Taken from this talk: https://www.youtube.com/watch?v=lwD8G1P52Sk
-" nnoremap <Leader>sp :normal! mz[s1z=`z<CR>
-
 " Insert mode completion
 nnoremap \s a<C-X><C-S><C-P>
 
 " Press * to search for the term under the cursor or a visual selection and
-" then press a key below to replace all instances of it in the current file.
-" The extra 'c' at the end will ask for confirmation before replacing.
+" then press the key below to replace all instances of it in the current file.
 nnoremap <Leader>r :%s///g<Left><Left>
+" The extra 'c' at the end will ask for confirmation before replacing.
 " nnoremap <Leader>rc :%s///gc<Left><Left><Left>
 
 " The same as above but instead of acting on the whole file it will be
 " restricted to the previously visually selected range. You can do that by
 " pressing *, visually selecting the range you want it to apply to and then
-" press a key below to replace all instances of it in the current selection.
-" The extra 'c' at the end will ask for confirmation before replacing.
+" press the key below to replace all instances of it in the current selection.
 xnoremap <Leader>r :s///g<Left><Left>
+" The extra 'c' at the end will ask for confirmation before replacing.
 " xnoremap <Leader>rc :s///gc<Left><Left><Left>
 
 " Type a replacement term and press . to repeat the replacement again. Useful
@@ -864,8 +842,8 @@ function! NetrwMapping()
 
 	" File Management
 	nmap <buffer> ff %:w<CR>:buffer #<CR>	" Create file
-	nmap <buffer> fr R	" Rename file
-	nmap <buffer> fc mc	" Copy marked file
+	nmap <buffer> fr R		" Rename file
+	nmap <buffer> fc mc		" Copy marked file
 	nmap <buffer> fC mtmc	" After you mark your files, put the cursor in a directory and this will assign the target directory and copy.
 	nmap <buffer> fm mm		" Move marked file
 	nmap <buffer> fM mtmm	" Same as fC but for moving files
@@ -884,11 +862,6 @@ augroup codeFolding
 	autocmd!
 	autocmd FileType vim setlocal foldmethod=marker
 	autocmd FileType c,cpp setlocal foldmethod=syntax
-augroup END
-
-augroup colorScheme
-	autocmd!
-	autocmd ColorSchemePre * call functions#ExtendHighlight('Error', 'CustomCleverFCharColor', 'cterm=underline')
 augroup END
 
 augroup git
@@ -927,7 +900,4 @@ augroup cursorStyle
 augroup END
 
 " }}}
-
-" File Sourcing
-" source $MYVIMDIR/statusline.vim
 

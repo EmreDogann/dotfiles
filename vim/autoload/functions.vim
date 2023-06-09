@@ -137,6 +137,7 @@ if g:USING_WSL
 
 	" From: https://stackoverflow.com/a/58822884/10439539
 	function! functions#SendToClip(type, ...)
+		let g:highlightedyank_highlight_in_visual = 1
 		if a:0
 			let g:myfixedcursor = getcurpos()
 			" Visual mode
@@ -153,6 +154,8 @@ if g:USING_WSL
 		" System32/clip.exe instead.
 		call system('clip.exe', l:stripedOutput)
 		call setpos('.', g:myfixedcursor)
+
+		let g:highlightedyank_highlight_in_visual = 0
 	endfunction
 endif
 
@@ -231,6 +234,15 @@ endfunction
 function! functions#MyObsessionStatus()
 	" NOTE: Uppercase U is needed for unicode codepoints longer than 4 characters
 	return ObsessionStatus("\Uf040a", "\Uf03e4")
+endfunction
+
+function! functions#cmakeInfo()
+	let cmakeInfo = cmake#GetInfo()
+	let output = ""
+	if cmakeInfo.status !=# ""
+		let output = output . cmakeInfo.status . " "
+	endif
+	return output . cmakeInfo.config
 endfunction
 
 function! functions#MyFugitiveHead()
