@@ -40,3 +40,4 @@ if [[ ! -f $(bat --config-dir)/themes/Catppuccin-$THEMEVARIANT.tmTheme ]] then
 	bat cache --build
 fi
 export BAT_THEME="Catppuccin-$THEMEVARIANT"
+COLORTERM="truecolor"

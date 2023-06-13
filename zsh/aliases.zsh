@@ -47,21 +47,13 @@ alias la='ls -lAh'
 # ----- Other -----
 alias reload="exec zsh"
 alias zshdr="cd $ZDOTDIR"
-alias zshrc="vim $ZDOTDIR/.zshrc"
-alias zshev="vim $ZDOTDIR/.zshenv"
-alias zshal="vim $ZDOTDIR/aliases.zsh"
-alias vimdr="cd $MYVIMDIR"
+alias zshrc="nvim $ZDOTDIR/.zshrc"
+alias zshev="nvim $ZDOTDIR/.zshenv"
+alias zshal="nvim $ZDOTDIR/aliases.zsh"
+alias nvimdr="cd $MYNEOVIMDIR"
 
-function vimrc() {
-	if [[ -f "$MYVIMDIR/sessions/vimrc_session.vim" ]] then
-		vim -S "$MYVIMDIR/sessions/vimrc_session.vim" $MYVIMRC
-	else
-		vim $MYVIMRC
-	fi
-}
-
-# Replace cat with bat 
-alias cat='bat --paging=never'
+# Replace cat with bat
+# alias cat='bat --paging=never'
 
 case "$(uname -s)" in
 
@@ -80,6 +72,6 @@ esac
 
 # ----- Searching -----
 if command -v fzf > /dev/null; then
-	alias vimf="fzf --multi --bind 'enter:become(vim {+})'"
+	alias nvimf="fzf --multi --bind 'enter:become(nvim {+})'"
 	alias cdf="fd --no-ignore --type d --strip-cwd-prefix --hidden --follow --exclude .git | fzf --print0 | xargs --no-run-if-empty -0 -o cd"
 fi

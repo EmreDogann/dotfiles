@@ -24,6 +24,13 @@ vim/.viminfo*
 vim/spell/*.add*
 vim/.netrwhist
 
+nvim/swap/*
+nvim/backup/*
+nvim/undo/*
+nvim/shada
+nvim/spell/*.add*
+local/share/nvim/*
+
 # COC.nvim config
 coc/*
 vim/node_modules

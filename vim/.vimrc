@@ -179,7 +179,7 @@ set foldlevelstart=99
 " Keep changes to the buffer without writing them to the file.
 set hidden
 
-" Automatically save changed made to the buffer
+" Automatically save changes made to the buffer
 set autowrite
 
 " Don't redraw screen immediately if executing something that was not typed
@@ -355,7 +355,7 @@ function! CustomCR() abort
 endfunction
 
 " Get PearTreeExpand working with coc.nvim
-imap <silent><expr> <CR> CustomCR()
+" imap <silent><expr> <CR> CustomCR()
 
 " }}}
 
@@ -550,11 +550,7 @@ function! CheckBackspace() abort
 endfunction
 
 " Use <c-space> to trigger completion
-if has('nvim')
-	inoremap <silent><expr> <c-space> coc#refresh()
-else
-	inoremap <silent><expr> <c-@> coc#refresh()
-endif
+inoremap <silent><expr> <c-@> coc#refresh()
 
 " Use `[g` and `]g` to navigate diagnostics
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list
@@ -626,7 +622,7 @@ xmap ac <Plug>(coc-classobj-a)
 omap ac <Plug>(coc-classobj-a)
 
 " Remap <C-f> and <C-b> to scroll float windows/popups
-if has('nvim-0.4.0') || has('patch-8.2.0750')
+if has('patch-8.2.0750')
 	nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
 	nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
 	inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"

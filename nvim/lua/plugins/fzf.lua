@@ -1,0 +1,23 @@
+return {
+	-- {
+	-- 	'ibhagwan/fzf-lua',
+	-- 	event = "VeryLazy",
+	-- 	dependencies = { 'nvim-tree/nvim-web-devicons' },
+	-- 	config = function()
+	-- 		local actions = require("fzf-lua.actions")
+	-- 		require('fzf-lua').setup({
+	-- 			winopts = {
+	-- 				preview = {
+	-- 					default = 'bat',
+	-- 					delay = 100
+	-- 				}
+	-- 			},
+	-- 			previewers = {
+	-- 				bat = {
+	-- 					theme = vim.env.BAT_THEME
+	-- 				}
+	-- 			}
+	-- 		})
+	-- 	end
+	-- }
+}

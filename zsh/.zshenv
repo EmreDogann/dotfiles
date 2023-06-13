@@ -4,8 +4,8 @@ export XDG_DATA_HOME=$XDG_CONFIG_HOME/local/share
 export XDG_CACHE_HOME=$XDG_CONFIG_HOME/cache
 
 # editor
-export EDITOR="vim"
-export VISUAL="vim"
+export EDITOR="nvim"
+export VISUAL="nvim"
 
 # zsh
 export HISTFILE="$ZDOTDIR/.zsh_history"    # History filepath

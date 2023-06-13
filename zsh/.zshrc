@@ -11,7 +11,7 @@ stty stop undef
 bindkey -e
 
 # Source file if it exists.
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh	# fzf fuzzy search
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh
 
 [ -f "$ZDOTDIR/prompt.zsh" ] && source "$ZDOTDIR/prompt.zsh"
 [ -f "$ZDOTDIR/exports.zsh" ] && source "$ZDOTDIR/exports.zsh"
@@ -19,51 +19,52 @@ bindkey -e
 [ -f "$ZDOTDIR/aliases.zsh" ] && source "$ZDOTDIR/aliases.zsh"
 
 # Use fd package if available
-if command -v fd >/dev/null 2>&1
-then
-	export FZF_DEFAULT_COMMAND="fd --strip-cwd-prefix --hidden --follow --exclude .git"
-	export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-	export FZF_ALT_C_COMMAND="$FZF_DEFAULT_COMMAND --type d"
+# if command -v fd >/dev/null 2>&1
+# then
+# 	export FZF_DEFAULT_COMMAND="fd --strip-cwd-prefix --hidden --follow --exclude .git"
+# 	export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+# 	export FZF_ALT_C_COMMAND="$FZF_DEFAULT_COMMAND --type d"
 
-	# - The first argument to the function ($1) is the base path to start traversal
-	_fzf_compgen_path() {
-	  fd --no-ignore --hidden --follow --exclude ".git" . "$1"
-	}
+# 	# - The first argument to the function ($1) is the base path to start traversal
+# 	_fzf_compgen_path() {
+# 	  fd --no-ignore --hidden --follow --exclude ".git" . "$1"
+# 	}
 
-	# Use fd to generate the list for directory completion
-	_fzf_compgen_dir() {
-	  fd --type d --no-ignore --hidden --follow --exclude ".git" . "$1"
-	}
+# 	# Use fd to generate the list for directory completion
+# 	_fzf_compgen_dir() {
+# 	  fd --type d --no-ignore --hidden --follow --exclude ".git" . "$1"
+# 	}
 
-	# - The first argument to the function is the name of the command.
-	# - You should make sure to pass the rest of the arguments to fzf.
-	_fzf_comprun() {
-	  local command=$1
-	  shift
+# 	# - The first argument to the function is the name of the command.
+# 	# - You should make sure to pass the rest of the arguments to fzf.
+# 	_fzf_comprun() {
+# 	  local command=$1
+# 	  shift
 
-	  case "$command" in
-		cd)           fzf --preview 'tree -C {} | head -200'   "$@" ;;
-		export|unset) fzf --preview "eval 'echo \$'{}"         "$@" ;;
-		ssh)          fzf --preview 'dig {}'                   "$@" ;;
-		*)            fzf --preview 'bat -n --color=always {}' "$@"	;;
-	  esac
-	}
-fi
+# 	  case "$command" in
+# 		cd)           fzf --preview 'tree -C {} | head -200'   "$@" ;;
+# 		export|unset) fzf --preview "eval 'echo \$'{}"         "$@" ;;
+# 		ssh)          fzf --preview 'dig {}'                   "$@" ;;
+# 		*)            fzf --preview 'bat -n --color=always {}' "$@"	;;
+# 	  esac
+# 	}
+# fi
 
-# Use ~~ as the trigger sequence instead of the default **
-# export FZF_COMPLETION_TRIGGER='~~'
-export FZF_COMPLETION_OPTS='--border --info=inline'
-export FZF_HEADER_MSG='| Use CTRL-C or ESC to cancel'
-printf -v fzfPreviewControls '%s' \
-	"--bind 'ctrl-y:preview-up,ctrl-e:preview-down,"\
-	"ctrl-b:preview-page-up,ctrl-f:preview-page-down,"\
-	"ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down'"
-	# "shift-up:preview-top,shift-down:preview-bottom,"\
-	# "alt-up:half-page-up,alt-down:half-page-down,"\
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --line-range :300  --color=always {}' --multi --height 40% --layout=reverse --border --info=inline --header='<Find File> $FZF_HEADER_MSG' $fzfPreviewControls"
-export FZF_CTRL_T_OPTS="--header='<Paste File/Directory Path> $FZF_HEADER_MSG'"
-export FZF_ALT_C_OPTS="--header='<cd into Directory> $FZF_HEADER_MSG' --preview 'tree -C {} | head -200' --info=inline"
-export FZF_CTRL_R_OPTS="--header='<Paste History> $FZF_HEADER_MSG'"
+# # Use ~~ as the trigger sequence instead of the default **
+# # export FZF_COMPLETION_TRIGGER='~~'
+# export FZF_COMPLETION_OPTS='--border --info=inline'
+# export FZF_HEADER_MSG='| Use CTRL-C or ESC to cancel'
+# printf -v fzfPreviewControls '%s' \
+# 	"--bind 'ctrl-y:preview-up,ctrl-e:preview-down,"\
+# 	"ctrl-b:preview-page-up,ctrl-f:preview-page-down,"\
+# 	"ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down'"
+# 	# "shift-up:preview-top,shift-down:preview-bottom,"\
+# 	# "alt-up:half-page-up,alt-down:half-page-down,"\
+# # export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --line-range :300  --color=always {}' --multi --height 40% --layout=reverse --border --info=inline --header='<Find File> $FZF_HEADER_MSG' $fzfPreviewControls"
+# export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --style=numbers --line-range :300  --color=always {}' --multi --height 40% --layout=reverse --border --info=inline --header='<Find File>'"
+# export FZF_CTRL_T_OPTS="--header='<Paste File/Directory Path> $FZF_HEADER_MSG'"
+# export FZF_ALT_C_OPTS="--header='<cd into Directory> $FZF_HEADER_MSG' --preview 'tree -C {} | head -200' --info=inline"
+# export FZF_CTRL_R_OPTS="--header='<Paste History> $FZF_HEADER_MSG'"
 
 # Use modern completion system
 autoload -Uz compinit && compinit
@@ -90,7 +91,6 @@ zstyle ':completion:*:manuals' separate-sections true
 zstyle ':completion:*:manuals.*' insert-sections   true
 zstyle ':completion:*:man:*' menu yes select
 
-
 # Syntax highlighting theme
 source $ZDOTDIR/colors/catppuccin/zsh-syntax-highlighting/themes/catppuccin_$THEMEVARIANT-zsh-syntax-highlighting.zsh
 
@@ -100,4 +100,3 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Zsh syntax highlighting
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-

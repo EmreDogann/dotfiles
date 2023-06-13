@@ -1,4 +1,3 @@
-
 " FZF {{{
 " command! -nargs=* -bang RG call functions#RipgrepFzf(<q-args>, <bang>0)
 function! functions#RipgrepFzf(query, fullscreen)
