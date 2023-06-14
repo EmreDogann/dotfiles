@@ -44,4 +44,11 @@ function M.SendToClip(type, visualMode)
 	vim.api.nvim_win_set_cursor(0, myfixedcursor)
 end
 
+function M.keymapLualine()
+	if vim.opt.iminsert:get() > 0 and vim.b.keymap_name then
+		return '⌨ ' .. vim.b.keymap_name
+	end
+	return ''
+end
+
 return M

@@ -60,12 +60,10 @@ keymap("n", "gV", function()
 end, optsExpr)
 
 ------ Plugin Mappings ------
--- Auto-session
--- keymap("n", "<leader>ss", "<cmd>SessionSave<CR>")
--- keymap("n", "<leader>sr", "<cmd>SessionRestore<CR>")
--- keymap("n", "<leader>sd", "<cmd>SessionDelete<CR>")
--- keymap("n", "<leader>sls", "<cmd>Autosession search<CR>")
--- keymap("n", "<leader>sld", "<cmd>Autosession delete<CR>")
+-- nvim-notify
+vim.keymap.set('n', '<leader>nc', function()
+	require("notify").dismiss({ silent = true })
+end, opts)
 
 -- nvim-possession
 keymap("n", "<leader>sl", function()
@@ -90,7 +88,8 @@ keymap("n", "<leader>l", function()
 end, opts)
 keymap("n", "<leader>b", function()
 	if vim.v.count ~= 0 then
-		vim.cmd("buf " .. vim.v.count)
+		-- vim.cmd("buf " .. vim.v.count)
+		vim.cmd("LualineBuffersJump " .. vim.v.count)
 	else
 		require('fzf-lua').buffers()
 	end

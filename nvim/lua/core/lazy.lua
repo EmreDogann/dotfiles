@@ -19,19 +19,19 @@ require("lazy").setup("plugins",
 	},
 	checker = { enabled = true },
 	change_detection = { notify = false },
-	-- performance = {
-	-- 	rtp = {
-	-- 		-- Disable some rtp plugins
-	-- 		disabled_plugins = {
-	-- 			"gzip",
-	-- 			"matchit",
-	-- 			"matchparen",
-	-- 			-- "netrwPlugin",
-	-- 			"tarPlugin",
-	-- 			"tohtml",
-	-- 			"tutor",
-	-- 			"zipPlugin",
-	-- 		},
-	-- 	},
-	-- },
+	performance = {
+		rtp = {
+			-- Disable some rtp plugins
+			disabled_plugins = {
+				"gzip",
+				"matchit",
+				"matchparen",
+				-- "netrwPlugin",
+				"tarPlugin",
+				"tohtml",
+				"tutor",
+				"zipPlugin",
+			},
+		},
+	},
 })

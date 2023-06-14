@@ -29,7 +29,7 @@ nvim/backup/*
 nvim/undo/*
 nvim/shada
 nvim/spell/*.add*
-local/share/nvim/*
+local/*
 
 # COC.nvim config
 coc/*

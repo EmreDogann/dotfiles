@@ -59,8 +59,8 @@ opt.completeopt = { "menuone", "noselect" } -- mostly just for cmp
 opt.sessionoptions:remove('options')
 
 -- Indent guides
-opt.list = true
-opt.listchars = { tab = "\\u258f ", trail = '·', extends = '»', precedes = '«', nbsp = '×' }
+-- opt.list = true
+-- opt.listchars = { tab = "\\u258f ", trail = '·', extends = '»', precedes = '«', nbsp = '×' }
 
 o.backup = true				-- Enable backups
 o.undofile = true			-- Enable undo file
@@ -94,7 +94,7 @@ o.wrap = false				-- Do not wrap lines
 o.foldlevelstart = 99	-- Start with all folds open initially
 o.hidden = true				-- Keep changes to bugger without writing them to the file
 o.autowrite = true			-- Auto save changes made to the buffer
-o.lazyredraw = true			-- Don't redraw screen immediately
+-- o.lazyredraw = true			-- Don't redraw screen immediately
 o.splitbelow = true			-- Open split to right and bottom.
 o.splitright = true
 o.pumblend = 20				-- Background transparency blending

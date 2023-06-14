@@ -15,7 +15,13 @@ return {
 					percentage = 0.15, -- percentage of the shade to apply to the inactive window
 				},
 				integrations = {
-					which_key = true
+					which_key = true,
+					noice = true,
+					notify = true,
+					indent_blankline = {
+						enabled = true,
+						colored_indent_levels = false,
+					},
 				}
 			})
 
@@ -23,7 +29,7 @@ return {
 
 			-- Change vertical split color
 			vim.api.nvim_set_hl(0, 'VertSplit', {link = 'SignColumn'})
-			vim.api.nvim_set_hl(0, 'Whitespace', {cterm = standout, ctermfg = 240, ctermbg = 235, fg = "#40455d", bg = "#303446"})
+			-- vim.api.nvim_set_hl(0, 'Whitespace', {cterm = standout, ctermfg = 240, ctermbg = 235, fg = "#40455d", bg = "#303446"})
 			vim.api.nvim_set_hl(0, 'Folded', {cterm = reverse, bg = "#3c4052"})
 		end
 	}

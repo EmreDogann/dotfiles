@@ -2,11 +2,20 @@ local functions = require('functions')
 
 return {
 	{'tpope/vim-surround'},
-	{'tpope/vim-commentary'},
 	{'tpope/vim-fugitive'},
-	{'tommcdo/vim-exchange'},
-	{'junegunn/vim-peekaboo'},
 	-- {'dstein64/vim-startuptime'},
+	-- {'chrisbra/unicode.vim'},
+	{
+	  'tpope/vim-commentary',
+	  lazy = true,
+	  keys = {'gc'}
+	},
+	{
+	  'tommcdo/vim-exchange',
+	  lazy = true,
+	  keys = {'cx'}
+	},
+	{ 'junegunn/vim-peekaboo' },
 	{
 		'airblade/vim-rooter',
 		init = function()
@@ -29,6 +38,8 @@ return {
 	},
 	{
 		'matze/vim-move',
+		lazy = true,
+		keys = {'<S-h>', '<S-j>', '<S-k>', '<S-l>'},
 		init = function()
 			vim.g.move_key_modifier = "S"
 			vim.g.move_key_modifier_visualmode = "S"
@@ -36,6 +47,7 @@ return {
 	},
 	{
 		'tmsvg/pear-tree',
+		event = "VeryLazy",
 		init = function()
 			vim.g.pear_tree_smart_openers = 1
 			vim.g.pear_tree_smart_closers = 1
@@ -44,6 +56,8 @@ return {
 	},
 	{
 		'unblevable/quick-scope',
+		lazy = true,
+		keys = {'f', 'F', 't', 'T'},
 		init = function()
 			vim.g.qs_highlight_on_keys = {'f', 'F', 't', 'T'}
 			local qsHighlightGroup = vim.api.nvim_create_augroup('QuickScopeHighlights', {clear = true})
@@ -67,6 +81,23 @@ return {
 	-- 		require('colorizer').setup()
 	-- 	end
 	-- },
+	{
+		'bennypowers/splitjoin.nvim',
+		lazy = true,
+		keys = {
+			{ 'gj', function() require'splitjoin'.join() end, desc = 'Join the object under cursor' },
+			{ 'g,', function() require'splitjoin'.split() end, desc = 'Split the object under cursor' },
+		},
+	},
+	{
+		"lukas-reineke/indent-blankline.nvim",
+		config = function()
+			require("indent_blankline").setup({
+				show_current_context = false,
+				blankline_char = '│'
+			})
+		end
+	},
 	{
 		'goolord/alpha-nvim',
 		event = "VimEnter",
