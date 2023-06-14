@@ -6,7 +6,8 @@ return {
 			-- stages = "fade",
 			top_down = true,
 			timeout = 1000,
-			fps = 60
+			fps = 60,
+			background_colour = '#000000'
 		})
 	end
 }

@@ -64,7 +64,7 @@ opt.sessionoptions:remove('options')
 
 o.backup = true				-- Enable backups
 o.undofile = true			-- Enable undo file
-o.cmdheight = 1				-- Give more space for displaying messages
+o.cmdheight = 0				-- Give more space for displaying messages
 o.updatetime = 300			-- Faster completion (4000ms default)
 opt.shortmess:append('c')	-- Don't pass messages to |ins-completion-menu|
 o.signcolumn = "yes"		-- Always show sign column

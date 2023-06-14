@@ -5,11 +5,7 @@ return {
 	{'tpope/vim-fugitive'},
 	-- {'dstein64/vim-startuptime'},
 	-- {'chrisbra/unicode.vim'},
-	{
-	  'tpope/vim-commentary',
-	  lazy = true,
-	  keys = {'gc'}
-	},
+	{ 'tpope/vim-commentary' },
 	{
 	  'tommcdo/vim-exchange',
 	  lazy = true,
@@ -73,6 +69,8 @@ return {
 	},
 
 	{'nathom/filetype.nvim'},
+	{'nvim-lua/plenary.nvim'},
+	{'ThePrimeagen/harpoon'},
 	-- {
 	-- 	'norcalli/nvim-colorizer.lua',
 	-- 	event = "VeryLazy",
@@ -91,10 +89,47 @@ return {
 	},
 	{
 		"lukas-reineke/indent-blankline.nvim",
+		event = {
+			'BufReadPost',
+			'BufNewFile',
+		},
 		config = function()
 			require("indent_blankline").setup({
+				use_treesitter = true,
+				show_first_indent_level = true,
+				show_trailing_blankline_indent = false,
 				show_current_context = false,
-				blankline_char = '│'
+				-- blankline_char = '│',
+				blankline_char = '▏',
+				filetype_exclude = {
+					'help',
+					'NvimTree',
+					'dashboard',
+					'Trouble',
+					'neogitstatus',
+				},
+				context_patterns = {
+					'class',
+					'return',
+					'function',
+					'method',
+					'^if',
+					'^while',
+					'jsx_element',
+					'^for',
+					'^object',
+					'^table',
+					'block',
+					'arguments',
+					'if_statement',
+					'else_clause',
+					'jsx_element',
+					'jsx_self_closing_element',
+					'try_statement',
+					'catch_clause',
+					'import_statement',
+					'operation_type',
+				},
 			})
 		end
 	},

@@ -82,3 +82,16 @@ autocmd('FileType', {
 autocmd({ 'FocusGained', 'TermClose', 'TermLeave' }, {
     command = 'silent! checktime'
 })
+
+-- Set cmdheight to 1 when recording, and put it back to normal when it stops
+autocmd('RecordingEnter', {
+    callback = function()
+        vim.opt_local.cmdheight = 1
+    end,
+})
+
+autocmd('RecordingLeave', {
+    callback = function()
+        vim.opt_local.cmdheight = 0
+    end,
+})

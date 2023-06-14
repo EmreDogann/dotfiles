@@ -1,6 +1,7 @@
 return {
 	'nvim-lualine/lualine.nvim',
 	event = "VeryLazy",
+	lazy = false,
 	dependencies = { 'nvim-tree/nvim-web-devicons' },
 	config = function()
 		require('lualine').setup({
@@ -11,7 +12,7 @@ return {
 			},
 			sections = {
 				lualine_a = {
-					{ 'mode', separator = { left = '' }, right_padding = 40 },
+					{ 'mode', separator = { left = '' }, right_padding = 2 },
 				},
 				lualine_b = { 'branch', 'filename' },
 				lualine_c = {},
