@@ -1,6 +1,10 @@
 return {
 	"folke/noice.nvim",
 	event = "VeryLazy",
+	dependencies = {
+		"MunifTanjim/nui.nvim",
+		"rcarriga/nvim-notify",
+	},
 	config = function()
 		require('noice').setup({
 			lsp = {
@@ -28,9 +32,4 @@ return {
 			},
 		})
 	end,
-	dependencies = {
-		-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
-		"MunifTanjim/nui.nvim",
-		"rcarriga/nvim-notify",
-	}
 }

@@ -1,17 +1,19 @@
 local functions = require('functions')
 
 return {
-	{'tpope/vim-surround'},
-	{'tpope/vim-fugitive'},
 	-- {'dstein64/vim-startuptime'},
 	-- {'chrisbra/unicode.vim'},
-	{ 'tpope/vim-commentary' },
+	{ 'junegunn/vim-peekaboo' },
+	{
+		'tpope/vim-fugitive',
+		cmd = {
+			"Git",
+		}
+	},
 	{
 	  'tommcdo/vim-exchange',
-	  lazy = true,
 	  keys = {'cx'}
 	},
-	{ 'junegunn/vim-peekaboo' },
 	{
 		'airblade/vim-rooter',
 		init = function()
@@ -22,20 +24,24 @@ return {
 	},
 	{
 		'andymass/vim-matchup',
+		event = { 'BufReadPost', 'BufNewFile' },
 		dependencies = 'nvim-treesitter/nvim-treesitter',
 		init = function()
 			vim.g.matchup_matchparen_offscreen = { method = 'popup', scrolloff = 1 }
 			vim.g.matchup_matchparen_deferred = 1
 		end,
-		event = {
-			'BufReadPost',
-			'BufNewFile'
-		}
 	},
 	{
 		'matze/vim-move',
-		lazy = true,
-		keys = {'<S-h>', '<S-j>', '<S-k>', '<S-l>'},
+		keys = {
+			{
+				'<S-h>',
+				mode = {"n", "x"},
+			},
+			{ '<S-j>', mode = {"n", "x"} },
+			{ '<S-k>', mode = {"n", "x"} },
+			{ '<S-l>', mode = {"n", "x"} },
+		},
 		init = function()
 			vim.g.move_key_modifier = "S"
 			vim.g.move_key_modifier_visualmode = "S"
@@ -52,7 +58,6 @@ return {
 	},
 	{
 		'unblevable/quick-scope',
-		lazy = true,
 		keys = {'f', 'F', 't', 'T'},
 		init = function()
 			vim.g.qs_highlight_on_keys = {'f', 'F', 't', 'T'}
@@ -80,12 +85,35 @@ return {
 	-- 	end
 	-- },
 	{
-		'bennypowers/splitjoin.nvim',
-		lazy = true,
+		'numToStr/Comment.nvim',
+		event = "VeryLazy",
+		config = true
+	},
+	{
+		"kylechui/nvim-surround",
+		version = "*", -- Use for stability; omit to use `main` branch for the latest features
+		event = "VeryLazy",
+		config = function()
+			require("nvim-surround").setup({
+				-- Configuration here, or leave empty to use defaults
+			})
+		end
+	},
+	{
+		'Wansmer/treesj',
 		keys = {
-			{ 'gj', function() require'splitjoin'.join() end, desc = 'Join the object under cursor' },
-			{ 'g,', function() require'splitjoin'.split() end, desc = 'Split the object under cursor' },
+			{
+				'<leader>j',
+				function () vim.keymap.set('n', '<leader>j', require('treesj').toggle) end,
+				desc = "Toggle join/split line under cursor"
+			},
 		},
+		dependencies = { 'nvim-treesitter/nvim-treesitter' },
+		config = function()
+			require('treesj').setup({
+				use_default_keymaps = false,
+			})
+		end,
 	},
 	{
 		"lukas-reineke/indent-blankline.nvim",
@@ -93,46 +121,19 @@ return {
 			'BufReadPre',
 		},
 		config = function()
+			vim.cmd([[highlight! link IndentBlanklineContextChar Comment]])
+
 			require("indent_blankline").setup({
 				use_treesitter = true,
-				show_first_indent_level = true,
+				show_first_indent_level = false,
 				show_trailing_blankline_indent = false,
 				show_current_context = true,
+
 				-- blankline_char = '│',
 				blankline_char = '▏',
-				buftype_exclude = {
-					"terminal",
-					"nofile"
-				},
-				filetype_exclude = {
-					'help',
-					'NvimTree',
-					'dashboard',
-					'Trouble',
-					'neogitstatus',
-				},
-				context_patterns = {
-					'class',
-					'return',
-					'function',
-					'method',
-					'^if',
-					'^while',
-					'jsx_element',
-					'^for',
-					'^object',
-					'^table',
-					'block',
-					'arguments',
-					'if_statement',
-					'else_clause',
-					'jsx_element',
-					'jsx_self_closing_element',
-					'try_statement',
-					'catch_clause',
-					'import_statement',
-					'operation_type',
-				},
+
+				buftype_exclude = { "terminal", "nofile" },
+				filetype_exclude = { 'help' },
 			})
 		end
 	},
@@ -146,10 +147,9 @@ return {
 	},
 	{
 		"folke/which-key.nvim",
-		event = "VeryLazy",
 		keys = {
 			'<leader>',
-			'"',
+			-- '"',
 			"'",
 			'`',
 			'c',
@@ -160,6 +160,11 @@ return {
 			vim.o.timeout = true
 			vim.o.timeoutlen = 300
 		end,
-		opts = {}
+		opts = {
+			window = {
+				border = "single",
+				winblend = 20,
+			}
+		}
 	}
 }

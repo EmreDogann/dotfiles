@@ -18,7 +18,6 @@ return {
 				},
 			},
 			actions = {
-
 				files = {
 					-- Providers that inherit these actions:
 					--   files, git_files, git_status, grep, lsp
