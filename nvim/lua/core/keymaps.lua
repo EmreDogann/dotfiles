@@ -7,6 +7,9 @@ local functions = require('functions')
 keymap("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
 
+-- Fast saving
+keymap('n', "<C-s>", ":wa<CR>", opts)
+
 -- Better window navigation
 keymap("n", "<C-h>", "<C-w>h", opts)
 keymap("n", "<C-j>", "<C-w>j", opts)
@@ -18,6 +21,17 @@ keymap("n", "<C-l>", "<C-w>l", opts)
 -- keymap("n", "<C-Down>", ":resize +2<CR>", opts)
 -- keymap("n", "<C-Left>", ":vertical resize -2<CR>", opts)
 -- keymap("n", "<C-Right>", ":vertical resize +2<CR>", opts)
+
+-- Disable arrow keys
+keymap('', '<Up>', ':echoerr "nono don be stopid"<CR>', opts)
+keymap('', '<Down>', ':echoerr "nono don be stopid"<CR>', opts)
+keymap('', '<Left>', ':echoerr "nono don be stopid"<CR>', opts)
+keymap('', '<Right>', ':echoerr "nono don be stopid"<CR>', opts)
+
+keymap('i', '<Up>', '<Nop>', opts)
+keymap('i', '<Down>', '<Nop>', opts)
+keymap('i', '<Left>', '<Nop>', opts)
+keymap('i', '<Right>', '<Nop>', opts)
 
 -- Navigate buffers
 keymap("n", "<Tab>", ":bnext<CR>", opts)
@@ -32,36 +46,38 @@ keymap("v", ">", ">gv", opts)
 
 -- " Paste from "0 register by default unless a register other than the default is specified.
 -- " From: https://stackoverflow.com/questions/18391573/how-make-vim-paste-to-always-paste-from-register-0-unless-its-specified
--- keymap("n", "p", "<cmd><C-U>call")
--- nnoremap <silent> p :<C-U>call functions#FormatPaste(v:register, 'p', 1)<CR>
--- nnoremap <silent> P :<C-U>call functions#FormatPaste(v:register, 'P', 1)<CR>
--- xnoremap <silent> p :<C-U>call functions#FormatPaste(v:register, 'p', 1)<CR>
--- xnoremap <silent> P :<C-U>call functions#FormatPaste(v:register, 'P', 1)<CR>
+keymap({"n", "x"}, "p", function() functions.FormatPaste(vim.v.register, 'p') end, opts)
+keymap({"n", "x"}, "P", function() functions.FormatPaste(vim.v.register, 'P') end, opts)
 
--- " Paste from default register (used for deleted text as a for of cut & paste).
--- nnoremap <silent> <leader>p :<C-U>call functions#FormatPaste('"', 'p')<CR>
--- nnoremap <silent> <leader>P :<C-U>call functions#FormatPaste('"', 'P')<CR>
--- xnoremap <silent> <leader>p :<C-U>call functions#FormatPaste('"', 'p')<CR>
--- xnoremap <silent> <leader>P :<C-U>call functions#FormatPaste('"', 'P')<CR>
+-- Copy to clipboard
+keymap("n", "cy", functions.YankFixedCursor(""), opts)
+keymap("n", "cyy", functions.YankFixedCursor("_"), opts)
+keymap("x", "Y", function()
+	functions.SendToClip(vim.fn.visualmode(), 1)
+end, opts)
 
--- nnoremap <silent> <expr> cy functions#YankFixedCursor("")
--- nnoremap <silent> <expr> cyy functions#YankFixedCursor("_")
--- xnoremap <silent> Y :<C-U>call functions#SendToClip(visualmode(),1)<CR>
-
--- keymap("n", "cy", functions.YankFixedCursor(""), optsExpr)
--- keymap("n", "cyy", functions.YankFixedCursor("_"), optsExpr)
-
+-- Paste from clipboard
 keymap({"n", "x"}, "cp", "\"+p", opts)
 keymap({"n", "x"}, "cP", "\"+P", opts)
 
--- " Select most recent pasted text
+-- Select most recent pasted text
 keymap("n", "gV", function()
 	return "`[" .. vim.fn.getregtype(vim.v.register):sub(1,1) .. "`]"
 end, optsExpr)
 
+-- Toggle spell check.
+keymap('n', "<F5>", ":setlocal spell!<CR>", opts)
+keymap('i', "<F5>", "<C-o>:setlocal spell!<CR>", opts)
+
+-- Line text-objects
+keymap('x', "il", "g_o^o")
+keymap('o', "il", ":<C-u>exe 'normal v' . v:count1 . 'il'<CR>", opts)
+keymap('x', "al", "g_o0o")
+keymap('o', "al", ":<C-u>exe 'normal v' . v:count1 . 'al'<CR>", opts)
+
 ------ Plugin Mappings ------
 -- nvim-notify
-vim.keymap.set('n', '<leader>nc', function()
+keymap('n', '<leader>nc', function()
 	require("notify").dismiss({ silent = true })
 end, opts)
 

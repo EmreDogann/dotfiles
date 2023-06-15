@@ -21,11 +21,11 @@ return {
 					-- 	require("noice").api.status.message.get_hl,
 					-- 	cond = require("noice").api.status.message.has,
 					-- },
-					-- {
-					-- 	require("noice").api.status.command.get,
-					-- 	cond = require("noice").api.status.command.has,
-					-- 	color = { fg = "#ff9e64" },
-					-- },
+					{
+						require("noice").api.status.command.get,
+						cond = require("noice").api.status.command.has,
+						color = { fg = require("catppuccin.palettes").get_palette(vim.env.THEMEVARIANT).flamingo },
+					},
 					-- {
 					-- 	require("noice").api.status.mode.get,
 					-- 	cond = require("noice").api.status.mode.has,
@@ -37,10 +37,16 @@ return {
 					-- 	color = { fg = "#ff9e64" },
 					-- },
 				},
-				lualine_y = { 'filetype', 'fileformat'},
+				lualine_y = {
+					{
+						'filetype',
+						colored = false,
+					},
+					'fileformat',
+				},
 				lualine_z = {
 					{ 'location', separator = { right = '' }, left_padding = 2 },
-					{ require('functions').keymapLualine }
+					-- { require('functions').keymapLualine }
 				},
 			},
 			inactive_sections = {

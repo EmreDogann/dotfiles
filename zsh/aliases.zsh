@@ -66,7 +66,7 @@ case "$(uname -s)" in
 	;;
 
 	CYGWIN*|MINGW32*|MSYS*|MINGW*)
-		echo 'zsh/aliases.zsh: MS Windows'
+		# echo 'zsh/aliases.zsh: MS Windows'
 	;;
 esac
 

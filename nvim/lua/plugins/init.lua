@@ -90,17 +90,20 @@ return {
 	{
 		"lukas-reineke/indent-blankline.nvim",
 		event = {
-			'BufReadPost',
-			'BufNewFile',
+			'BufReadPre',
 		},
 		config = function()
 			require("indent_blankline").setup({
 				use_treesitter = true,
 				show_first_indent_level = true,
 				show_trailing_blankline_indent = false,
-				show_current_context = false,
+				show_current_context = true,
 				-- blankline_char = '│',
 				blankline_char = '▏',
+				buftype_exclude = {
+					"terminal",
+					"nofile"
+				},
 				filetype_exclude = {
 					'help',
 					'NvimTree',
@@ -144,6 +147,15 @@ return {
 	{
 		"folke/which-key.nvim",
 		event = "VeryLazy",
+		keys = {
+			'<leader>',
+			'"',
+			"'",
+			'`',
+			'c',
+			'y',
+			'd',
+		},
 		init = function()
 			vim.o.timeout = true
 			vim.o.timeoutlen = 300

@@ -8,11 +8,23 @@ setopt interactive_comments
 stty stop undef
 
 # Switch to emacs mode
-bindkey -e
+# bindkey -e
+# bindkey '^[[1;5C' emacs-forward-word
+# bindkey '^[[1;5D' emacs-backward-word
+
+# Better vi mode
+# Do the initialization when the script is sourced (i.e. Initialize instantly)
+# ZVM_INIT_MODE=sourcing
+[ -f "$ZDOTDIR/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh" ] && source "$ZDOTDIR/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh"
+# The plugin will auto execute this zvm_after_init function
+function zvm_after_init() {
+	[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+	autoload -Uz compinit && compinit
+	zmodload zsh/complist
+}
+ZVM_ESCAPE_KEYTIMEOUT=0.01
 
 # Source file if it exists.
-[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.zsh
-
 [ -f "$ZDOTDIR/prompt.zsh" ] && source "$ZDOTDIR/prompt.zsh"
 [ -f "$ZDOTDIR/exports.zsh" ] && source "$ZDOTDIR/exports.zsh"
 [ -f "$ZDOTDIR/theme.zsh" ] && source "$ZDOTDIR/theme.zsh"
@@ -51,7 +63,7 @@ then
 fi
 
 # Use ~~ as the trigger sequence instead of the default **
-export FZF_COMPLETION_TRIGGER='~~'
+# export FZF_COMPLETION_TRIGGER='~~'
 export FZF_COMPLETION_OPTS='--border --info=inline'
 export FZF_HEADER_MSG='| Use CTRL-C or ESC to cancel'
 printf -v fzfPreviewControls '%s' \
@@ -100,3 +112,5 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Zsh syntax highlighting
 source $ZDOTDIR/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

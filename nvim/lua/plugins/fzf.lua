@@ -17,6 +17,28 @@ return {
 					delay = 10
 				},
 			},
+			actions = {
+
+				files = {
+					-- Providers that inherit these actions:
+					--   files, git_files, git_status, grep, lsp
+					--   oldfiles, quickfix, loclist, tags, btags args
+					["default"]     = actions.file_edit_or_qf,
+					["ctrl-s"]      = actions.file_split,
+					["ctrl-v"]      = actions.file_vsplit,
+					["ctrl-t"]      = actions.file_tabedit,
+					["alt-q"]       = actions.file_sel_to_qf,
+					["alt-l"]       = actions.file_sel_to_ll,
+				},
+				buffers = {
+					-- Providers that inherit these actions:
+					--   buffers, tabs, lines, blines
+					["default"]     = actions.buf_edit,
+					["ctrl-s"]      = actions.buf_split,
+					["ctrl-v"]      = actions.buf_vsplit,
+					["ctrl-t"]      = actions.buf_tabedit,
+				}
+			},
 			fzf_opts = {
 				["--info"] = "inline",
 				["--padding"] = "3%,3%,3%,3%",
@@ -60,7 +82,8 @@ return {
 				fzf_opts = {
 					["--info"] = "inline",
 				},
-			}
+			},
+			file_icon_padding = ' ',
 		})
 	end
 }

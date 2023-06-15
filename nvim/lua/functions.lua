@@ -1,4 +1,5 @@
 local M = {}
+local L = {line = nil, col = nil}
 
 -- Usage extend_hl('Comment', 'StatusLine', { italic = true })
 -- From: https://www.reddit.com/r/neovim/comments/yexeil/comment/iu0lbgt/?utm_source=share&utm_medium=web2x&context=3
@@ -18,30 +19,49 @@ end
 
 -- Adapted From: https://vi.stackexchange.com/questions/24367/unexpected-behavior-with-feedkeys
 function M.YankFixedCursor(motionPrefix)
-	myfixedcursor = vim.api.nvim_win_get_cursor(0)
-	vim.api.nvim_set_operatorfunc(M.SendToClip)
-	return 'g@' .. motionPrefix
+	vim.o.operatorfunc = "v:lua.require'functions'.SendToClip"
+	-- Set mark z to current cursor pos to restore to later
+	return "mzg@" .. motionPrefix
 end
 
 -- Adapted From: https://stackoverflow.com/a/58822884/10439539
 function M.SendToClip(type, visualMode)
 	if visualMode ~= nil then
-		myfixedcursor = vim.api.nvim_win_get_cursor(0)
 		-- Visual mode
-		vim.cmd([[keepjumps silent! normal! gv"0y]])
-	elseif type ==# 'line' then
+		vim.cmd([[keepjumps silent! normal! mzgv"0y]])
+	elseif type == 'line' then
 		vim.cmd([[keepjumps silent! normal! '[V']"0y]])
-	elseif type ==# 'char' then
+	elseif type == 'char' then
 		vim.cmd([[keepjumps silent! normal! `[v`]"0y]])
 	end
 
 	-- From: https://stackoverflow.com/a/20076502/10439539
 	local stripedOutput = vim.fn.substitute(vim.fn.getreg('0'), '\\s\\{2,}\\|\\n$', '', 'g')
-	-- Yanking to + register does not work for some reason. So use
-	-- System32/clip.exe instead.
-	vim.cmd([[silent! normal! "+y]])
-	-- call system('clip.exe', l:stripedOutput)
-	vim.api.nvim_win_set_cursor(0, myfixedcursor)
+	-- Yanking to + register does not work for some reason. So use win32yank.exe instead.
+	vim.fn.system('win32yank.exe -i --crlf', stripedOutput)
+	vim.api.nvim_win_set_cursor(0, vim.api.nvim_buf_get_mark(0, 'z'))
+end
+
+function M.FormatPaste(reg, command)
+	local register = reg == '"' and '"0' or '"' .. reg
+	vim.cmd("normal! " .. register .. command)
+
+	local mode = vim.fn.getregtype(vim.v.register):sub(1,1)
+	if mode == 'v' then
+		-- Character mode
+		vim.cmd([[keepjumps normal gV]])
+		vim.cmd([[keepjumps normal =]])
+		vim.cmd([[keepjumps normal ^]])
+	elseif mode == 'V' then
+		-- The commands don't work when they are combined. When they're
+		-- combined, it's like they're working with stale/old data.
+		vim.cmd([[keepjumps normal gV]])
+		vim.cmd([[keepjumps normal =]])
+		vim.cmd([[keepjumps normal ^]])
+	elseif mode == "\\<C-V>" then
+		-- Visual-Block mode
+		return nil
+	end
 end
 
 return M

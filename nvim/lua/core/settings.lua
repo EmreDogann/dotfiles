@@ -13,7 +13,7 @@ vim.g.IS_WSL = IS_LINUX and uname.release:lower():find 'microsoft' and true or f
 vim.g.session_dir = vim.fn.expand(vim.fn.stdpath("data") .. "/sessions")
 
 o.fileencoding = "utf-8"
-vim.o.clipboard = 'unnamedplus'
+-- vim.o.clipboard = 'unnamedplus'
 
 -- Set directory for swap & backup files.
 o.directory = vim.env.MYNEOVIMDIR .. "/swap//"
@@ -87,8 +87,8 @@ o.autoindent = true			-- Keep indentation from previous line
 o.smartindent = true		-- Auto inserts indentation in some cases
 o.smarttab = true
 
-o.scrolloff = 8				-- Minimal number of screen lines to keep above and below the cursor
-o.sidescrolloff = 8			-- Minimal number of screen columns to keep to the left and right of the cursor
+o.scrolloff = 6				-- Minimal number of screen lines to keep above and below the cursor
+o.sidescrolloff = 6			-- Minimal number of screen columns to keep to the left and right of the cursor
 o.wrap = false				-- Do not wrap lines
 
 o.foldlevelstart = 99	-- Start with all folds open initially
@@ -103,6 +103,15 @@ o.laststatus = 2			-- Always show statusline
 o.showtabline = 2			-- Always show tabline
 o.termguicolors = true		-- Set term gui colors (most terminals support this)
 -- opt.iskeyword:append("-")	-- treats words with `-` as single words
+
+-- Netrw options
+g.netrw_keepdir = 0
+g.netrw_liststyle = 3
+g.netrw_banner = 0
+g.netrw_winsize = 15
+g.netrw_browse_split = 4
+g.netrw_altv = 1
+g.netrw_list_hide = opt.wildignore
 
 -- Disable provider warnings in the healthcheck
 g.loaded_perl_provider = 0

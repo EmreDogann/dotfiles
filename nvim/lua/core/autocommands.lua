@@ -51,7 +51,7 @@ autocmd('VimResized', {
 -- Never insert line as a comment when using 'o' to enter insert mode
 autocmd('BufWinEnter', {
     callback = function()
-        vim.cmd('setlocal formatoptions-=o')
+        vim.cmd('setlocal formatoptions-=cro')
     end,
 })
 
@@ -62,6 +62,7 @@ autocmd('FileType', {
         'man',
         'lspinfo',
         'checkhealth',
+		'netrw',
     },
     callback = function(event)
         vim.bo[event.buf].buflisted = false
@@ -81,17 +82,4 @@ autocmd('FileType', {
 -- Check if the file needs to be reloaded when it's changed
 autocmd({ 'FocusGained', 'TermClose', 'TermLeave' }, {
     command = 'silent! checktime'
-})
-
--- Set cmdheight to 1 when recording, and put it back to normal when it stops
-autocmd('RecordingEnter', {
-    callback = function()
-        vim.opt_local.cmdheight = 1
-    end,
-})
-
-autocmd('RecordingLeave', {
-    callback = function()
-        vim.opt_local.cmdheight = 0
-    end,
 })
