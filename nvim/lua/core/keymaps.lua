@@ -44,11 +44,6 @@ keymap("n", "<S-q>", "<cmd>bdelete!<CR>", opts)
 keymap("v", "<", "<gv", opts)
 keymap("v", ">", ">gv", opts)
 
--- " Paste from "0 register by default unless a register other than the default is specified.
--- " From: https://stackoverflow.com/questions/18391573/how-make-vim-paste-to-always-paste-from-register-0-unless-its-specified
-keymap({"n", "x"}, "p", function() functions.FormatPaste(vim.v.register, 'p') end, opts)
-keymap({"n", "x"}, "P", function() functions.FormatPaste(vim.v.register, 'P') end, opts)
-
 -- Copy to clipboard
 keymap("n", "cy", functions.YankFixedCursor(""), opts)
 keymap("n", "cyy", functions.YankFixedCursor("_"), opts)
@@ -56,9 +51,14 @@ keymap("x", "Y", function()
 	functions.SendToClip(vim.fn.visualmode(), 1)
 end, opts)
 
+-- " Paste from "0 register by default unless a register other than the default is specified.
+-- " From: https://stackoverflow.com/questions/18391573/how-make-vim-paste-to-always-paste-from-register-0-unless-its-specified
+keymap({"n", "x"}, "p", function() functions.FormatPaste(vim.v.register, 'p') end, opts)
+keymap({"n", "x"}, "P", function() functions.FormatPaste(vim.v.register, 'P') end, opts)
+
 -- Paste from clipboard
-keymap({"n", "x"}, "cp", "\"+p", opts)
-keymap({"n", "x"}, "cP", "\"+P", opts)
+keymap({"n", "x"}, "cp", function() functions.FormatPaste("+", 'p') end, opts)
+keymap({"n", "x"}, "cP", function() functions.FormatPaste("+", 'P') end, opts)
 
 -- Select most recent pasted text
 keymap("n", "gV", function()
