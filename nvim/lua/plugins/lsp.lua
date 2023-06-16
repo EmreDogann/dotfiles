@@ -41,6 +41,7 @@ return {
 					},
 				},
 			},
+			"hrsh7th/nvim-cmp",
 		},
 		event = {
 			"BufReadPre",
@@ -48,55 +49,12 @@ return {
 		},
 		config = function()
 			local lspconfig = require("lspconfig")
-			-- local keys = {
-			-- 	{
-			-- 		'gd',
-			-- 		function()
-			-- 			return require('fzf-lua').lsp_definitions()
-			-- 		end,
-			-- 		desc = 'Goto Definition',
-			-- 	},
-			-- 	{
-			-- 		'gr',
-			-- 		function()
-			-- 			return require('fzf-lua').lsp_references()
-			-- 		end,
-			-- 		desc = 'References',
-			-- 	},
-			-- 	{
-			-- 		'gD',
-			-- 		-- vim.lsp.buf.declaration,
-			-- 		function()
-			-- 			return require('fzf-lua').lsp_declarations()
-			-- 		end,
-			-- 		desc = 'Goto Declaration',
-			-- 	},
-			-- 	{
-			-- 		'gI',
-			-- 		function()
-			-- 			return require('fzf-lua').lsp_implementations()
-			-- 		end,
-			-- 		desc = 'Goto Implementation',
-			-- 	},
-			-- 	{
-			-- 		'gy',
-			-- 		function()
-			-- 			return require('fzf-lua').lsp_type_definitions()
-			-- 		end,
-			-- 		desc = 'Goto T[y]pe Definition',
-			-- 	},
-			-- 	{
-			-- 		'K',
-			-- 		vim.lsp.buf.hover,
-			-- 		desc = 'Hover',
-			-- 	},
-			-- 	{
-			-- 		'gK',
-			-- 		vim.lsp.buf.signature_help,
-			-- 		desc = 'Signature Help',
-			-- 	},
-			-- }
+
+			-- Add additional capabilities supported by nvim-cmp
+			local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
 			lspconfig.neocmake.setup({
+				capabilities = capabilities,
 				root_dir = lspconfig.util.root_pattern(
 					"CMakePresets.json",
 					"CTestConfig.cmake",
@@ -106,9 +64,11 @@ return {
 				),
 			})
 
-			lspconfig.clangd.setup({})
+			-- Using clangd-extensions instead. See below.
+			-- lspconfig.clangd.setup({})
 
 			lspconfig.lua_ls.setup({
+				capabilities = capabilities,
 				settings = {
 					Lua = {
 						diagnostics = {
@@ -127,23 +87,25 @@ return {
 				},
 			})
 
-			lspconfig.marksman.setup({})
+			lspconfig.marksman.setup({
+				capabilities = capabilities,
+			})
 
 			-- Use LspAttach autocommand to only map the following keys
 			-- after the language server attaches to the current buffer
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("LspConfig", {}),
 				callback = function(ev)
-					-- Enable completion triggered by <c-x><c-o>
-					-- vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
-
 					-- Buffer local mappings.
 					vim.keymap.set("n", "gd", function()
-						return require("fzf-lua").lsp_definitions()
+						return require("fzf-lua").lsp_definitions({ jump_to_single_result = true })
 					end, { buffer = ev.buf, desc = "Goto Definition" })
 
 					vim.keymap.set("n", "gr", function()
-						return require("fzf-lua").lsp_references()
+						return require("fzf-lua").lsp_references({
+							jump_to_single_result = true,
+							ignore_current_line = true,
+						})
 					end, { buffer = ev.buf, desc = "References" })
 
 					vim.keymap.set("n", "gD", function()
@@ -160,9 +122,44 @@ return {
 
 					vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = ev.buf, desc = "Hover" })
 					vim.keymap.set("n", "gk", vim.lsp.buf.signature_help, { buffer = ev.buf, desc = "Signature Help" })
+					vim.keymap.set("n", "gi", "<cmd>ClangdSymbolInfo<CR>", { buffer = ev.buf, desc = "Symbol Info under Cursor" })
+					vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename Signature" })
+					vim.keymap.set(
+						{ "n", "v" },
+						"<space>ca",
+						vim.lsp.buf.code_action,
+						{ buffer = ev.buf, desc = "Perform Code Action" }
+					)
 				end,
 			})
 		end,
+	},
+
+	-- clangd-extentions
+	{
+		"p00f/clangd_extensions.nvim",
+		dependencies = "hrsh7th/nvim-cmp",
+		-- config = function()
+		-- 	require("clangd_extensions").setup({
+		-- 		server = {
+		-- 			capabilities = require('cmp_nvim_lsp').default_capabilities(),
+		-- 		}
+		-- 	})
+		-- end,
+		opts = {
+			server = {
+				capabilities = require('cmp_nvim_lsp').default_capabilities(),
+			},
+			extensions = {
+				autoSetHints = false,
+				memory_info = {
+					border = "single",
+				},
+				symbol_info = {
+					border = "single",
+				},
+			}
+		}
 	},
 
 	-- null-ls.nvim

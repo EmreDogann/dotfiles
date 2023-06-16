@@ -139,27 +139,28 @@ return {
 			require("alpha").setup(require("alpha.themes.startify").config)
 		end,
 	},
-	{
-		"folke/which-key.nvim",
-		keys = {
-			"<leader>",
-			-- '"',
-			"'",
-			"`",
-			"c",
-			"y",
-			"d",
-			"g",
-		},
-		init = function()
-			vim.o.timeout = true
-			vim.o.timeoutlen = 300
-		end,
-		opts = {
-			window = {
-				border = "single",
-				winblend = 20,
-			},
-		},
-	},
+	-- Causes <leader>g to move the cursor to the right by 1
+	-- {
+	-- 	"folke/which-key.nvim",
+	-- 	keys = {
+	-- 		"<leader>",
+	-- 		-- '"',
+	-- 		"'",
+	-- 		"`",
+	-- 		"c",
+	-- 		"y",
+	-- 		"d",
+	-- 		"g",
+	-- 	},
+	-- 	init = function()
+	-- 		vim.o.timeout = true
+	-- 		vim.o.timeoutlen = 300
+	-- 	end,
+	-- 	opts = {
+	-- 		window = {
+	-- 			border = "single",
+	-- 			winblend = 20,
+	-- 		},
+	-- 	},
+	-- },
 }

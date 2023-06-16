@@ -2,14 +2,15 @@ return {
 	{
 		"hrsh7th/nvim-cmp",
 		dependencies = {
-			"FelipeLema/cmp-async-path", -- Complete filepaths
-			"hrsh7th/cmp-buffer", -- Word completion in current buffer
+			"FelipeLema/cmp-async-path",	-- Complete filepaths
+			"hrsh7th/cmp-buffer",			-- Word completion in current buffer
 			"hrsh7th/cmp-calc",
 			"hrsh7th/cmp-cmdline",
-			"saadparwaiz1/cmp_luasnip", -- Luasnip completion
-			"hrsh7th/cmp-nvim-lsp", -- LSP completions
-			"hrsh7th/cmp-nvim-lua", -- Lua completions
-			"onsails/lspkind.nvim", -- VSCode-like pictograms in lsp completion menu
+			"L3MON4D3/LuaSnip",				-- Snippets
+			"saadparwaiz1/cmp_luasnip",		-- Luasnip completion
+			"hrsh7th/cmp-nvim-lsp",			-- LSP completions
+			"hrsh7th/cmp-nvim-lua",			-- Lua completions
+			"onsails/lspkind.nvim",			-- VSCode-like pictograms in lsp completion menu
 		},
 		config = function()
 			local cmp = require("cmp")
