@@ -13,25 +13,25 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup("plugins",
-{
-	defaults = {
-		version = false,		-- Always use the latest git commit
-	},
-	checker = { enabled = true },
-	change_detection = { notify = false },
-	performance = {
-		rtp = {
-			-- Disable some rtp plugins
-			disabled_plugins = {
-				"gzip",
-				"matchit",
-				"matchparen",
-				-- "netrwPlugin",
-				"tarPlugin",
-				"tohtml",
-				"tutor",
-				"zipPlugin",
+	{
+		defaults = {
+			version = false,		-- Always use the latest git commit
+		},
+		checker = { enabled = true },
+		change_detection = { notify = false },
+		performance = {
+			rtp = {
+				-- Disable some rtp plugins
+				disabled_plugins = {
+					"gzip",
+					"matchit",
+					"matchparen",
+					-- "netrwPlugin",
+					"tarPlugin",
+					"tohtml",
+					"tutor",
+					"zipPlugin",
+				},
 			},
 		},
-	},
 })

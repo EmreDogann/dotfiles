@@ -63,11 +63,32 @@ autocmd('FileType', {
         'lspinfo',
         'checkhealth',
 		'netrw',
+		'noice',
     },
     callback = function(event)
         vim.bo[event.buf].buflisted = false
         vim.keymap.set('n', 'q', '<cmd>close<cr>', { buffer = event.buf, silent = true })
     end,
+})
+
+-- Disable switching buffers when in Lazy.nvim window.
+autocmd('FileType', {
+	pattern = { 'lazy' },
+	callback = function()
+		local opts = {silent = true, noremap = false, buffer = true}
+		vim.keymap.set('', "<Tab>", "<Nop>", opts)
+		vim.keymap.set('', "<S-Tab>", "<Nop>", opts)
+		vim.keymap.set('', "<S-Tab>", "<Nop>", opts)
+		vim.keymap.set('', "<leader>b", "<Nop>", opts)
+
+		-- Disable Harpoon mappings
+		vim.keymap.set("n", "<leader>ha", "<Nop>", opts)
+		vim.keymap.set("n", "<leader>hh", "<Nop>", opts)
+		vim.keymap.set("n", "<M-h>", "<Nop>", opts)
+		vim.keymap.set("n", "<M-j>", "<Nop>", opts)
+		vim.keymap.set("n", "<M-k>", "<Nop>", opts)
+		vim.keymap.set("n", "<M-l>", "<Nop>", opts)
+	end
 })
 
 -- Check for spelling in text filetypes and enable wrapping

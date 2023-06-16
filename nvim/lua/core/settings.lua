@@ -103,13 +103,13 @@ o.pumheight = 10			-- Make popup menu smaller
 o.laststatus = 2			-- Always show statusline
 o.showtabline = 2			-- Always show tabline
 o.termguicolors = true		-- Set term gui colors (most terminals support this)
--- opt.iskeyword:append("-")	-- treats words with `-` as single words
+-- opt.isekyword:append("-")	-- treats words with `-` as single words
 
 -- Netrw options
 g.netrw_keepdir = 0
 g.netrw_liststyle = 3
 g.netrw_banner = 0
-g.netrw_winsize = 15
+g.netrw_winsize = 25
 g.netrw_browse_split = 4
 g.netrw_altv = 1
 g.netrw_list_hide = opt.wildignore
