@@ -124,6 +124,7 @@ o.pumheight = 10 -- Make popup menu smaller
 o.laststatus = 2 -- Always show statusline
 o.showtabline = 2 -- Always show tabline
 o.termguicolors = true -- Set term gui colors (most terminals support this)
+-- o.colorcolumn = "80" -- Show column where taxt wrapping occurs
 -- opt.isekyword:append("-")	-- treats words with `-` as single words
 
 -- Status Column

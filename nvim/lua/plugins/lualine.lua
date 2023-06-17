@@ -24,7 +24,15 @@ return {
 						},
 					},
 				},
-				lualine_c = { "filename" },
+				lualine_c = {
+					{ "filename", path = 1 },
+					{
+						require("nvim-possession").status,
+						cond = function()
+							return require("nvim-possession").status() ~= nil
+						end,
+					},
+				},
 				lualine_x = {
 					-- {
 					-- 	"%S",

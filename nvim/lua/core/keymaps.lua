@@ -20,6 +20,15 @@ keymap("n", "a", function()
 	return string.match(vim.api.nvim_get_current_line(), "%g") == nil and '"_S' or "a"
 end, { expr = true, noremap = true })
 
+-- Keep cursor position when joining lines
+keymap("n", "J", "mzJ`z", opts)
+
+-- Keep cursor in the middle when scrolling page-up/down or when searching
+keymap("n", "<C-d>", "<C-d>zz", opts)
+keymap("n", "<C-u>", "<C-u>zz", opts)
+keymap("n", "n", "nzzzv", opts)
+keymap("n", "N", "Nzzzv", opts)
+
 -- Better window navigation
 keymap("n", "<C-h>", "<C-w>h", opts)
 keymap("n", "<C-j>", "<C-w>j", opts)
@@ -55,9 +64,9 @@ keymap("v", "<", "<gv", opts)
 keymap("v", ">", ">gv", opts)
 
 -- Copy to clipboard
-keymap("n", "cy", functions.YankFixedCursor(""), opts)
-keymap("n", "cyy", functions.YankFixedCursor("_"), opts)
-keymap("x", "Y", function()
+keymap("n", "<leader>y", functions.YankFixedCursor(""), opts)
+keymap("n", "<leader>yy", functions.YankFixedCursor("_"), opts)
+keymap("x", "<leader>y", function()
 	functions.SendToClip(vim.fn.visualmode(), 1)
 end, opts)
 
@@ -71,10 +80,10 @@ keymap({ "n", "x" }, "P", function()
 end, opts)
 
 -- Paste from clipboard
-keymap({ "n", "x" }, "cp", function()
+keymap({ "n", "x" }, "<leader>p", function()
 	functions.FormatPaste("+", "p")
 end, opts)
-keymap({ "n", "x" }, "cP", function()
+keymap({ "n", "x" }, "<leader>P", function()
 	functions.FormatPaste("+", "P")
 end, opts)
 
@@ -127,6 +136,11 @@ keymap(
 keymap("n", "<leader>nc", function()
 	require("notify").dismiss({ silent = true })
 end, opts)
+
+-- noice.nvim
+-- keymap("c", "<CR>", function()
+-- 	require("noice").redirect(vim.fn.getcmdline())
+-- end, { desc = "Redirect Cmdline" })
 
 -- LuaSnips
 -- Snippet expansion key.

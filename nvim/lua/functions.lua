@@ -65,6 +65,7 @@ end
 
 -- Function to check if a floating dialog exists and if not
 -- then check for diagnostics under the cursor
+-- Can be used for CursorHover Diagnostics
 function M.OpenDiagnosticIfNoFloat()
 	-- for _, winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
 	-- 	if vim.api.nvim_win_get_config(winid).zindex then
