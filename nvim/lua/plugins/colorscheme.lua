@@ -14,6 +14,9 @@ return {
 				shade = "dark",
 				percentage = 0.25, -- percentage of the shade to apply to the inactive window
 			},
+			custom_highlight = {
+				DiagnosticUnderlineError = { cterm = undercurl, gui = undercurl },
+			},
 			integrations = {
 				which_key = true,
 				noice = true,
@@ -24,14 +27,17 @@ return {
 				},
 				treesitter_context = true,
 				harpoon = true,
-			}
+				mason = true,
+				cmp = true,
+				symbols_outline = true,
+			},
 		})
 
 		vim.cmd([[colorscheme catppuccin]])
 
 		-- Change vertical split color
-		vim.api.nvim_set_hl(0, 'VertSplit', {link = 'SignColumn'})
+		vim.api.nvim_set_hl(0, "VertSplit", { link = "SignColumn" })
 		-- vim.api.nvim_set_hl(0, 'Whitespace', {cterm = standout, ctermfg = 240, ctermbg = 235, fg = "#40455d", bg = "#303446"})
-		vim.api.nvim_set_hl(0, 'Folded', {cterm = reverse, bg = "#3c4052"})
-	end
+		vim.api.nvim_set_hl(0, "Folded", { cterm = reverse, bg = "#3c4052" })
+	end,
 }

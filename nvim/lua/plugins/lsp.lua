@@ -1,3 +1,20 @@
+local function GetCapabilities()
+	local lspCapabilities = vim.lsp.protocol.make_client_capabilities()
+	lspCapabilities.offsetEncoding = { "utf-16" }
+
+	-- Add additional capabilities supported by nvim-cmp
+	local cmpCapabilities = require("cmp_nvim_lsp").default_capabilities()
+	lspCapabilities = vim.tbl_extend("force", lspCapabilities, cmpCapabilities)
+
+	-- Enable folding (for nvim-ufo)
+	lspCapabilities.textDocument.foldingRange = {
+		dynamicRegistration = false,
+		lineFoldingOnly = true,
+	}
+
+	return lspCapabilities
+end
+
 return {
 	-- mason.nvim
 	{
@@ -6,6 +23,7 @@ return {
 		cmd = "Mason",
 		opts = {
 			ui = {
+				border = "single",
 				icons = {
 					package_installed = "",
 					package_pending = "",
@@ -18,10 +36,13 @@ return {
 	-- lspconfig
 	{
 		"neovim/nvim-lspconfig",
+		lazy = false,
+		priority = 999,
 		dependencies = {
 			"williamboman/mason.nvim",
 			{
 				"williamboman/mason-lspconfig.nvim",
+				event = "VeryLazy",
 				opts = {
 					ensure_installed = {
 						"lua_ls",
@@ -29,29 +50,36 @@ return {
 						"neocmake",
 						"marksman",
 					},
+					automatic_installation = false,
 				},
 			},
 			{
 				"jay-babu/mason-null-ls.nvim",
 				opts = {
 					ensure_installed = {
+						"clang-format",
 						"stylua",
-						"markdownlint",
-						-- 'luacheck',
+						-- "markdownlint",
 					},
+					automatic_installation = false,
 				},
 			},
+			"folke/neodev.nvim", -- lsp for nvim-lua config
+			"p00f/clangd_extensions.nvim", -- Clangd LSP config
 			"hrsh7th/nvim-cmp",
 		},
 		event = {
 			"BufReadPre",
 			"BufNewFile",
 		},
-		config = function()
-			local lspconfig = require("lspconfig")
+		init = function()
+			-- INFO must be before the lsp-config setup of lua-ls
+			require("neodev").setup({
+				library = { plugins = false }, -- plugins are helpful e.g. for plenary, but slow down lsp loading
+			})
 
-			-- Add additional capabilities supported by nvim-cmp
-			local capabilities = require('cmp_nvim_lsp').default_capabilities()
+			local lspconfig = require("lspconfig")
+			local capabilities = GetCapabilities()
 
 			lspconfig.neocmake.setup({
 				capabilities = capabilities,
@@ -71,15 +99,27 @@ return {
 				capabilities = capabilities,
 				settings = {
 					Lua = {
+						completion = {
+							callSnippet = "Replace",
+							keywordSnippet = "Replace",
+							displayContext = 5,
+							postfix = ".", -- useful for `table.insert` and the like
+						},
+						runtime = {
+							-- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+							version = "LuaJIT",
+						},
 						diagnostics = {
+							-- Get the language server to recognize the `vim` global
 							globals = { "vim" },
 						},
 						workspace = {
-							library = {
-								[vim.fn.expand("$VIMRUNTIME/lua")] = true,
-								[vim.fn.stdpath("config") .. "/lua"] = true,
-							},
+							-- Make the server aware of Neovim runtime files
+							-- library = vim.api.nvim_get_runtime_file("", true),
+							checkThirdParty = false,
 						},
+						format = { enable = false }, -- using stylua instead. Also, sumneko-lsp-formatting has this weird bug where all folds are opened
+						-- Do not send telemetry data containing a randomized but unique identifier
 						telemetry = {
 							enable = false,
 						},
@@ -89,6 +129,59 @@ return {
 
 			lspconfig.marksman.setup({
 				capabilities = capabilities,
+			})
+		end,
+		config = function()
+			-- Borders
+			require("lspconfig.ui.windows").default_options.border = "single"
+			vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
+			vim.lsp.handlers["textDocument/signatureHelp"] =
+				vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
+
+			-- Diagnostic symbols for display in the sign column.
+			-- local diagnosticIcons = { Error = "", Warn = "▲", Info = "", Hint = "" }
+			local diagnosticIcons = { Error = "🞬", Warn = "▲", Info = "", Hint = "" }
+			-- local diagnosticIcons = { Error = "", Warn = "", Info = "", Hint = "" }
+			for type, icon in pairs(diagnosticIcons) do
+				local hl = "DiagnosticSign" .. type
+				vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+			end
+
+			local function fmt(diag)
+				local source = diag.source and " (" .. diag.source:gsub("%.$", "") .. ")" or ""
+				local msg = diag.message
+				return msg .. source
+			end
+
+			vim.diagnostic.config({
+				virtual_text = false,
+				virtual_lines = {
+					highlight_whole_line = false,
+				},
+				update_in_insert = false,
+				float = {
+					header = false,
+					format = function(diag)
+						return fmt(diag)
+					end,
+					-- source = "if_many",
+					border = "single",
+					scope = "cursor",
+					focusable = false,
+					close_events = {
+						"CursorMoved",
+						"CursorMovedI",
+						"BufHidden",
+						"InsertCharPre",
+						"WinLeave",
+					},
+				},
+				severity_sort = true,
+				-- signs = {
+				-- 	severity = {
+				-- 		min = vim.diagnostic.severity.INFO,
+				-- 	},
+				-- },
 			})
 
 			-- Use LspAttach autocommand to only map the following keys
@@ -120,9 +213,19 @@ return {
 						return require("fzf-lua").lsp_type_definitions()
 					end, { buffer = ev.buf, desc = "Goto T[y]pe Definition" })
 
-					vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = ev.buf, desc = "Hover" })
+					vim.keymap.set("n", "K", function()
+						local winid = require("ufo").peekFoldedLinesUnderCursor()
+						if not winid then
+							vim.lsp.buf.hover()
+						end
+					end, { buffer = ev.buf, desc = "Hover Symbol or Peek fold" })
 					vim.keymap.set("n", "gk", vim.lsp.buf.signature_help, { buffer = ev.buf, desc = "Signature Help" })
-					vim.keymap.set("n", "gi", "<cmd>ClangdSymbolInfo<CR>", { buffer = ev.buf, desc = "Symbol Info under Cursor" })
+					vim.keymap.set(
+						"n",
+						"gi",
+						"<cmd>ClangdSymbolInfo<CR>",
+						{ buffer = ev.buf, desc = "Symbol Info under Cursor" }
+					)
 					vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename Signature" })
 					vim.keymap.set(
 						{ "n", "v" },
@@ -139,47 +242,134 @@ return {
 	{
 		"p00f/clangd_extensions.nvim",
 		dependencies = "hrsh7th/nvim-cmp",
-		-- config = function()
-		-- 	require("clangd_extensions").setup({
-		-- 		server = {
-		-- 			capabilities = require('cmp_nvim_lsp').default_capabilities(),
-		-- 		}
-		-- 	})
-		-- end,
-		opts = {
-			server = {
-				capabilities = require('cmp_nvim_lsp').default_capabilities(),
-			},
-			extensions = {
-				autoSetHints = false,
-				memory_info = {
-					border = "single",
+		config = function()
+			local capabilities = GetCapabilities()
+
+			require("clangd_extensions").setup({
+				server = {
+					capabilities = capabilities,
+					cmd = {
+						"clangd",
+						"--background-index",
+						"-j=8",
+						-- "--query-driver=/usr/bin/**/clang-*,/bin/clang,/bin/clang++,/usr/bin/gcc,/usr/bin/g++",
+						"--clang-tidy",
+						"--completion-style=bundled",
+						"--all-scopes-completion",
+						"--completion-style=detailed",
+						"--header-insertion-decorators",
+						"--header-insertion=iwyu",
+						"--pch-storage=memory",
+					},
+					autostart = true,
 				},
-				symbol_info = {
-					border = "single",
+				extensions = {
+					autoSetHints = false,
+					memory_info = {
+						border = "single",
+					},
+					symbol_info = {
+						border = "single",
+					},
 				},
-			}
-		}
+			})
+		end,
 	},
 
 	-- null-ls.nvim
 	{
 		"jose-elias-alvarez/null-ls.nvim",
-		dependencies = "williamboman/mason.nvim",
+		dependencies = {
+			"neovim/nvim-lspconfig",
+			"nvim-lua/plenary.nvim",
+		},
 		event = {
 			"BufReadPre",
 			"BufNewFile",
 		},
-		opts = function()
-			local nls = require("null-ls")
-			return {
+		config = function()
+			local lsp_formatting = function(bufnr)
+				vim.lsp.buf.format({
+					filter = function(client)
+						return client.name == "null-ls"
+					end,
+					async = false,
+					bufnr = bufnr,
+				})
+			end
+
+			-- If you want to set up formatting on save, you can use this as a callback
+			local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
+			local null_ls = require("null-ls")
+			null_ls.setup({
 				sources = {
-					nls.builtins.formatting.stylua,
-					nls.builtins.formatting.markdownlint,
-					-- nls.builtins.diagnostics.markdownlint,
-					-- nls.builtins.diagnostics.luacheck,
+					null_ls.builtins.formatting.clang_format,
+					null_ls.builtins.formatting.stylua,
+					-- null_ls.builtins.diagnostics.clang_check,
 				},
-			}
+				on_attach = function(client, bufnr) -- Format on save
+					if client.supports_method("textDocument/formatting") then
+						vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+						vim.api.nvim_create_autocmd("BufWritePre", {
+							group = augroup,
+							buffer = bufnr,
+							callback = function()
+								lsp_formatting(bufnr)
+							end,
+						})
+					end
+				end,
+			})
 		end,
 	},
+
+	-- lsp_lines.nvim
+	{
+		"https://git.sr.ht/~whynothugo/lsp_lines.nvim",
+		event = "LspAttach",
+		config = function()
+			require("lsp_lines").setup()
+			-- Start off disabled
+			require("lsp_lines").toggle()
+		end,
+	},
+
+	-- symbols-outline.nvim
+	-- {
+	-- 	"simrat39/symbols-outline.nvim",
+	-- 	keys = {
+	-- 		{ "<leader>o", "<cmd>SymbolsOutline<CR>", desc = "Open symbols-outline" },
+	-- 	},
+	-- 	opts = {
+	-- 		symbols = {
+	-- 			File = { icon = " " },
+	-- 			Module = { icon = " " },
+	-- 			Namespace = { icon = " " },
+	-- 			Package = { icon = " " },
+	-- 			Class = { icon = " " },
+	-- 			Method = { icon = " " },
+	-- 			Property = { icon = " " },
+	-- 			Field = { icon = " " },
+	-- 			Constructor = { icon = " " },
+	-- 			Enum = { icon = " " },
+	-- 			Interface = { icon = " " },
+	-- 			Function = { icon = " " },
+	-- 			Variable = { icon = " " },
+	-- 			Constant = { icon = " " },
+	-- 			String = { icon = " " },
+	-- 			Number = { icon = " " },
+	-- 			Boolean = { icon = " " },
+	-- 			Array = { icon = " " },
+	-- 			Object = { icon = " " },
+	-- 			Key = { icon = " " },
+	-- 			Null = { icon = " " },
+	-- 			EnumMember = { icon = " " },
+	-- 			Struct = { icon = " " },
+	-- 			Event = { icon = " " },
+	-- 			Operator = { icon = " " },
+	-- 			TypeParameter = { icon = " " },
+	-- 		},
+	-- 	},
+	-- },
 }

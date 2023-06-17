@@ -11,7 +11,7 @@ end
 
 function M.SaveAll()
 	local original_cursor = vim.fn.winsaveview()
-	vim.lsp.buf.format()
+	-- vim.lsp.buf.format()
 	vim.cmd([[:wa]])
 	vim.fn.winrestview(original_cursor)
 end
@@ -61,6 +61,29 @@ function M.FormatPaste(reg, command)
 		-- Visual-Block mode
 		return nil
 	end
+end
+
+-- Function to check if a floating dialog exists and if not
+-- then check for diagnostics under the cursor
+function M.OpenDiagnosticIfNoFloat()
+	-- for _, winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+	-- 	if vim.api.nvim_win_get_config(winid).zindex then
+	-- 		return
+	-- 	end
+	-- end
+
+	-- THIS IS FOR BUILTIN LSP
+	vim.diagnostic.open_float({
+		scope = "cursor",
+		focusable = false,
+		close_events = {
+			"CursorMoved",
+			"CursorMovedI",
+			"BufHidden",
+			"InsertCharPre",
+			"WinLeave",
+		},
+	}, 0)
 end
 
 return M

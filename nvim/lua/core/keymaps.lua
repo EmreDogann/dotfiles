@@ -12,6 +12,14 @@ keymap("n", "<C-s>", function()
 	functions.SaveAll()
 end, opts)
 
+---- Auto indent on empty line.
+keymap("n", "i", function()
+	return string.match(vim.api.nvim_get_current_line(), "%g") == nil and '"_S' or "i"
+end, { expr = true, noremap = true })
+keymap("n", "a", function()
+	return string.match(vim.api.nvim_get_current_line(), "%g") == nil and '"_S' or "a"
+end, { expr = true, noremap = true })
+
 -- Better window navigation
 keymap("n", "<C-h>", "<C-w>h", opts)
 keymap("n", "<C-j>", "<C-w>j", opts)
@@ -94,11 +102,62 @@ keymap("o", "al", ":<C-u>exe 'normal v' . v:count1 . 'al'<CR>", opts)
 --     { noremap = true, silent = false }
 -- )
 
+-- Diagnostics
+keymap(
+	"n",
+	"<M-CR>",
+	":lua vim.diagnostic.open_float()<CR>",
+	{ noremap = true, silent = true, desc = "Open Diagnostics Floating Window" }
+)
+keymap(
+	"n",
+	"]d",
+	":lua vim.diagnostic.goto_next()<CR>",
+	{ noremap = true, silent = true, desc = "Go to next Diagnostic" }
+)
+keymap(
+	"n",
+	"[d",
+	":lua vim.diagnostic.goto_prev()<CR>",
+	{ noremap = true, silent = true, desc = "Go to prev Diagnostic" }
+)
+
 ------ Plugin Mappings ------
 -- nvim-notify
 keymap("n", "<leader>nc", function()
 	require("notify").dismiss({ silent = true })
 end, opts)
+
+-- LuaSnips
+-- Snippet expansion key.
+-- Press Ctrl-k to either expand the current item, or jump to the next item.
+keymap({ "i", "s" }, "<C-k>", function()
+	if require("luasnip").expand_or_jumpable() then
+		require("luasnip").expand_or_jump()
+	end
+end, opts)
+-- Press Ctrl-j to jump backwards in the snippet.
+keymap({ "i", "s" }, "<C-j>", function()
+	if require("luasnip").jumpable(-1) then
+		require("luasnip").jump(-1)
+	end
+end, opts)
+-- Press Ctrl-h Ctrl-l to select within a list of options. Useful for choice nodes.
+keymap("i", "<C-l>", function()
+	if require("luasnip").choice_active() then
+		require("luasnip").change_choice(1)
+	end
+end)
+keymap("i", "<C-h>", function()
+	if require("luasnip").choice_active() then
+		require("luasnip").change_choice(-1)
+	end
+end)
+
+-- Lsp_Lines
+keymap("", "<Leader><leader>l", function()
+	require("lsp_lines").toggle()
+end, { desc = "Toggle lsp_lines" })
 
 -- Harpoon
 keymap("n", "<leader>ha", function()

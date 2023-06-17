@@ -82,6 +82,10 @@ return {
 					["--info"] = "inline",
 				},
 			},
+			lsp = {
+				-- make lsp requests synchronous so they work with null-ls
+				async_or_timeout = 3000,
+			},
 			file_icon_padding = ' ',
 		})
 	end

@@ -1,6 +1,6 @@
 # ----- Options Configuration -----
 setopt hist_ignore_all_dups hist_reduce_blanks share_history append_history inc_append_history
-setopt correct correct_all
+# setopt correct correct_all
 setopt menu_complete nomatch
 setopt interactive_comments
 

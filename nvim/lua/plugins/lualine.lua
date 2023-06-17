@@ -1,21 +1,35 @@
 return {
-	'nvim-lualine/lualine.nvim',
+	"nvim-lualine/lualine.nvim",
 	lazy = false,
-	dependencies = { 'nvim-tree/nvim-web-devicons' },
+	dependencies = { "nvim-tree/nvim-web-devicons" },
 	config = function()
-		require('lualine').setup({
+		require("lualine").setup({
 			options = {
 				theme = "catppuccin",
-				component_separators = '|',
-				section_separators = { left = '', right = '' },
+				component_separators = "|",
+				section_separators = { left = "", right = "" },
 			},
 			sections = {
 				lualine_a = {
-					{ 'mode', separator = { left = '' }, right_padding = 2 },
+					{ "mode", separator = { left = "" }, right_padding = 2 },
 				},
-				lualine_b = { 'branch', 'filename' },
-				lualine_c = {},
+				lualine_b = {
+					"branch",
+					"diff",
+					{
+						"diagnostics",
+						sources = {
+							-- "nvim_lsp",
+							"nvim_diagnostic",
+						},
+					},
+				},
+				lualine_c = { "filename" },
 				lualine_x = {
+					-- {
+					-- 	"%S",
+					-- 	color = { fg = require("catppuccin.palettes").get_palette(vim.env.THEMEVARIANT).flamingo },
+					-- },
 					-- {
 					-- 	require("noice").api.status.message.get_hl,
 					-- 	cond = require("noice").api.status.message.has,
@@ -38,40 +52,40 @@ return {
 				},
 				lualine_y = {
 					{
-						'filetype',
+						"filetype",
 						colored = false,
 					},
-					'fileformat',
+					"fileformat",
 				},
 				lualine_z = {
-					{ 'location', separator = { right = '' }, left_padding = 2 },
+					{ "location", separator = { right = "" }, left_padding = 2 },
 					-- { require('functions').keymapLualine }
 				},
 			},
 			inactive_sections = {
-				lualine_a = { 'filename' },
+				lualine_a = { "filename" },
 				lualine_b = {},
 				lualine_c = {},
 				lualine_x = {},
 				lualine_y = {},
-				lualine_z = { 'location' },
+				lualine_z = { "location" },
 			},
 			tabline = {
 				lualine_a = {
 					{
-						'buffers',
-						icons_enabled = false,
+						"buffers",
+						icons_enabled = true,
 						mode = 2,
 						use_mode_colors = true,
-					}
+					},
 				},
 				lualine_b = {},
 				lualine_c = {},
 				lualine_x = {},
 				lualine_y = {},
-				lualine_z = {'tabs'}
+				lualine_z = { "tabs" },
 			},
-			extensions = { 'fugitive', 'fzf', 'lazy', 'man' },
+			extensions = { "fugitive", "fzf", "lazy", "man", "symbols-outline" },
 		})
-	end
+	end,
 }

@@ -72,6 +72,7 @@ return {
 	{ "nathom/filetype.nvim" },
 	{ "nvim-lua/plenary.nvim" },
 	{ "ThePrimeagen/harpoon" },
+	{ "ThePrimeagen/vim-be-good" },
 	-- {
 	-- 	'norcalli/nvim-colorizer.lua',
 	-- 	event = "VeryLazy",
@@ -106,6 +107,7 @@ return {
 		config = function()
 			require("treesj").setup({
 				use_default_keymaps = false,
+				max_join_length = 150,
 			})
 		end,
 	},
@@ -131,14 +133,14 @@ return {
 			})
 		end,
 	},
-	{
-		"goolord/alpha-nvim",
-		event = "VimEnter",
-		dependencies = { "nvim-tree/nvim-web-devicons" },
-		config = function()
-			require("alpha").setup(require("alpha.themes.startify").config)
-		end,
-	},
+	-- {
+	-- 	"goolord/alpha-nvim",
+	-- 	event = "VimEnter",
+	-- 	dependencies = { "nvim-tree/nvim-web-devicons" },
+	-- 	config = function()
+	-- 		require("alpha").setup(require("alpha.themes.startify").config)
+	-- 	end,
+	-- },
 	-- Causes <leader>g to move the cursor to the right by 1
 	-- {
 	-- 	"folke/which-key.nvim",

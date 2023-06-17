@@ -2,16 +2,18 @@ return {
 	{
 		"hrsh7th/nvim-cmp",
 		dependencies = {
-			"FelipeLema/cmp-async-path",	-- Complete filepaths
-			"hrsh7th/cmp-buffer",			-- Word completion in current buffer
-			"hrsh7th/cmp-calc",
-			"hrsh7th/cmp-cmdline",
-			"L3MON4D3/LuaSnip",				-- Snippets
-			"saadparwaiz1/cmp_luasnip",		-- Luasnip completion
-			"hrsh7th/cmp-nvim-lsp",			-- LSP completions
-			"hrsh7th/cmp-nvim-lua",			-- Lua completions
-			"onsails/lspkind.nvim",			-- VSCode-like pictograms in lsp completion menu
+			"FelipeLema/cmp-async-path", -- Complete filepaths
+			"hrsh7th/cmp-buffer", -- Word completion in current buffer
+			"hrsh7th/cmp-calc", -- Math completion
+			"saadparwaiz1/cmp_luasnip", -- Luasnip completion
+			"hrsh7th/cmp-nvim-lsp", -- LSP completions
+			"hrsh7th/cmp-nvim-lua", -- Lua completions
+			"onsails/lspkind.nvim", -- VSCode-like pictograms in lsp completion menu
 		},
+		event = "InsertEnter",
+		init = function()
+			vim.opt.completeopt = { "menu", "menuone", "noselect" }
+		end,
 		config = function()
 			local cmp = require("cmp")
 			cmp.setup({
@@ -35,22 +37,24 @@ return {
 					documentation = cmp.config.window.bordered(),
 				},
 				mapping = cmp.mapping.preset.insert({
+					["<C-p>"] = cmp.mapping.select_prev_item(),
+					["<C-n>"] = cmp.mapping.select_next_item(),
 					["<C-b>"] = cmp.mapping.scroll_docs(-4),
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
 					["<C-e>"] = cmp.mapping.abort(),
 					["<CR>"] = cmp.mapping.confirm({
-						behavior = cmp.ConfirmBehavior.Insert,
+						behavior = cmp.ConfirmBehavior.Replace,
 						select = true,
 					}),
 					["<C-Space>"] = cmp.mapping.complete(),
 				}),
 				sources = {
-					{ name = "nvim_lua" },
+					{ name = "luasnip" },
 					{ name = "nvim_lsp" },
-					-- { name = 'buffer' },
+					{ name = "nvim_lua" },
 					{ name = "async_path" },
-					-- { name = 'cmdline' },
 					{ name = "calc" },
+					{ name = "buffer", max_item_count = 6 },
 				},
 				formatting = {
 					format = require("lspkind").cmp_format({
@@ -59,48 +63,23 @@ return {
 						maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
 						ellipsis_char = "...", -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
 						menu = {
-							buffer = "[Buffer]",
+							buffer = "[Buf]",
 							nvim_lsp = "[LSP]",
 							luasnip = "[LuaSnip]",
 							nvim_lua = "[Lua]",
+							path = "[Path]",
 							latex_symbols = "[Latex]",
 						},
-
-						-- The function below will be called before any actual modifications from lspkind
-						-- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
-						-- before = function (entry, vim_item)
-						-- 	...
-						-- 	return vim_item
-						-- end
 					}),
 				},
 				experimental = {
+					native_menu = false,
 					ghost_text = true,
 				},
 			})
 
 			-- LspKind highlights
 			vim.api.nvim_set_hl(0, "CmpItemMenu", { link = "NonText" })
-
-			-- -- cmp-cmdline setup
-			-- cmp.setup.cmdline('/', {
-			-- 	mapping = cmp.mapping.preset.cmdline(),
-			-- 	sources = {
-			-- 		{ name = 'buffer' },
-			-- 	},
-			-- })
-			--
-			-- cmp.setup.cmdline(':', {
-			-- 	mapping = cmp.mapping.preset.cmdline(),
-			-- 	sources = cmp.config.sources({ { name = 'path' } }, {
-			-- 		{
-			-- 			name = 'cmdline',
-			-- 			option = {
-			-- 				ignore_cmds = { 'Man', '!' },
-			-- 			},
-			-- 		},
-			-- 	}),
-			-- })
 		end,
 	},
 }
