@@ -27,14 +27,17 @@ return {
 					{
 						"diagnostics",
 						sources = {
-							-- "nvim_lsp",
+							"nvim_lsp",
 							"nvim_diagnostic",
 						},
 					},
 				},
 				lualine_c = {
-					_G.Statusline_Getcwd,
-					{ "filename", path = 1 },
+					{
+						"filename",
+						path = 1,
+						newfile_status = true, -- Display new file status (new file means no write after created)
+					},
 					-- {
 					-- 	require("nvim-possession").status,
 					-- 	cond = function()
@@ -76,7 +79,15 @@ return {
 						"filetype",
 						colored = false,
 					},
-					-- "fileformat",
+					{
+						"fileformat",
+						padding = { left = 1, right = 2 },
+						symbols = {
+							unix = "", -- e712
+							dos = "", -- e70f
+							mac = "", -- e711
+						},
+					},
 				},
 				lualine_z = {
 					{ "location", separator = { right = "" }, left_padding = 2 },
@@ -84,7 +95,12 @@ return {
 				},
 			},
 			inactive_sections = {
-				lualine_a = { "filename" },
+				lualine_a = {
+					{
+						"filename",
+						padding = { left = 0, right = 5 },
+					},
+				},
 				lualine_b = {},
 				lualine_c = {},
 				lualine_x = {},
@@ -103,6 +119,11 @@ return {
 				lualine_b = {},
 				lualine_c = {},
 				lualine_x = {
+					{
+						_G.Statusline_Getcwd,
+						icons_enabled = true,
+						icon = "",
+					},
 					{
 						require("nvim-possession").status,
 						cond = function()
