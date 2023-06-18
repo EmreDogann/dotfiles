@@ -78,12 +78,7 @@ opt.sessionoptions:remove("options")
 -- opt.list = true
 -- opt.listchars = { tab = "\\u258f ", trail = '·', extends = '»', precedes = '«', nbsp = '×' }
 
--- Reduce command line messages since we can't see them properly anyway with
--- cmdheight = 0
-opt.shortmess:append("C")
-opt.shortmess:append("S") -- We have our own search counter
 opt.shortmess:append("c")
-opt.shortmess:append("s")
 
 o.backup = true -- Enable backups
 o.undofile = true -- Enable undo file

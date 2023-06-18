@@ -19,11 +19,10 @@ return {
 			},
 			sections = {
 				lualine_a = {
-					{ "mode", separator = { left = "" }, right_padding = 2 },
+					{ "mode", separator = { left = "" } },
 				},
 				lualine_b = {
 					"branch",
-					-- "diff",
 					{
 						"diagnostics",
 						sources = {
@@ -38,12 +37,6 @@ return {
 						path = 1,
 						newfile_status = true, -- Display new file status (new file means no write after created)
 					},
-					-- {
-					-- 	require("nvim-possession").status,
-					-- 	cond = function()
-					-- 		return require("nvim-possession").status() ~= nil
-					-- 	end,
-					-- },
 				},
 				lualine_x = {
 					{
@@ -54,25 +47,11 @@ return {
 					-- 	"%S",
 					-- 	color = { fg = require("catppuccin.palettes").get_palette(vim.env.THEMEVARIANT).flamingo },
 					-- },
-					-- {
-					-- 	require("noice").api.status.message.get_hl,
-					-- 	cond = require("noice").api.status.message.has,
-					-- },
 					{
 						require("noice").api.status.command.get,
 						cond = require("noice").api.status.command.has,
 						color = { fg = require("catppuccin.palettes").get_palette(vim.env.THEMEVARIANT).flamingo },
 					},
-					-- {
-					-- 	require("noice").api.status.mode.get,
-					-- 	cond = require("noice").api.status.mode.has,
-					-- 	color = { fg = "#ff9e64" },
-					-- },
-					-- {
-					-- 	require("noice").api.status.search.get,
-					-- 	cond = require("noice").api.status.search.has,
-					-- 	color = { fg = "#ff9e64" },
-					-- },
 				},
 				lualine_y = {
 					{
@@ -91,7 +70,6 @@ return {
 				},
 				lualine_z = {
 					{ "location", separator = { right = "" }, left_padding = 2 },
-					-- { require('functions').keymapLualine }
 				},
 			},
 			inactive_sections = {

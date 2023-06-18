@@ -16,8 +16,14 @@ end, opts)
 keymap("n", "i", function()
 	return string.match(vim.api.nvim_get_current_line(), "%g") == nil and '"_S' or "i"
 end, { expr = true, noremap = true })
+keymap("n", "I", function()
+	return string.match(vim.api.nvim_get_current_line(), "%g") == nil and '"_S' or "I"
+end, { expr = true, noremap = true })
 keymap("n", "a", function()
 	return string.match(vim.api.nvim_get_current_line(), "%g") == nil and '"_S' or "a"
+end, { expr = true, noremap = true })
+keymap("n", "A", function()
+	return string.match(vim.api.nvim_get_current_line(), "%g") == nil and '"_S' or "A"
 end, { expr = true, noremap = true })
 
 -- Keep cursor position when joining lines

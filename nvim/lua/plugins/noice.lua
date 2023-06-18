@@ -44,7 +44,7 @@ return {
 				},
 				presets = {
 					bottom_search = true, -- use a classic bottom cmdline for search
-					command_palette = true, -- position the cmdline and popupmenu together
+					command_palette = false, -- position the cmdline and popupmenu together
 					long_message_to_split = false, -- long messages will be sent to a split
 					cmdline_output_to_split = false, -- Show commandline in split window.
 					inc_rename = true, -- enables an input dialog for inc-rename.nvim
@@ -117,21 +117,6 @@ return {
 						win_options = {
 							wrap = false,
 						},
-					},
-				},
-				format = {
-					default = { "{level} ", "{title} ", "{message}" },
-					notify = { "{message}" },
-					-- Default format for the history
-					details = {
-						"{level} ",
-						"{date} ",
-						"{event}",
-						{ "{kind}", before = { ".", hl_group = "NoiceFormatKind" } },
-						" ",
-						"{title} ",
-						"{cmdline}\n",
-						"{message}",
 					},
 				},
 				routes = {

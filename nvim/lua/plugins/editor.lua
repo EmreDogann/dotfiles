@@ -37,7 +37,7 @@ local function nN(char)
 		vim.keymap.set("n", "<CR>", function()
 			local keyCodes = vim.api.nvim_replace_termcodes("<Tab><CR>", true, false, true)
 			vim.api.nvim_feedkeys(keyCodes, "im", false)
-		end, { buffer = true })
+		end, { buffer = true, silent = true })
 	end
 end
 
@@ -154,14 +154,16 @@ return {
 				nearest_float_when = "auto",
 			})
 
+			local opts = { noremap = true, silent = true }
+
 			vim.keymap.set({ "n", "x" }, "n", function()
 				nN("n")
 				vim.cmd([[normal! zz]])
-			end)
+			end, opts)
 			vim.keymap.set({ "n", "x" }, "N", function()
 				nN("N")
 				vim.cmd([[normal! zz]])
-			end)
+			end, opts)
 		end,
 	},
 
