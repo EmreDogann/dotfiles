@@ -3,7 +3,20 @@ local functions = require("functions")
 return {
 	-- {'dstein64/vim-startuptime'},
 	-- {'chrisbra/unicode.vim'},
-	{ "junegunn/vim-peekaboo" },
+	-- {
+	-- 	"romainl/vim-cool",
+	-- 	keys = {
+	-- 		{ "/", mode = { "n", "x" } },
+	-- 		{ "?", mode = { "n", "x" } },
+	-- 	},
+	-- },
+	{
+		"junegunn/vim-peekaboo",
+		keys = {
+			{ '"', mode = { "n", "x" } },
+			{ "@", mode = { "n", "x" } },
+		},
+	},
 	{
 		"tpope/vim-fugitive",
 		cmd = {
@@ -71,7 +84,29 @@ return {
 
 	{ "nathom/filetype.nvim" },
 	{ "nvim-lua/plenary.nvim" },
-	{ "ThePrimeagen/harpoon" },
+	{
+		"ThePrimeagen/harpoon",
+		init = function()
+			vim.keymap.set("n", "<leader>ha", function()
+				require("harpoon.mark").add_file()
+			end, { silent = true })
+			vim.keymap.set("n", "<leader>hh", function()
+				require("harpoon.ui").toggle_quick_menu()
+			end, { silent = true })
+			-- vim.keymap.set("n", "<M-h>", function()
+			-- 	require("harpoon.ui").nav_file(1)
+			-- end, { silent = true })
+			-- vim.keymap.set("n", "<M-j>", function()
+			-- 	require("harpoon.ui").nav_file(2)
+			-- end, { silent = true })
+			-- vim.keymap.set("n", "<M-k>", function()
+			-- 	require("harpoon.ui").nav_file(3)
+			-- end, { silent = true })
+			-- vim.keymap.set("n", "<M-l>", function()
+			-- 	require("harpoon.ui").nav_file(4)
+			-- end, { silent = true })
+		end,
+	},
 	{ "ThePrimeagen/vim-be-good" },
 	-- {
 	-- 	'norcalli/nvim-colorizer.lua',
@@ -81,6 +116,29 @@ return {
 	-- 		require('colorizer').setup()
 	-- 	end
 	-- },
+	{
+		"nvim-tree/nvim-web-devicons",
+		module = true,
+		config = function()
+			require("nvim-web-devicons").setup({
+				color_icons = true,
+			})
+		end,
+	},
+	{
+		"gbprod/cutlass.nvim",
+		keys = {
+			{ "c", mode = { "n", "x" } },
+			{ "C", mode = { "n", "x" } },
+			{ "s", mode = { "n", "x" } },
+			{ "S", mode = { "n", "x" } },
+			{ "d", mode = { "n", "x" } },
+			{ "D", mode = { "n", "x" } },
+			{ "x", mode = { "n", "x" } },
+			{ "X", mode = { "n", "x" } },
+		},
+		config = true,
+	},
 	{
 		"numToStr/Comment.nvim",
 		event = "VeryLazy",

@@ -27,6 +27,20 @@ local function foldTextFormatter(virtText, lnum, endLnum, width, truncate)
 	return newVirtText
 end
 
+-- nvim-hlslens & nvim-ufo integration
+local function nN(char)
+	local ok, winid = require("hlslens").nNPeekWithUFO(char)
+	if ok and winid then
+		-- Safe to override buffer scope keymaps remapped by ufo,
+		-- ufo will restore previous buffer keymaps before closing preview window
+		-- Type <CR> will switch to preview window and fire `trace` action
+		vim.keymap.set("n", "<CR>", function()
+			local keyCodes = vim.api.nvim_replace_termcodes("<Tab><CR>", true, false, true)
+			vim.api.nvim_feedkeys(keyCodes, "im", false)
+		end, { buffer = true })
+	end
+end
+
 return {
 	{
 		"luukvbaal/statuscol.nvim",
@@ -52,18 +66,6 @@ return {
 						-- click = "v:lua.ScSa",
 					},
 				},
-				-- segments = {
-				--   { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
-				--   {
-				--     sign = { name = { "Diagnostic" }, maxwidth = 2, auto = true },
-				--     click = "v:lua.ScSa"
-				--   },
-				--   { text = { builtin.lnumfunc }, click = "v:lua.ScLa", },
-				--   {
-				--     sign = { name = { ".*" }, maxwidth = 2, colwidth = 1, auto = true, wrap = true },
-				--     click = "v:lua.ScSa"
-				--   },
-				-- }
 			})
 		end,
 	},
@@ -72,7 +74,10 @@ return {
 	{
 		"kevinhwang91/nvim-ufo",
 		dependencies = "kevinhwang91/promise-async",
-		event = "BufReadPost",
+		event = {
+			"BufReadPost",
+			"BufNewFile",
+		},
 		keys = {
 			{
 				"zR",
@@ -103,5 +108,81 @@ return {
 				fold_virt_text_handler = foldTextFormatter,
 			})
 		end,
+	},
+
+	-- nvim-hlslens
+	{
+		"kevinhwang91/nvim-hlslens",
+		keys = {
+			{
+				"n",
+				[[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]],
+				noremap = true,
+				silent = true,
+				mode = { "n", "x" },
+			},
+			{
+				"N",
+				[[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]],
+				noremap = true,
+				silent = true,
+				mode = { "n", "x" },
+			},
+			{ "/", [[/<Cmd>lua require('hlslens').start()<CR>]], noremap = true, silent = true, mode = { "n", "x" } },
+			{ "?", [[?<Cmd>lua require('hlslens').start()<CR>]], noremap = true, silent = true, mode = { "n", "x" } },
+			{ "*", [[*<Cmd>lua require('hlslens').start()<CR>]], noremap = true, silent = true, mode = { "n", "x" } },
+			{ "#", [[#<Cmd>lua require('hlslens').start()<CR>]], noremap = true, silent = true, mode = { "n", "x" } },
+			{
+				"g*",
+				[[g*<Cmd>lua require('hlslens').start()<CR>]],
+				noremap = true,
+				silent = true,
+				mode = { "n", "x" },
+			},
+			{
+				"g#",
+				[[g#<Cmd>lua require('hlslens').start()<CR>]],
+				noremap = true,
+				silent = true,
+				mode = { "n", "x" },
+			},
+		},
+		config = function()
+			require("hlslens").setup({
+				calm_down = true,
+				nearest_only = true,
+				nearest_float_when = "auto",
+			})
+
+			vim.keymap.set({ "n", "x" }, "n", function()
+				nN("n")
+				vim.cmd([[normal! zz]])
+			end)
+			vim.keymap.set({ "n", "x" }, "N", function()
+				nN("N")
+				vim.cmd([[normal! zz]])
+			end)
+		end,
+	},
+
+	-- bufdelete.nvim
+	{
+		"famiu/bufdelete.nvim",
+		keys = {
+			{
+				"<S-q>",
+				function()
+					return require("bufdelete").bufdelete(0, false)
+				end,
+				desc = "Delete the current buffer",
+			},
+			-- {
+			-- 	"<leader>bK",
+			-- 	function()
+			-- 		return require("bufdelete").bufdelete(0, true)
+			-- 	end,
+			-- 	desc = "Delete the current buffer forcefully",
+			-- },
+		},
 	},
 }

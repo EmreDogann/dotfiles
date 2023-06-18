@@ -87,4 +87,40 @@ function M.OpenDiagnosticIfNoFloat()
 	}, 0)
 end
 
+-- Show working directory in statusline
+function _G.Statusline_Getcwd()
+	if vim.bo.filetype ~= "help" and vim.bo.filetype ~= "man" and vim.bo.buftype ~= "terminal" then
+		local path = vim.fn.fnamemodify(vim.fn.getcwd(0), ":~")
+
+		return vim.fn.pathshorten(path, math.floor(vim.fn.winwidth(0) * 0.03))
+	else
+		return ""
+	end
+end
+
+-- Show search count in statusline
+function _G.Statusline_Search()
+	if vim.v.hlsearch == 1 then
+		-- searchcount can fail e.g. if unbalanced braces in search pattern
+		local ok, searchcount = pcall(vim.fn.searchcount)
+
+		if ok and searchcount["total"] > 0 then
+			return "‹" .. "⚲ " .. searchcount["current"] .. "∕" .. searchcount["total"] .. "›"
+		end
+	end
+
+	return ""
+end
+
+-- Show macro recoring message in statusline
+function _G.Statusline_MacroRecording()
+	local recording_register = vim.fn.reg_recording()
+
+	if recording_register == "" then
+		return ""
+	else
+		return "‹" .. "rec @" .. recording_register .. "›"
+	end
+end
+
 return M

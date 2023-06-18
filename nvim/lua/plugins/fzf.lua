@@ -1,6 +1,5 @@
 return {
 	"ibhagwan/fzf-lua",
-	-- commit = "2b22ee5fb022a0444707a798a4ab032a34706431",
 	event = "VeryLazy",
 	module = true,
 	dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -92,5 +91,34 @@ return {
 			},
 			file_icon_padding = " ",
 		})
+
+		vim.keymap.set("n", "<c-P>", function()
+			require("fzf-lua").files()
+		end, { silent = true })
+		vim.keymap.set("n", "<leader>l", function()
+			require("fzf-lua").blines()
+		end, { silent = true })
+		vim.keymap.set("n", "<leader>b", function()
+			if vim.v.count ~= 0 then
+				vim.cmd("LualineBuffersJump " .. vim.v.count)
+			else
+				require("fzf-lua").buffers()
+			end
+		end, { silent = true })
+		vim.keymap.set("n", "<leader>?", function()
+			require("fzf-lua").help_tags()
+		end, { silent = true })
+		vim.keymap.set("n", "<leader>/", function()
+			require("fzf-lua").grep_curbuf()
+		end, { silent = true })
+		vim.keymap.set("n", "<leader><C-_>", function() -- <C-_> is CTRL-/
+			require("fzf-lua").grep_project()
+		end, { silent = true })
+		vim.keymap.set("n", "<leader>t", function()
+			require("fzf-lua").tags()
+		end, { silent = true })
+		vim.keymap.set("n", "<leader>m", function()
+			require("fzf-lua").marks()
+		end, { silent = true })
 	end,
 }

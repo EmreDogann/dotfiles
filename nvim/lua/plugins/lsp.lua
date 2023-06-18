@@ -226,7 +226,8 @@ return {
 						"<cmd>ClangdSymbolInfo<CR>",
 						{ buffer = ev.buf, desc = "Symbol Info under Cursor" }
 					)
-					vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename Signature" })
+
+					-- vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename Signature" })
 					vim.keymap.set(
 						{ "n", "v" },
 						"<space>ca",
@@ -332,6 +333,28 @@ return {
 			require("lsp_lines").setup()
 			-- Start off disabled
 			require("lsp_lines").toggle()
+
+			vim.keymap.set("", "<Leader><leader>l", function()
+				require("lsp_lines").toggle()
+			end, { silent = true, desc = "Toggle lsp_lines" })
+		end,
+	},
+
+	-- Incremental Rename (like :set incsearch but for LSP renaming)
+	{
+		"smjonas/inc-rename.nvim",
+		keys = {
+			{
+				"<leader>rn",
+				function()
+					return ":IncRename " .. vim.fn.expand("<cword>")
+				end,
+				expr = true,
+				desc = "Rename Signature",
+			},
+		},
+		config = function()
+			require("inc_rename").setup()
 		end,
 	},
 

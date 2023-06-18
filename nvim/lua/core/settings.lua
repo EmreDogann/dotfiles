@@ -78,11 +78,17 @@ opt.sessionoptions:remove("options")
 -- opt.list = true
 -- opt.listchars = { tab = "\\u258f ", trail = '·', extends = '»', precedes = '«', nbsp = '×' }
 
+-- Reduce command line messages since we can't see them properly anyway with
+-- cmdheight = 0
+opt.shortmess:append("C")
+opt.shortmess:append("S") -- We have our own search counter
+opt.shortmess:append("c")
+opt.shortmess:append("s")
+
 o.backup = true -- Enable backups
 o.undofile = true -- Enable undo file
 o.cmdheight = 0 -- Give more space for displaying messages
 o.updatetime = 300 -- Faster completion (4000ms default)
-opt.shortmess:append("c") -- Don't pass messages to |ins-completion-menu|
 o.signcolumn = "yes" -- Always show sign column
 vim.cmd("filetype plugin indent on") -- filetype detection[ON] plugin[ON] indent[ON]
 opt.complete:append("kspell") -- Keyword completion. kSpell - dictionary
@@ -99,6 +105,7 @@ o.tabstop = 4 -- Number of spaces a <Tab> counts for
 o.softtabstop = 4 -- Number of spaces a <Tab> counts for while editing.
 o.autoindent = true -- Keep indentation from previous line
 o.smartindent = true -- Auto inserts indentation in some cases
+o.breakindent = true
 o.smarttab = true
 
 o.scrolloff = 6 -- Minimal number of screen lines to keep above and below the cursor
@@ -118,6 +125,7 @@ o.autowrite = true -- Auto save changes made to the buffer
 -- o.lazyredraw = true			-- Don't redraw screen immediately
 o.splitbelow = true -- Open split to right and bottom.
 o.splitright = true
+o.splitkeep = "screen"
 o.pumblend = 20 -- Popup Menu background transparency blending
 o.winblend = 20 -- FLoating window background transparency blending
 o.pumheight = 10 -- Make popup menu smaller
