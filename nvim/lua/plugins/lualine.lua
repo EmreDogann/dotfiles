@@ -111,7 +111,10 @@ return {
 				},
 				lualine_y = {},
 				lualine_z = {
-					"tabs",
+					{
+						"tabs",
+						use_mode_colors = true,
+					},
 				},
 			},
 			extensions = { "fugitive", "fzf", "lazy", "man", "symbols-outline" },
