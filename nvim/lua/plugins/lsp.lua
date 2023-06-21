@@ -230,8 +230,10 @@ return {
 					-- vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename Signature" })
 					vim.keymap.set(
 						{ "n", "v" },
-						"<space>ca",
-						vim.lsp.buf.code_action,
+						"<M-CR>",
+						-- require("fzf-lua").lsp_code_actions,
+						"<cmd>CodeActionMenu<CR>",
+						-- vim.lsp.buf.code_action,
 						{ buffer = ev.buf, desc = "Perform Code Action" }
 					)
 				end,
@@ -252,15 +254,16 @@ return {
 					cmd = {
 						"clangd",
 						"--background-index",
-						"-j=8",
-						-- "--query-driver=/usr/bin/**/clang-*,/bin/clang,/bin/clang++,/usr/bin/gcc,/usr/bin/g++",
 						"--clang-tidy",
-						"--completion-style=bundled",
-						"--all-scopes-completion",
 						"--completion-style=detailed",
 						"--header-insertion-decorators",
 						"--header-insertion=iwyu",
 						"--pch-storage=memory",
+					},
+					init_options = {
+						usePlaceholders = true,
+						completeUnimported = true,
+						clangdFileStatus = true,
 					},
 					autostart = true,
 				},
@@ -307,6 +310,7 @@ return {
 				sources = {
 					null_ls.builtins.formatting.clang_format,
 					null_ls.builtins.formatting.stylua,
+					null_ls.builtins.hover.dictionary.with({ filetypes = { "text", "markdown" } }),
 					-- null_ls.builtins.diagnostics.clang_check,
 				},
 				on_attach = function(client, bufnr) -- Format on save

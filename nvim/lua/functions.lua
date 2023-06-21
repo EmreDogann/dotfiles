@@ -87,6 +87,36 @@ function M.OpenDiagnosticIfNoFloat()
 	}, 0)
 end
 
+-- From: https://github.com/neovim/neovim/issues/21985#issuecomment-1402056008
+-- Currently unused
+function M.get_diagnostic_at_cursor()
+	local cur_buf = vim.api.nvim_get_current_buf()
+	local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+	local entrys = vim.diagnostic.get(cur_buf, { lnum = line - 1 })
+	local res = {}
+	for _, v in pairs(entrys) do
+		if v.col <= col and v.end_col >= col then
+			table.insert(res, {
+				code = v.code,
+				message = v.message,
+				range = {
+					["start"] = {
+						character = v.col,
+						line = v.lnum,
+					},
+					["end"] = {
+						character = v.end_col,
+						line = v.end_lnum,
+					},
+				},
+				severity = v.severity,
+				source = v.source or nil,
+			})
+		end
+	end
+	return res
+end
+
 -- Show working directory in statusline
 function _G.Statusline_Getcwd()
 	if vim.bo.filetype ~= "help" and vim.bo.filetype ~= "man" and vim.bo.buftype ~= "terminal" then

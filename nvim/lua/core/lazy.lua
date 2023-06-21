@@ -16,8 +16,15 @@ require("lazy").setup("plugins", {
 	defaults = {
 		version = false, -- Always use the latest git commit
 	},
+	dev = {
+		-- directory where you store your local plugin projects
+		path = "~/nvim-plugin-projects",
+		---@type string[] plugins that match these patterns will use your local versions instead of being fetched from GitHub
+		patterns = {}, -- For example {"folke"}
+		fallback = false, -- Fallback to git when local plugin doesn't exist
+	},
 	ui = {
-		border = "single",
+		border = "rounded",
 		icons = {
 			cmd = " ",
 			config = " ",

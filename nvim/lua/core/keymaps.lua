@@ -117,7 +117,7 @@ keymap("o", "al", ":<C-u>exe 'normal v' . v:count1 . 'al'<CR>", opts)
 -- Diagnostics
 keymap(
 	"n",
-	"<M-CR>",
+	"<leader>ca",
 	":lua vim.diagnostic.open_float()<CR>",
 	{ noremap = true, silent = true, desc = "Open Diagnostics Floating Window" }
 )
