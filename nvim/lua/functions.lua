@@ -122,7 +122,7 @@ function _G.Statusline_Getcwd()
 	if vim.bo.filetype ~= "help" and vim.bo.filetype ~= "man" and vim.bo.buftype ~= "terminal" then
 		local path = vim.fn.fnamemodify(vim.fn.getcwd(0), ":~")
 
-		return vim.fn.pathshorten(path, math.floor(vim.fn.winwidth(0) * 0.03))
+		return vim.fn.pathshorten(path, math.floor(vim.fn.winwidth(0) * 0.1))
 	else
 		return ""
 	end

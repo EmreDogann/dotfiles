@@ -15,6 +15,7 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins", {
 	defaults = {
 		version = false, -- Always use the latest git commit
+		lazy = true,
 	},
 	dev = {
 		-- directory where you store your local plugin projects
@@ -56,14 +57,26 @@ require("lazy").setup("plugins", {
 		rtp = {
 			-- Disable some rtp plugins
 			disabled_plugins = {
-				"gzip",
 				"matchit",
 				"matchparen",
-				-- "netrwPlugin",
-				"tarPlugin",
+				"netrw",
+				"netrwPlugin",
+				"netrwSettings",
+				"netrwFileHandlers",
 				"tohtml",
 				"tutor",
+				"zip",
 				"zipPlugin",
+				"gzip",
+				"tar",
+				"tarPlugin",
+				"getscript",
+				"getscriptPlugin",
+				"vimball",
+				"vimballPlugin",
+				"2html_plugin",
+				"logipat",
+				"rrhelper",
 			},
 		},
 	},

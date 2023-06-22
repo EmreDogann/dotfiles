@@ -1,7 +1,7 @@
 return {
 	"ibhagwan/fzf-lua",
 	event = "VeryLazy",
-	module = true,
+	-- module = true,
 	dependencies = { "nvim-tree/nvim-web-devicons" },
 	config = function()
 		local actions = require("fzf-lua.actions")
@@ -92,10 +92,26 @@ return {
 			file_icon_padding = " ",
 		})
 
-		vim.keymap.set("n", "<c-P>", function()
+		vim.keymap.set("n", "<C-p><C-p>", function()
 			require("fzf-lua").files()
 		end, { silent = true })
-		vim.keymap.set("n", "<leader>l", function()
+		vim.keymap.set("n", "<C-p><C-o>", function()
+			require("fzf-lua").oldfiles()
+		end, { silent = true })
+		vim.keymap.set("n", "<C-p><C-q>", function()
+			require("fzf-lua").quickfix()
+		end, { silent = true })
+		vim.keymap.set("n", "<C-p><C-l>", function() -- <C-_> is CTRL-/
+			require("fzf-lua").grep_project()
+		end, { silent = true })
+		vim.keymap.set("n", "<C-p><C-t>", function()
+			require("fzf-lua").tags()
+		end, { silent = true })
+		vim.keymap.set("n", "<C-p><C-m>", function()
+			require("fzf-lua").marks()
+		end, { silent = true })
+
+		vim.keymap.set("n", "<leader>/", function()
 			require("fzf-lua").blines()
 		end, { silent = true })
 		vim.keymap.set("n", "<leader>b", function()
@@ -108,17 +124,12 @@ return {
 		vim.keymap.set("n", "<leader>?", function()
 			require("fzf-lua").help_tags()
 		end, { silent = true })
-		vim.keymap.set("n", "<leader>/", function()
-			require("fzf-lua").grep_curbuf()
-		end, { silent = true })
-		vim.keymap.set("n", "<leader><C-_>", function() -- <C-_> is CTRL-/
-			require("fzf-lua").grep_project()
-		end, { silent = true })
-		vim.keymap.set("n", "<leader>t", function()
-			require("fzf-lua").tags()
-		end, { silent = true })
-		vim.keymap.set("n", "<leader>m", function()
-			require("fzf-lua").marks()
-		end, { silent = true })
+
+		vim.keymap.set({ "n", "v", "i" }, "<C-x><C-f>", function()
+			require("fzf-lua").complete_path()
+		end, { silent = true, desc = "Fuzzy complete path" })
+		vim.keymap.set({ "n", "v", "i" }, "<C-x><C-l>", function()
+			require("fzf-lua").complete_line()
+		end, { silent = true, desc = "Fuzzy complete line" })
 	end,
 }

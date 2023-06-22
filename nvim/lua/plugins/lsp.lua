@@ -1,6 +1,6 @@
 local function GetCapabilities()
 	local lspCapabilities = vim.lsp.protocol.make_client_capabilities()
-	lspCapabilities.offsetEncoding = { "utf-16" }
+	lspCapabilities.offsetEncoding = { "utf-16" } -- Fixes some weird bugs
 
 	-- Add additional capabilities supported by nvim-cmp
 	local cmpCapabilities = require("cmp_nvim_lsp").default_capabilities()
@@ -36,10 +36,12 @@ return {
 	-- lspconfig
 	{
 		"neovim/nvim-lspconfig",
-		lazy = false,
-		priority = 999,
+		-- lazy = false,
+		-- priority = 999,
 		dependencies = {
 			"williamboman/mason.nvim",
+
+			-- Auto-install LSP servers
 			{
 				"williamboman/mason-lspconfig.nvim",
 				event = "VeryLazy",
@@ -53,6 +55,8 @@ return {
 					automatic_installation = false,
 				},
 			},
+
+			-- Auto-install linters/formatters
 			{
 				"jay-babu/mason-null-ls.nvim",
 				opts = {
@@ -64,6 +68,7 @@ return {
 					automatic_installation = false,
 				},
 			},
+
 			"folke/neodev.nvim", -- lsp for nvim-lua config
 			"p00f/clangd_extensions.nvim", -- Clangd LSP config
 			"hrsh7th/nvim-cmp",
@@ -75,7 +80,7 @@ return {
 		init = function()
 			-- INFO must be before the lsp-config setup of lua-ls
 			require("neodev").setup({
-				library = { plugins = false }, -- plugins are helpful e.g. for plenary, but slow down lsp loading
+				library = { plugins = { "nvim-dap-ui" }, types = true }, -- plugins are helpful e.g. for plenary, but slow down lsp loading
 			})
 
 			local lspconfig = require("lspconfig")
@@ -133,10 +138,10 @@ return {
 		end,
 		config = function()
 			-- Borders
-			require("lspconfig.ui.windows").default_options.border = "single"
-			vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
+			require("lspconfig.ui.windows").default_options.border = "rounded"
+			vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
 			vim.lsp.handlers["textDocument/signatureHelp"] =
-				vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
+				vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
 
 			-- Diagnostic symbols for display in the sign column.
 			-- local diagnosticIcons = { Error = "", Warn = "▲", Info = "", Hint = "" }
@@ -165,7 +170,7 @@ return {
 						return fmt(diag)
 					end,
 					-- source = "if_many",
-					border = "single",
+					border = "rounded",
 					scope = "cursor",
 					focusable = false,
 					close_events = {
@@ -227,7 +232,7 @@ return {
 						{ buffer = ev.buf, desc = "Symbol Info under Cursor" }
 					)
 
-					-- vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename Signature" })
+					-- vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename Signature" })
 					vim.keymap.set(
 						{ "n", "v" },
 						"<M-CR>",
@@ -338,7 +343,7 @@ return {
 			-- Start off disabled
 			require("lsp_lines").toggle()
 
-			vim.keymap.set("", "<Leader><leader>l", function()
+			vim.keymap.set("", "<F4>", function()
 				require("lsp_lines").toggle()
 			end, { silent = true, desc = "Toggle lsp_lines" })
 		end,
@@ -349,7 +354,7 @@ return {
 		"smjonas/inc-rename.nvim",
 		keys = {
 			{
-				"<leader>rn",
+				"<F2>",
 				function()
 					return ":IncRename " .. vim.fn.expand("<cword>")
 				end,

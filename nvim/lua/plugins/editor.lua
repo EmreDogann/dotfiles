@@ -113,6 +113,7 @@ return {
 	-- nvim-hlslens
 	{
 		"kevinhwang91/nvim-hlslens",
+		event = "BufReadPre",
 		keys = {
 			{
 				"n",
@@ -186,6 +187,20 @@ return {
 			-- 	desc = "Delete the current buffer forcefully",
 			-- },
 		},
+	},
+
+	{
+		"axkirillov/hbac.nvim",
+		config = function()
+			require("hbac").setup({
+				autoclose = true, -- set autoclose to false if you want to close manually
+				threshold = 7, -- hbac will start closing unedited buffers once that number is reached
+				close_command = function(bufnr)
+					vim.api.nvim_buf_delete(bufnr, {})
+				end,
+				close_buffers_with_windows = true, -- hbac will close buffers with associated windows if this option is `true`
+			})
+		end,
 	},
 
 	{

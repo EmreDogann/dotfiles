@@ -13,9 +13,13 @@ return {
 	{
 		"junegunn/vim-peekaboo",
 		keys = {
-			{ '"', mode = { "n", "x" } },
-			{ "@", mode = { "n", "x" } },
+			{ '<leader>"', mode = { "n", "x" } },
+			{ "<leader>@", mode = { "n", "x" } },
 		},
+		init = function()
+			vim.g.peekaboo_prefix = "<leader>"
+			vim.g.peekaboo_ins_prefix = "<C-x>"
+		end,
 	},
 	{
 		"tpope/vim-fugitive",
@@ -57,15 +61,15 @@ return {
 			vim.g.move_key_modifier_visualmode = "M"
 		end,
 	},
-	{
-		"tmsvg/pear-tree",
-		event = "VeryLazy",
-		init = function()
-			vim.g.pear_tree_smart_openers = 1
-			vim.g.pear_tree_smart_closers = 1
-			vim.g.pear_tree_smart_backspace = 1
-		end,
-	},
+	-- {
+	-- 	"tmsvg/pear-tree",
+	-- 	event = "VeryLazy",
+	-- 	init = function()
+	-- 		vim.g.pear_tree_smart_openers = 1
+	-- 		vim.g.pear_tree_smart_closers = 1
+	-- 		vim.g.pear_tree_smart_backspace = 1
+	-- 	end,
+	-- },
 	{
 		"unblevable/quick-scope",
 		keys = { "f", "F", "t", "T" },
@@ -107,7 +111,7 @@ return {
 			-- end, { silent = true })
 		end,
 	},
-	{ "ThePrimeagen/vim-be-good" },
+	{ "ThePrimeagen/vim-be-good", cmd = "VimBeGood" },
 	-- {
 	-- 	'norcalli/nvim-colorizer.lua',
 	-- 	event = "VeryLazy",
@@ -187,10 +191,38 @@ return {
 				blankline_char = "▏",
 
 				buftype_exclude = { "terminal", "nofile" },
-				filetype_exclude = { "help" },
+				filetype_exclude = {
+					"help",
+					"startify",
+					"dashboard",
+					"packer",
+					"neogitstatus",
+					"NvimTree",
+					"neo-tree",
+					"Trouble",
+				},
 			})
 		end,
 	},
+	-- {
+	-- 	"tversteeg/registers.nvim",
+	-- 	name = "registers",
+	-- 	keys = {
+	-- 		{ '"', mode = { "n", "v" } },
+	-- 		{ "<C-R>", mode = "i" },
+	-- 	},
+	-- 	cmd = "Registers",
+	-- 	config = function()
+	-- 		require("registers").setup({
+	-- 			show_empty = false,
+	-- 			register_user_command = false,
+	-- 			window = {
+	-- 				border = "rounded",
+	-- 				max_width = 120,
+	-- 			},
+	-- 		})
+	-- 	end,
+	-- },
 	-- {
 	-- 	"goolord/alpha-nvim",
 	-- 	event = "VimEnter",

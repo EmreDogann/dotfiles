@@ -1,3 +1,5 @@
+local keymap = vim.keymap.set
+
 return {
 	"Civitasv/cmake-tools.nvim",
 	cmd = {
@@ -27,7 +29,7 @@ return {
 			cmake_regenerate_on_save = true, -- auto generate when save CMakeLists.txt
 			cmake_generate_options = { "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" }, -- this will be passed when invoke `CMakeGenerate`
 			cmake_build_options = {}, -- this will be passed when invoke `CMakeBuild`
-			cmake_build_directory = "", -- this is used to specify generate directory for cmake
+			cmake_build_directory = "build", -- this is used to specify generate directory for cmake
 			cmake_build_directory_prefix = "cmake_build_", -- when cmake_build_directory is set to "", this option will be activated
 			cmake_soft_link_compile_commands = true, -- this will automatically make a soft link from compile commands file to project root dir
 			cmake_compile_commands_from_lsp = false, -- this will automatically set compile commands file location using lsp, to use it, please set `cmake_soft_link_compile_commands` to false
@@ -68,5 +70,20 @@ return {
 				focus_on_launch_terminal = false, -- Focus on cmake launch terminal when executable target in launched.
 			},
 		})
+
+		keymap("n", "<leader>cg", "<cmd>CMakeGenerate<CR>", { desc = "CMake: Generate" })
+		keymap("n", "<leader>cx", "<cmd>CMakeGenerate!<CR>", { desc = "CMake: Clean and generate" })
+		keymap("n", "<leader>cbb", "<cmd>CMakeBuild<CR>", { desc = "CMake: Build" })
+		keymap("n", "<leader>cll", "<cmd>CMakeRun<CR>", { desc = "CMake: Run" })
+		keymap("n", "<leader>cld", "<cmd>CMakeDebug<CR>", { desc = "CMake: Debug" })
+		keymap("n", "<leader>cby", "<cmd>CMakeSelectBuildType<CR>", { desc = "CMake: Select Build Type" })
+		keymap("n", "<leader>cbt", "<cmd>CMakeSelectBuildTarget<CR>", { desc = "CMake: Select Build Target" })
+		keymap("n", "<leader>clt", "<cmd>CMakeSelectLaunchTarget<CR>", { desc = "CMake: Select Launch Target" })
+		keymap("n", "<leader>co", "<cmd>CMakeOpen<CR>", { desc = "CMake: Open CMake Console" })
+		keymap("n", "<leader>cc", "<cmd>CMakeClose<CR>", { desc = "CMake: Close CMake Console" })
+		-- keymap("n", "<leader>ci", "<cmd>CMakeInstall<CR>", { desc = "CMake: Intall CMake target" })
+		-- keymap("n", "<leader>cn", "<cmd>CMakeClean<CR>", { desc = "CMake: Clean CMake target" })
+		keymap("n", "<leader>cs", "<cmd>CMakeStop<CR>", { desc = "CMake: Stop CMake Process" })
+		-- keymap("n", "<leader>cp", "<cmd>cd %:p:h<CR> ", { desc = "CMake: Change pwd to current file" })
 	end,
 }

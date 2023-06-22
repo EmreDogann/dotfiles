@@ -96,14 +96,16 @@ keymap("n", "gV", function()
 end, optsExpr)
 
 -- Toggle spell check.
-keymap("n", "<F5>", ":setlocal spell!<CR>", opts)
-keymap("i", "<F5>", "<C-o>:setlocal spell!<CR>", opts)
+keymap("n", "<F3>", ":setlocal spell!<CR>", opts)
+keymap("i", "<F3>", "<C-o>:setlocal spell!<CR>", opts)
 
 -- Line text-objects
 keymap("x", "il", "g_o^o")
 keymap("o", "il", ":<C-u>exe 'normal v' . v:count1 . 'il'<CR>", opts)
 keymap("x", "al", "g_o0o")
 keymap("o", "al", ":<C-u>exe 'normal v' . v:count1 . 'al'<CR>", opts)
+
+keymap("n", "<C-CR>", "= print('hey there')<CR>", opts)
 
 -- Action: Show treesitter capture group for textobject under cursor.
 -- keymap("n", "<C-e>",

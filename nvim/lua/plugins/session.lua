@@ -1,6 +1,13 @@
 return {
 	"gennaro-tedesco/nvim-possession",
-	dependencies = { "ibhagwan/fzf-lua" },
+	lazy = false,
+	-- dependencies = { "ibhagwan/fzf-lua" },
+	-- keys = {
+	-- 	"<leader>sl",
+	-- 	"<leader>sn",
+	-- 	"<leader>su",
+	-- 	"<leader>sd",
+	-- },
 	config = function()
 		require("nvim-possession").setup({
 			autoload = true,
