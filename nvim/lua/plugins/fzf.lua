@@ -6,7 +6,7 @@ return {
 	config = function()
 		local actions = require("fzf-lua.actions")
 		require("fzf-lua").setup({
-			-- "telescope",
+			"telescope",
 			winopts = {
 				height = 0.7,
 				width = 0.6,
@@ -90,6 +90,19 @@ return {
 				-- async_or_timeout = 3000,
 			},
 			file_icon_padding = " ",
+		})
+
+		require("fzf-lua").register_ui_select({
+			winopts = {
+				height = 0.3,
+				width = 0.2,
+				row = 0.5,
+				col = 0.5,
+			},
+			fzf_opts = {
+				["--layout"] = "reverse-list",
+				["--info"] = "hidden",
+			},
 		})
 
 		vim.keymap.set("n", "<C-p><C-p>", function()

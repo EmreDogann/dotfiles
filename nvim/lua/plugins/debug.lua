@@ -103,7 +103,7 @@ return {
 			)
 			vim.fn.sign_define(
 				"DapStopped",
-				{ text = icons.ui.ChevronRight, texthl = "Error", linehl = "DapStoppedLinehl", numhl = "" }
+				{ text = icons.ui.Amogus, texthl = "Error", linehl = "DapStoppedLinehl", numhl = "" }
 			)
 			vim.fn.sign_define(
 				"DapBreakpointRejected",

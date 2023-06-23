@@ -7,6 +7,9 @@ local functions = require("functions")
 keymap("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
 
+-- Fast quiting
+keymap("n", "<S-q>", "<cmd>w<CR><cmd>bd<CR>", { silent = true })
+
 -- Fast saving
 keymap("n", "<C-s>", function()
 	functions.SaveAll()

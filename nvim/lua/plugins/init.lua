@@ -86,7 +86,10 @@ return {
 		end,
 	},
 
-	{ "nathom/filetype.nvim" },
+	{
+		"nathom/filetype.nvim",
+		lazy = false,
+	},
 	{ "nvim-lua/plenary.nvim" },
 	{
 		"ThePrimeagen/harpoon",

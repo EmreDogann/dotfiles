@@ -107,6 +107,7 @@ return {
 		VirtualPrefix = "",
 		Next = "",
 		Previous = "",
+		Amogus = "ඞ",
 	},
 	diagnostics = {
 		Error = " ",
