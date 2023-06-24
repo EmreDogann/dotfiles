@@ -1,26 +1,9 @@
 local functions = require("functions")
 
 return {
+	-- Vim (vimscript) plugins
 	-- {'dstein64/vim-startuptime'},
 	-- {'chrisbra/unicode.vim'},
-	-- {
-	-- 	"romainl/vim-cool",
-	-- 	keys = {
-	-- 		{ "/", mode = { "n", "x" } },
-	-- 		{ "?", mode = { "n", "x" } },
-	-- 	},
-	-- },
-	{
-		"junegunn/vim-peekaboo",
-		keys = {
-			{ '<leader>"', mode = { "n", "x" } },
-			{ "<leader>@", mode = { "n", "x" } },
-		},
-		init = function()
-			vim.g.peekaboo_prefix = "<leader>"
-			vim.g.peekaboo_ins_prefix = "<C-x>"
-		end,
-	},
 	{
 		"tpope/vim-fugitive",
 		cmd = {
@@ -32,11 +15,14 @@ return {
 		keys = { "cx" },
 	},
 	{
-		"airblade/vim-rooter",
+		"junegunn/vim-peekaboo",
+		keys = {
+			{ '<leader>"', mode = { "n", "x" } },
+			{ "<leader>@", mode = { "n", "x" } },
+		},
 		init = function()
-			-- vim.g.rooter_silent_chdir = 1
-			vim.g.rooter_manual_only = 1 -- Start in manual mode
-			vim.g.rooter_resolve_links = 1
+			vim.g.peekaboo_prefix = "<leader>"
+			vim.g.peekaboo_ins_prefix = "<C-x>"
 		end,
 	},
 	{
@@ -61,15 +47,6 @@ return {
 			vim.g.move_key_modifier_visualmode = "M"
 		end,
 	},
-	-- {
-	-- 	"tmsvg/pear-tree",
-	-- 	event = "VeryLazy",
-	-- 	init = function()
-	-- 		vim.g.pear_tree_smart_openers = 1
-	-- 		vim.g.pear_tree_smart_closers = 1
-	-- 		vim.g.pear_tree_smart_backspace = 1
-	-- 	end,
-	-- },
 	{
 		"unblevable/quick-scope",
 		keys = { "f", "F", "t", "T" },
@@ -86,11 +63,29 @@ return {
 		end,
 	},
 
+	-- Neovim (lua) plugins
+	{
+		"nvim-lua/plenary.nvim",
+		module = true,
+	},
 	{
 		"nathom/filetype.nvim",
 		lazy = false,
 	},
-	{ "nvim-lua/plenary.nvim" },
+	{
+		"notjedi/nvim-rooter.lua",
+		cmd = {
+			"Rooter",
+			"RooterToggle",
+		},
+		config = function()
+			require("nvim-rooter").setup({
+				rooter_patterns = { ".git", ".hg", ".svn" },
+				trigger_patterns = { "*" },
+				manual = true,
+			})
+		end,
+	},
 	{
 		"ThePrimeagen/harpoon",
 		init = function()
@@ -115,14 +110,6 @@ return {
 		end,
 	},
 	{ "ThePrimeagen/vim-be-good", cmd = "VimBeGood" },
-	-- {
-	-- 	'norcalli/nvim-colorizer.lua',
-	-- 	event = "VeryLazy",
-	-- 	init = function()
-	-- 		-- Attaches to every FileType mode
-	-- 		require('colorizer').setup()
-	-- 	end
-	-- },
 	{
 		"nvim-tree/nvim-web-devicons",
 		module = true,
@@ -207,25 +194,6 @@ return {
 			})
 		end,
 	},
-	-- {
-	-- 	"tversteeg/registers.nvim",
-	-- 	name = "registers",
-	-- 	keys = {
-	-- 		{ '"', mode = { "n", "v" } },
-	-- 		{ "<C-R>", mode = "i" },
-	-- 	},
-	-- 	cmd = "Registers",
-	-- 	config = function()
-	-- 		require("registers").setup({
-	-- 			show_empty = false,
-	-- 			register_user_command = false,
-	-- 			window = {
-	-- 				border = "rounded",
-	-- 				max_width = 120,
-	-- 			},
-	-- 		})
-	-- 	end,
-	-- },
 	-- {
 	-- 	"goolord/alpha-nvim",
 	-- 	event = "VimEnter",

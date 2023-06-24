@@ -15,31 +15,35 @@ local function GetCapabilities()
 	return lspCapabilities
 end
 
-return {
-	-- mason.nvim
-	{
-		"williamboman/mason.nvim",
-		build = ":MasonUpdate",
-		cmd = "Mason",
-		opts = {
-			ui = {
-				border = "single",
-				icons = {
-					package_installed = "",
-					package_pending = "",
-					package_uninstalled = "",
-				},
-			},
-		},
-	},
+local on_attach = function(client)
+	if client.name == "jsonls" then
+		client.resolved_capabilities.document_formatting = false
+		client.resolved_capabilities.document_range_formatting = false
+	end
+end
 
+return {
 	-- lspconfig
 	{
 		"neovim/nvim-lspconfig",
-		-- lazy = false,
-		-- priority = 999,
+		lazy = false,
+		priority = 999,
 		dependencies = {
-			"williamboman/mason.nvim",
+			{
+				"williamboman/mason.nvim",
+				build = ":MasonUpdate",
+				cmd = "Mason",
+				opts = {
+					ui = {
+						border = "single",
+						icons = {
+							package_installed = "",
+							package_pending = "",
+							package_uninstalled = "",
+						},
+					},
+				},
+			},
 
 			-- Auto-install LSP servers
 			{
@@ -63,7 +67,6 @@ return {
 					ensure_installed = {
 						"clang-format",
 						"stylua",
-						-- "markdownlint",
 					},
 					automatic_installation = false,
 				},
@@ -73,10 +76,7 @@ return {
 			"p00f/clangd_extensions.nvim", -- Clangd LSP config
 			"hrsh7th/nvim-cmp",
 		},
-		event = {
-			"BufReadPre",
-			"BufNewFile",
-		},
+		event = { "BufReadPre", "BufNewFile" },
 		init = function()
 			-- INFO must be before the lsp-config setup of lua-ls
 			require("neodev").setup({
@@ -189,6 +189,7 @@ return {
 				-- },
 			})
 
+			-- LSP Keybinds
 			-- Use LspAttach autocommand to only map the following keys
 			-- after the language server attaches to the current buffer
 			vim.api.nvim_create_autocmd("LspAttach", {
@@ -197,26 +198,27 @@ return {
 					-- Buffer local mappings.
 					vim.keymap.set("n", "gd", function()
 						return require("fzf-lua").lsp_definitions({ jump_to_single_result = true })
-					end, { buffer = ev.buf, desc = "Goto Definition" })
+					end, { buffer = ev.buf, desc = "Goto Definitions" })
 
 					vim.keymap.set("n", "gr", function()
 						return require("fzf-lua").lsp_references({
 							jump_to_single_result = true,
 							ignore_current_line = true,
+							-- fzf_cli_args = "--delimiter '[\\]:]' --with-nth -1..",
 						})
-					end, { buffer = ev.buf, desc = "References" })
+					end, { buffer = ev.buf, desc = "Goto References" })
 
-					vim.keymap.set("n", "gD", function()
-						return require("fzf-lua").lsp_declarations()
-					end, { buffer = ev.buf, desc = "Goto Declaration" })
+					-- vim.keymap.set("n", "gD", function()
+					-- 	return require("fzf-lua").lsp_declarations()
+					-- end, { buffer = ev.buf, desc = "Goto Declarations" })
 
-					vim.keymap.set("n", "gI", function()
+					vim.keymap.set("n", "gi", function()
 						return require("fzf-lua").lsp_implementations()
-					end, { buffer = ev.buf, desc = "Goto Implementation" })
+					end, { buffer = ev.buf, desc = "Goto Implementations" })
 
 					vim.keymap.set("n", "gy", function()
-						return require("fzf-lua").lsp_type_definitions()
-					end, { buffer = ev.buf, desc = "Goto T[y]pe Definition" })
+						return require("fzf-lua").lsp_typedefs()
+					end, { buffer = ev.buf, desc = "Goto Type Definitions" })
 
 					vim.keymap.set("n", "K", function()
 						local winid = require("ufo").peekFoldedLinesUnderCursor()
@@ -225,14 +227,14 @@ return {
 						end
 					end, { buffer = ev.buf, desc = "Hover Symbol or Peek fold" })
 					vim.keymap.set("n", "gk", vim.lsp.buf.signature_help, { buffer = ev.buf, desc = "Signature Help" })
-					vim.keymap.set(
-						"n",
-						"gi",
-						"<cmd>ClangdSymbolInfo<CR>",
-						{ buffer = ev.buf, desc = "Symbol Info under Cursor" }
-					)
+					-- vim.keymap.set(
+					-- 	"n",
+					-- 	"gi",
+					-- 	"<cmd>ClangdSymbolInfo<CR>",
+					-- 	{ buffer = ev.buf, desc = "Symbol Info under Cursor" }
+					-- )
 
-					-- vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename Signature" })
+					-- vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename Signature" }) -- Using inc-rename.nvim
 					vim.keymap.set(
 						{ "n", "v" },
 						"<M-CR>",
@@ -334,6 +336,20 @@ return {
 		end,
 	},
 
+	-- Code-actions-menu
+	{
+		"weilbith/nvim-code-action-menu",
+		-- dev = true,
+		cmd = "CodeActionMenu",
+		init = function()
+			vim.g.code_action_menu_window_border = "rounded"
+
+			vim.g.code_action_menu_show_details = false
+			vim.g.code_action_menu_show_diff = true
+			vim.g.code_action_menu_show_action_kind = false
+		end,
+	},
+
 	-- lsp_lines.nvim
 	{
 		"https://git.sr.ht/~whynothugo/lsp_lines.nvim",
@@ -346,6 +362,72 @@ return {
 			vim.keymap.set("", "<F4>", function()
 				require("lsp_lines").toggle()
 			end, { silent = true, desc = "Toggle lsp_lines" })
+		end,
+	},
+
+	-- lsp-signature
+	{
+		"ray-x/lsp_signature.nvim",
+		event = "LspAttach",
+		dependencies = "neovim/nvim-lspconfig",
+		config = function()
+			require("lsp_signature").setup({
+				bind = true, -- This is mandatory, otherwise border config won't get registered.
+				handler_opts = {
+					border = "rounded",
+				},
+				hint_enable = false,
+				auto_close_after = 2,
+				hi_parameter = "IncSearch",
+			})
+		end,
+	},
+
+	-- glance.nvim
+	{
+		"DNLHC/glance.nvim",
+		event = "LspAttach",
+		config = function()
+			require("glance").setup({
+				height = 25,
+				detached = true,
+				border = {
+					enable = true,
+				},
+			})
+
+			vim.api.nvim_create_autocmd("LspAttach", {
+				group = vim.api.nvim_create_augroup("LspGlance", {}),
+				callback = function(ev)
+					vim.keymap.set(
+						"n",
+						"gD",
+						"<cmd>Glance definitions<CR>",
+						{ buffer = ev.buf, desc = "Goto Definitions" }
+					)
+
+					vim.keymap.set(
+						"n",
+						"gR",
+						"<cmd>Glance references<CR>",
+						{ buffer = ev.buf, desc = "Goto References" }
+					)
+
+					vim.keymap.set(
+						"n",
+						"gI",
+						"<cmd>Glance implementations<CR>",
+						{ buffer = ev.buf, desc = "Goto Implementations" }
+					)
+
+					vim.keymap.set(
+						"n",
+						"gY",
+						"<cmd>Glance type_definitions<CR>",
+						{ buffer = ev.buf, desc = "Goto Type Definitions" }
+					)
+				end,
+			})
 		end,
 	},
 

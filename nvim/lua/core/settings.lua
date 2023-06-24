@@ -10,14 +10,14 @@ vim.g.IS_MAC = os == "Darwin"
 vim.g.IS_LINUX = os == "Linux"
 vim.g.IS_WINDOWS = os:find("Windows") and true or false
 vim.g.IS_WSL = vim.g.IS_LINUX and uname.release:lower():find("microsoft") and true or false
-vim.g.session_dir = vim.fn.expand(vim.fn.stdpath("data") .. "/sessions")
+vim.g.session_dir = vim.fn.expand(vim.fn.stdpath("data") .. "/sessions/")
 
 o.fileencoding = "utf-8"
 -- vim.o.clipboard = 'unnamedplus'
 
 -- Set directory for swap & backup files.
 o.directory = vim.env.MYNEOVIMDIR .. "/swap//"
-o.shada = "'100,<100,s10,h,n" .. vim.env.MYNEOVIMDIR .. "/shada"
+o.shada = "!,f1,'100,<100,s10,h,n" .. vim.env.MYNEOVIMDIR .. "/shada"
 o.viewdir = vim.env.MYNEOVIMDIR .. "/view//"
 o.backupdir = vim.env.MYNEOVIMDIR .. "/backup//"
 o.undodir = vim.env.MYNEOVIMDIR .. "/undo//"
@@ -73,6 +73,7 @@ o.wildignorecase = true -- Case insensitive tab completion
 
 -- Session & View
 opt.sessionoptions:remove("options")
+opt.sessionoptions:remove("terminal")
 
 -- Indent guides
 -- opt.list = true

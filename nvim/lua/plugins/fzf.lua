@@ -8,8 +8,8 @@ return {
 		require("fzf-lua").setup({
 			"telescope",
 			winopts = {
-				height = 0.7,
-				width = 0.6,
+				height = 0.6,
+				width = 0.5,
 				row = 0.5,
 				col = 0.5,
 				preview = {
@@ -87,7 +87,16 @@ return {
 			},
 			lsp = {
 				-- make lsp requests synchronous so they work with null-ls
-				-- async_or_timeout = 3000,
+				async_or_timeout = 3000,
+				include_declaration = false,
+				winopts = {
+					height = 0.7,
+					width = 0.6,
+					preview = {
+						layout = "vertical",
+						vertical = "down:45%",
+					},
+				},
 			},
 			file_icon_padding = " ",
 		})

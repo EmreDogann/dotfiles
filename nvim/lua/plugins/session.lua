@@ -1,7 +1,7 @@
 return {
 	"gennaro-tedesco/nvim-possession",
 	lazy = false,
-	-- dependencies = { "ibhagwan/fzf-lua" },
+	dependencies = { "ibhagwan/fzf-lua" },
 	-- keys = {
 	-- 	"<leader>sl",
 	-- 	"<leader>sn",
@@ -10,6 +10,12 @@ return {
 	-- },
 	config = function()
 		require("nvim-possession").setup({
+			sessions = {
+				sessions_path = vim.g.session_dir,
+				sessions_variable = "session",
+				sessions_icon = "📌 ",
+			},
+
 			autoload = true,
 			autoswitch = {
 				enable = true,
