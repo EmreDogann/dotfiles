@@ -79,5 +79,13 @@ return {
 				dotfiles = false,
 			},
 		})
+
+		-- Closes nvim-tree buffer when exiting neovim
+		vim.api.nvim_create_autocmd({ "BufUnload" }, {
+			pattern = "NvimTree*",
+			callback = function()
+				require("nvim-tree.api").tree.close()
+			end,
+		})
 	end,
 }

@@ -1,6 +1,6 @@
-local opt = vim.opt
-local o = vim.o
 local g = vim.g
+local o = vim.o
+local opt = vim.opt
 local wo = vim.wo
 local bo = vim.bo
 local uname = vim.loop.os_uname()
@@ -72,6 +72,8 @@ opt.wildignore = {
 o.wildignorecase = true -- Case insensitive tab completion
 
 -- Session & View
+-- opt.sessionoptions:append("globals")
+opt.sessionoptions:append("winpos")
 opt.sessionoptions:remove("options")
 opt.sessionoptions:remove("terminal")
 

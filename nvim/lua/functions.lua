@@ -2,7 +2,7 @@ local M = {}
 
 -- Usage extend_hl('Comment', 'StatusLine', { italic = true })
 -- From: https://www.reddit.com/r/neovim/comments/yexeil/comment/iu0lbgt/?utm_source=share&utm_medium=web2x&context=3
-function M.extend_hl(base, name, def)
+function M.ExtendHL(base, name, def)
 	local current_def = vim.api.nvim_get_hl_by_name(base, true)
 	local new_def = vim.tbl_extend("force", current_def, def)
 
@@ -16,6 +16,20 @@ function M.SaveAll()
 	vim.fn.winrestview(original_cursor)
 end
 
+-- From: https://stackoverflow.com/a/70730552/10439539
+function M.preserve(arguments)
+	local fullArguments = string.format("keepjumps keeppatterns execute %q", arguments)
+	-- local original_cursor = vim.fn.winsaveview()
+	local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+	vim.api.nvim_command(fullArguments)
+	local lastline = vim.fn.line("$")
+	-- vim.fn.winrestview(original_cursor)
+	if line > lastline then
+		line = lastline
+	end
+	vim.api.nvim_win_set_cursor(0, { line, col })
+end
+
 -- Adapted From: https://vi.stackexchange.com/questions/24367/unexpected-behavior-with-feedkeys
 function M.YankFixedCursor(motionPrefix)
 	vim.o.operatorfunc = "v:lua.require'functions'.SendToClip"
@@ -24,24 +38,33 @@ function M.YankFixedCursor(motionPrefix)
 end
 
 -- Adapted From: https://stackoverflow.com/a/58822884/10439539
-function M.SendToClip(type, visualMode)
-	if visualMode ~= nil then
+function M.SendToClip(type, format)
+	local defaultFormat = true
+	-- From: https://stackoverflow.com/a/66003880/10439539
+	format = format or (format == nil and defaultFormat)
+
+	if type == "v" then
 		-- Visual mode
-		vim.cmd([[keepjumps silent! normal! mzgv"0y]])
+		vim.cmd([[keepjumps silent! normal! mz"0y]])
 	elseif type == "line" then
 		vim.cmd([[keepjumps silent! normal! '[V']"0y]])
 	elseif type == "char" then
 		vim.cmd([[keepjumps silent! normal! `[v`]"0y]])
 	end
 
-	-- From: https://stackoverflow.com/a/20076502/10439539
-	local stripedOutput = vim.fn.substitute(vim.fn.getreg("0"), "\\s\\{2,}\\|\\n$", "", "g")
+	local output = vim.fn.getreg("0")
+	if format == true then
+		-- From: https://stackoverflow.com/a/20076502/10439539
+		output = vim.fn.substitute(output, "\\s\\{2,}\\|\\n$", "", "g")
+	end
 	-- Yanking to + register does not work for some reason. So use win32yank.exe instead.
-	vim.fn.system("win32yank.exe -i --crlf", stripedOutput)
+	vim.fn.system("win32yank.exe -i --crlf", output)
 	vim.api.nvim_win_set_cursor(0, vim.api.nvim_buf_get_mark(0, "z"))
 end
 
 function M.FormatPaste(reg, command)
+	local line, col = unpack(vim.api.nvim_win_get_cursor(0)) -- Save cursor position
+
 	local register = reg == '"' and '"0' or '"' .. reg
 	vim.cmd("normal! " .. register .. command)
 
@@ -61,6 +84,13 @@ function M.FormatPaste(reg, command)
 		-- Visual-Block mode
 		return nil
 	end
+
+	-- Restore cursor position
+	local lastline = vim.fn.line("$")
+	if line > lastline then
+		line = lastline
+	end
+	vim.api.nvim_win_set_cursor(0, { line, col })
 end
 
 -- Function to check if a floating dialog exists and if not

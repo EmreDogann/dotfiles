@@ -1,6 +1,6 @@
 local function GetCapabilities()
 	local lspCapabilities = vim.lsp.protocol.make_client_capabilities()
-	lspCapabilities.offsetEncoding = { "utf-16" } -- Fixes some weird bugs
+	lspCapabilities.offsetEncoding = { "utf-8", "utf-16" } -- Fixes some weird bugs
 
 	-- Add additional capabilities supported by nvim-cmp
 	local cmpCapabilities = require("cmp_nvim_lsp").default_capabilities()
@@ -13,13 +13,6 @@ local function GetCapabilities()
 	}
 
 	return lspCapabilities
-end
-
-local on_attach = function(client)
-	if client.name == "jsonls" then
-		client.resolved_capabilities.document_formatting = false
-		client.resolved_capabilities.document_range_formatting = false
-	end
 end
 
 return {
@@ -255,9 +248,17 @@ return {
 		config = function()
 			local capabilities = GetCapabilities()
 
+			local clangd_capabilities = {
+				textDocument = {
+					completion = {
+						editsNearCursor = true,
+					},
+				},
+			}
+
 			require("clangd_extensions").setup({
 				server = {
-					capabilities = capabilities,
+					capabilities = vim.tbl_deep_extend("keep", capabilities, clangd_capabilities),
 					cmd = {
 						"clangd",
 						"--background-index",
@@ -446,6 +447,97 @@ return {
 		},
 		config = function()
 			require("inc_rename").setup()
+		end,
+	},
+
+	-- refractoring.nvim
+	{
+		"ThePrimeagen/refactoring.nvim",
+		keys = {
+			{
+				mode = "v",
+				"<leader>rr",
+			},
+			{
+				mode = "n",
+				"<leader>rp",
+			},
+			{
+				mode = { "n", "v" },
+				"<leader>rv",
+			},
+			{
+				mode = "n",
+				"<leader>rc",
+			},
+		},
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
+		config = function()
+			require("refactoring").setup({
+				prompt_func_return_type = {
+					lua = true,
+					cpp = true,
+					cc = true,
+					c = true,
+					h = true,
+					hpp = true,
+					cxx = true,
+				},
+				prompt_func_param_type = {
+					lua = true,
+					cpp = true,
+					cc = true,
+					c = true,
+					h = true,
+					hpp = true,
+					cxx = true,
+				},
+				printf_statements = {},
+				print_var_statements = {},
+			})
+
+			-- prompt for a refactor to apply when the remap is triggered
+			vim.api.nvim_set_keymap(
+				"v",
+				"<leader>rr",
+				":lua require('refactoring').select_refactor()<CR>",
+				{ noremap = true, silent = true, expr = false }
+			)
+
+			-- You can also use below = true here to change the position of the printf
+			-- statement (or set two remaps for either one). This remap must be made in normal mode.
+			vim.api.nvim_set_keymap(
+				"n",
+				"<leader>rp",
+				":lua require('refactoring').debug.printf({below = false})<CR>",
+				{ noremap = true }
+			)
+
+			-- Remap in normal mode and passing { normal = true } will automatically find the variable under the cursor and print it
+			vim.api.nvim_set_keymap(
+				"n",
+				"<leader>rv",
+				":lua require('refactoring').debug.print_var({ normal = true })<CR>",
+				{ noremap = true }
+			)
+			-- Remap in visual mode will print whatever is in the visual selection
+			vim.api.nvim_set_keymap(
+				"v",
+				"<leader>rv",
+				":lua require('refactoring').debug.print_var({})<CR>",
+				{ noremap = true }
+			)
+
+			-- Cleanup function: this remap should be made in normal mode
+			vim.api.nvim_set_keymap(
+				"n",
+				"<leader>rc",
+				":lua require('refactoring').debug.cleanup({})<CR>",
+				{ noremap = true }
+			)
 		end,
 	},
 

@@ -51,6 +51,7 @@ alias zshrc="nvim $ZDOTDIR/.zshrc"
 alias zshev="nvim $ZDOTDIR/.zshenv"
 alias zshal="nvim $ZDOTDIR/aliases.zsh"
 alias nvimdr="cd $MYNEOVIMDIR"
+alias nvimdat="cd $XDG_CONFIG_HOME/local/share/nvim/sessions"
 
 # Replace cat with bat
 # alias cat='bat --paging=never'

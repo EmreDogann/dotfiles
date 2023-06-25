@@ -2,7 +2,7 @@ local functions = require("functions")
 
 return {
 	-- Vim (vimscript) plugins
-	-- {'dstein64/vim-startuptime'},
+	-- { "dstein64/vim-startuptime" },
 	-- {'chrisbra/unicode.vim'},
 	{
 		"tpope/vim-fugitive",
@@ -56,8 +56,8 @@ return {
 			vim.api.nvim_create_autocmd("ColorScheme", {
 				group = qsHighlightGroup,
 				callback = function()
-					functions.extend_hl("String", "QuickScopePrimary", { underline = true })
-					functions.extend_hl("Error", "QuickScopeSecondary", { underline = true })
+					functions.ExtendHL("String", "QuickScopePrimary", { underline = true })
+					functions.ExtendHL("Error", "QuickScopeSecondary", { underline = true })
 				end,
 			})
 		end,
@@ -175,7 +175,7 @@ return {
 				use_treesitter = true,
 				show_first_indent_level = false,
 				show_trailing_blankline_indent = false,
-				show_current_context = true,
+				show_current_context = false,
 
 				-- blankline_char = '│',
 				blankline_char = "▏",

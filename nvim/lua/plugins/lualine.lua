@@ -1,17 +1,17 @@
 -- Credited to [evil_lualine](https://github.com/nvim-lualine/lualine.nvim/blob/master/examples/evil_lualine.lua)
-local conditions = {
-	buffer_not_empty = function()
-		return vim.fn.empty(vim.fn.expand("%:t")) ~= 1
-	end,
-	hide_in_width = function()
-		return vim.fn.winwidth(0) > 80
-	end,
-	check_git_workspace = function()
-		local filepath = vim.fn.expand("%:p:h")
-		local gitdir = vim.fn.finddir(".git", filepath .. ";")
-		return gitdir and #gitdir > 0 and #gitdir < #filepath
-	end,
-}
+-- local conditions = {
+-- 	buffer_not_empty = function()
+-- 		return vim.fn.empty(vim.fn.expand("%:t")) ~= 1
+-- 	end,
+-- 	hide_in_width = function()
+-- 		return vim.fn.winwidth(0) > 80
+-- 	end,
+-- 	check_git_workspace = function()
+-- 		local filepath = vim.fn.expand("%:p:h")
+-- 		local gitdir = vim.fn.finddir(".git", filepath .. ";")
+-- 		return gitdir and #gitdir > 0 and #gitdir < #filepath
+-- 	end,
+-- }
 
 return {
 	{
@@ -31,6 +31,7 @@ return {
 					component_separators = "|",
 					section_separators = { left = "", right = "" },
 					disabled_filetypes = { "lazy", "NvimTree", "peekaboo" },
+					globalstatus = true,
 				},
 				refresh = {
 					statusline = 1000,
@@ -57,18 +58,6 @@ return {
 							path = 1,
 							newfile_status = true, -- Display new file status (new file means no write after created)
 							separator = { right = "" },
-						},
-						{
-							function()
-								local cur_buf = vim.api.nvim_get_current_buf()
-								return require("hbac.state").is_pinned(cur_buf) and "📍" or ""
-								-- tip: nerd fonts have pinned/unpinned icons!
-							end,
-							padding = {
-								left = 0,
-								right = 1,
-							},
-							color = { fg = "#ef5f6b", gui = "bold" },
 						},
 					},
 					lualine_x = {
@@ -121,18 +110,6 @@ return {
 							newfile_status = true, -- Display new file status (new file means no write after created)
 							separator = { right = "" },
 						},
-						{
-							function()
-								local cur_buf = vim.api.nvim_get_current_buf()
-								return require("hbac.state").is_pinned(cur_buf) and "📍" or ""
-								-- tip: nerd fonts have pinned/unpinned icons!
-							end,
-							padding = {
-								left = 0,
-								right = 1,
-							},
-							color = { fg = "#ef5f6b", gui = "bold" },
-						},
 					},
 					lualine_b = {},
 					lualine_c = {},
@@ -145,8 +122,9 @@ return {
 					lualine_a = {
 						-- {
 						-- 	"buffers",
+						-- 	-- separator = { left = "", right = "" },
 						-- 	icons_enabled = true,
-						-- 	mode = 2,
+						-- 	mode = 0,
 						-- 	use_mode_colors = true,
 						-- },
 					},
@@ -256,6 +234,7 @@ return {
 						},
 						{
 							require("nvim-possession").status,
+							separator = { right = "" },
 							cond = function()
 								return require("nvim-possession").status() ~= nil
 							end,
@@ -273,6 +252,7 @@ return {
 					lualine_z = {
 						-- {
 						-- 	"tabs",
+						-- 	separator = { left = "", right = "" },
 						-- 	use_mode_colors = true,
 						-- },
 					},
@@ -285,6 +265,7 @@ return {
 	-- tabline.nvim
 	{
 		"kdheepak/tabline.nvim",
+		lazy = false,
 		dev = true,
 		dependencies = {
 			"nvim-lualine/lualine.nvim",
@@ -292,37 +273,33 @@ return {
 		},
 		config = function()
 			require("tabline").setup({
-				enable = true,
+				enable = false,
 				options = {
 					section_separators = { "", "" },
 					component_separators = { "", "" },
 					max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
 					show_tabs_always = true, -- this shows tabs only when there are more than one tab or if the first tab is named
 					show_devicons = true, -- this shows devicons in buffer section
-					show_bufnr = false, -- this appends [bufnr] to buffer section,
+					show_bufnr = false, -- this appends [bufnr] to buffer section,section
 					show_filename_only = true, -- shows base filename only instead of relative path in filename
 					show_last_separator = false, -- Show separator after the last buffer or tab (default = false)
-					modified_icon = " ●", -- change the default modified icon
+					modified_icon = "●", -- change the default modified icon
 					modified_italic = true, -- set to true by default; this determines whether the filename turns italic if modified
 					show_tabs_only = false, -- this shows only tabs instead of tabs + buffers
 				},
 			})
-
-			vim.cmd([[
-				set sessionoptions+=tabpages " store tabpages in session
-			]])
+			-- vim.keymap.set("n", "<F10>", ":TablineBufferNext<CR>", { silent = true })
+			-- vim.keymap.set("n", "<S-Tab>", ":TablineBufferPrevious<CR>", { silent = true })
 		end,
 	},
 
-	-- scope.nvim (used with tabline.nvim)
 	{
-		"tiagovla/scope.nvim",
+		"backdround/tabscope.nvim",
 		lazy = false,
-		event = "VeryLazy",
 		config = function()
-			require("scope").setup({
-				restore_state = false, -- experimental
-			})
+			require("tabscope").setup()
+			-- To remove tab local buffer, use remove_tab_buffer:
+			vim.keymap.set("n", "<F10>", require("tabscope").remove_tab_buffer)
 		end,
 	},
 }

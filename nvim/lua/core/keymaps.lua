@@ -73,7 +73,10 @@ keymap("v", ">", ">gv", opts)
 keymap("n", "<leader>y", functions.YankFixedCursor(""), opts)
 keymap("n", "<leader>yy", functions.YankFixedCursor("_"), opts)
 keymap("x", "<leader>y", function()
-	functions.SendToClip(vim.fn.visualmode(), 1)
+	functions.SendToClip(vim.fn.mode(), false)
+end, opts)
+keymap("x", "<leader>Y", function()
+	functions.SendToClip(vim.fn.mode(), true)
 end, opts)
 
 -- " Paste from "0 register by default unless a register other than the default is specified.
