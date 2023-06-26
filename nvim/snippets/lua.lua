@@ -1,7 +1,7 @@
 local ls = require("luasnip") --{{{
-local s = ls.s                --> snippet
-local i = ls.i                --> insert node
-local t = ls.t                --> text node
+local s = ls.s --> snippet
+local i = ls.i --> insert node
+local t = ls.t --> text node
 
 local d = ls.dynamic_node
 local c = ls.choice_node
@@ -66,7 +66,7 @@ local function cs(trigger, nodes, opts) --{{{
 	end
 
 	table.insert(target_table, snippet) -- insert snippet into appropriate table
-end                                  --}}}
+end --}}}
 
 -- Start Refactoring --
 
@@ -74,9 +74,9 @@ cs("CMD", { -- [CMD] multiline vim.cmd{{{
 	t({ "vim.cmd[[", "  " }),
 	i(1, ""),
 	t({ "", "]]" }),
-})                                            --}}}
+}) --}}}
 cs("cmd", fmt("vim.cmd[[{}]]", { i(1, "") })) -- single line vim.cmd
-cs({                                          -- github import for packer{{{
+cs({ -- github import for packer{{{
 	trig = "https://github%.com/([%w-%._]+)/([%w-%._]+)!",
 	regTrig = true,
 	hidden = true,
@@ -93,7 +93,7 @@ cs({                                          -- github import for packer{{{
 	i(1, ""),
 }, "auto") --}}}
 
-cs(        -- {regexSnippet} LuaSnippet{{{
+cs( -- {regexSnippet} LuaSnippet{{{
 	"regexSnippet",
 	fmt(
 		[=[
@@ -112,7 +112,7 @@ cs( -- {}
 		}
 	),
 	{ pattern = "*/snippets/*.lua", "<C-d>" }
-)   --}}}
+) --}}}
 cs( -- [luaSnippet] LuaSnippet{{{
 	"luaSnippet",
 	fmt(
@@ -137,7 +137,7 @@ cs("{}", fmt( -- {}
 		}
 	),
 	{ pattern = "*/snippets/*.lua", "jcs" }
-)   --}}}
+) --}}}
 
 cs( -- choice_node_snippet luaSnip choice node{{{
 	"choice_node_snippet",
@@ -151,7 +151,7 @@ c({}, {{ {} }}),
 		}
 	),
 	{ pattern = "*/snippets/*.lua", "jcn" }
-)   --}}}
+) --}}}
 
 cs( -- [function] Lua function snippet{{{
 	"function",
@@ -168,7 +168,7 @@ end
 		}
 	),
 	"jff"
-)   --}}}
+) --}}}
 cs( -- [local_function] Lua function snippet{{{
 	"local_function",
 	fmt(
@@ -184,7 +184,7 @@ end
 		}
 	),
 	"jlf"
-)   --}}}
+) --}}}
 cs( -- [local] Lua local variable snippet{{{
 	"local",
 	fmt(

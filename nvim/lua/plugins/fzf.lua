@@ -80,6 +80,34 @@ return {
 					["--padding"] = "5%,3%,5%,3%",
 				},
 			},
+			tabs = {
+				prompt = "Tabs❯ ",
+				tab_title = "Tab",
+				tab_marker = "<<",
+				file_icons = true, -- show file icons?
+				color_icons = true, -- colorize file|git icons
+				actions = {
+					-- actions inherit from 'actions.buffers' and merge
+					["default"] = actions.buf_switch,
+					["ctrl-x"] = { fn = actions.buf_del, reload = true },
+				},
+				fzf_opts = {
+					-- hide tabnr
+					["--padding"] = "5%,3%,5%,3%",
+					["--delimiter"] = "'[\\):]'",
+					["--with-nth"] = "2..",
+				},
+				winopts = {
+					height = 0.6,
+					width = 0.25,
+					row = 0.5,
+					col = 0.5,
+					preview = {
+						layout = "vertical",
+						vertical = "down:45%",
+					},
+				},
+			},
 			grep = {
 				fzf_opts = {
 					["--info"] = "inline",
@@ -112,7 +140,7 @@ return {
 			end
 
 			-- Auto-width
-			local min_w, max_w = 0.05, 0.70
+			local min_w, max_w = 0.10, 0.70
 			local longest = 0
 			for i, v in ipairs(items) do
 				local length = #v
@@ -155,7 +183,7 @@ return {
 		-- 	},
 		-- })
 
-		vim.keymap.set("n", "<C-p><C-p>", function()
+		vim.keymap.set("n", "<C-p><C-[>", function()
 			require("fzf-lua").files()
 		end, { silent = true })
 		vim.keymap.set("n", "<C-p><C-o>", function()
@@ -164,7 +192,7 @@ return {
 		vim.keymap.set("n", "<C-p><C-q>", function()
 			require("fzf-lua").quickfix()
 		end, { silent = true })
-		vim.keymap.set("n", "<C-p><C-l>", function() -- <C-_> is CTRL-/
+		vim.keymap.set("n", "<C-p><C-l>", function()
 			require("fzf-lua").grep_project()
 		end, { silent = true })
 		vim.keymap.set("n", "<C-p><C-t>", function()
@@ -178,11 +206,14 @@ return {
 			require("fzf-lua").blines()
 		end, { silent = true })
 		vim.keymap.set("n", "<leader>b", function()
-			if vim.v.count ~= 0 then
-				vim.cmd("LualineBuffersJump " .. vim.v.count)
-			else
-				require("fzf-lua").buffers()
-			end
+			-- if vim.v.count ~= 0 then
+			-- 	vim.cmd("LualineBuffersJump " .. vim.v.count)
+			-- else
+			require("fzf-lua").buffers()
+			-- end
+		end, { silent = true })
+		vim.keymap.set("n", "<leader>t", function()
+			require("fzf-lua").tabs()
 		end, { silent = true })
 		vim.keymap.set("n", "<leader>?", function()
 			require("fzf-lua").help_tags()

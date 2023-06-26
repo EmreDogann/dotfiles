@@ -125,7 +125,7 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
 
 -- local tablineBuffersGroup = augroup("TablineBuffers", { clear = true })
 --
--- autocmd({ "SessionLoadPost", "TabEnter" }, {
+-- autocmd({ "TabEnter" }, {
 -- 	group = tablineBuffersGroup,
 -- 	callback = function()
 -- 		local data = vim.t.tabline_data

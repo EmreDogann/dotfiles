@@ -72,7 +72,7 @@ opt.wildignore = {
 o.wildignorecase = true -- Case insensitive tab completion
 
 -- Session & View
--- opt.sessionoptions:append("globals")
+opt.sessionoptions:append("globals")
 opt.sessionoptions:append("winpos")
 opt.sessionoptions:remove("options")
 opt.sessionoptions:remove("terminal")

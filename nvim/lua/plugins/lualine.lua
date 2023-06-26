@@ -120,24 +120,33 @@ return {
 
 				tabline = {
 					lualine_a = {
+						{
+							"buffers",
+							separator = { left = "", right = "" },
+							icons_enabled = true,
+							mode = 0,
+							use_mode_colors = true,
+							symbols = {
+								modified = " ●", -- Text to show when the buffer is modified
+								alternate_file = "#", -- Text to show to identify the alternate file
+								directory = "", -- Text to show when the buffer is a directory
+							},
+						},
 						-- {
-						-- 	"buffers",
-						-- 	-- separator = { left = "", right = "" },
-						-- 	icons_enabled = true,
-						-- 	mode = 0,
+						-- 	"windows",
 						-- 	use_mode_colors = true,
 						-- },
 					},
 					lualine_b = {},
 					lualine_c = {
-						{
-							require("tabline").tabline_buffers,
-							padding = {
-								left = 0,
-								right = 1,
-							},
-							separator = { left = "" },
-						},
+						-- {
+						-- 	require("tabline").tabline_buffers,
+						-- 	padding = {
+						-- 		left = 0,
+						-- 		right = 1,
+						-- 	},
+						-- 	separator = { left = "" },
+						-- },
 					},
 					lualine_x = {
 						{
@@ -239,22 +248,32 @@ return {
 								return require("nvim-possession").status() ~= nil
 							end,
 						},
-						{
-							require("tabline").tabline_tabs,
-							padding = {
-								left = 1,
-								right = 0,
-							},
-							separator = { right = "" },
-						},
+						-- {
+						-- 	require("tabline").tabline_tabs,
+						-- 	padding = {
+						-- 		left = 1,
+						-- 		right = 0,
+						-- 	},
+						-- 	separator = { right = "" },
+						-- },
 					},
 					lualine_y = {},
 					lualine_z = {
-						-- {
-						-- 	"tabs",
-						-- 	separator = { left = "", right = "" },
-						-- 	use_mode_colors = true,
-						-- },
+						{
+							"tabs",
+							mode = 1,
+							separator = { left = "", right = "" },
+							use_mode_colors = true,
+							fmt = function(name, context)
+								-- Show + if buffer is modified in tab
+								local buflist = vim.fn.tabpagebuflist(context.tabnr)
+								local winnr = vim.fn.tabpagewinnr(context.tabnr)
+								local bufnr = buflist[winnr]
+								local mod = vim.fn.getbufvar(bufnr, "&mod")
+
+								return name .. (mod == 1 and " ●" or "")
+							end,
+						},
 					},
 				},
 				extensions = { "fugitive", "fzf", "lazy", "man", "nvim-dap-ui", "nvim-tree", "quickfix" },
@@ -263,43 +282,54 @@ return {
 	},
 
 	-- tabline.nvim
-	{
-		"kdheepak/tabline.nvim",
-		lazy = false,
-		dev = true,
-		dependencies = {
-			"nvim-lualine/lualine.nvim",
-			"nvim-tree/nvim-web-devicons",
-		},
-		config = function()
-			require("tabline").setup({
-				enable = false,
-				options = {
-					section_separators = { "", "" },
-					component_separators = { "", "" },
-					max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
-					show_tabs_always = true, -- this shows tabs only when there are more than one tab or if the first tab is named
-					show_devicons = true, -- this shows devicons in buffer section
-					show_bufnr = false, -- this appends [bufnr] to buffer section,section
-					show_filename_only = true, -- shows base filename only instead of relative path in filename
-					show_last_separator = false, -- Show separator after the last buffer or tab (default = false)
-					modified_icon = "●", -- change the default modified icon
-					modified_italic = true, -- set to true by default; this determines whether the filename turns italic if modified
-					show_tabs_only = false, -- this shows only tabs instead of tabs + buffers
-				},
-			})
-			-- vim.keymap.set("n", "<F10>", ":TablineBufferNext<CR>", { silent = true })
-			-- vim.keymap.set("n", "<S-Tab>", ":TablineBufferPrevious<CR>", { silent = true })
-		end,
-	},
+	-- {
+	-- 	"kdheepak/tabline.nvim",
+	-- 	lazy = false,
+	-- 	dev = true,
+	-- 	dependencies = {
+	-- 		"nvim-lualine/lualine.nvim",
+	-- 		"nvim-tree/nvim-web-devicons",
+	-- 	},
+	-- 	config = function()
+	-- 		require("tabline").setup({
+	-- 			enable = false,
+	-- 			options = {
+	-- 				section_separators = { "", "" },
+	-- 				component_separators = { "", "" },
+	-- 				max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
+	-- 				show_tabs_always = true, -- this shows tabs only when there are more than one tab or if the first tab is named
+	-- 				show_devicons = true, -- this shows devicons in buffer section
+	-- 				show_bufnr = false, -- this appends [bufnr] to buffer section,section
+	-- 				show_filename_only = true, -- shows base filename only instead of relative path in filename
+	-- 				show_last_separator = false, -- Show separator after the last buffer or tab (default = false)
+	-- 				modified_icon = "●", -- change the default modified icon
+	-- 				modified_italic = true, -- set to true by default; this determines whether the filename turns italic if modified
+	-- 				show_tabs_only = false, -- this shows only tabs instead of tabs + buffers
+	-- 			},
+	-- 		})
+	-- 		-- vim.keymap.set("n", "<F10>", ":TablineBufferNext<CR>", { silent = true })
+	-- 		-- vim.keymap.set("n", "<S-Tab>", ":TablineBufferPrevious<CR>", { silent = true })
+	-- 	end,
+	-- },
 
-	{
-		"backdround/tabscope.nvim",
-		lazy = false,
-		config = function()
-			require("tabscope").setup()
-			-- To remove tab local buffer, use remove_tab_buffer:
-			vim.keymap.set("n", "<F10>", require("tabscope").remove_tab_buffer)
-		end,
-	},
+	-- {
+	-- 	"tiagovla/scope.nvim",
+	-- 	lazy = false,
+	-- 	dev = true,
+	-- 	config = function()
+	-- 		require("scope").setup({
+	-- 			restore_state = true,
+	-- 		})
+	-- 	end,
+	-- },
+
+	-- {
+	-- 	"backdround/tabscope.nvim",
+	-- 	lazy = false,
+	-- 	config = function()
+	-- 		require("tabscope").setup()
+	-- 		-- To remove tab local buffer, use remove_tab_buffer:
+	-- 		vim.keymap.set("n", "<F10>", require("tabscope").remove_tab_buffer)
+	-- 	end,
+	-- },
 }

@@ -67,23 +67,10 @@ return {
 			incremental_selection = {
 				enable = true,
 				keymaps = {
-					-- <F36> is equivalent to <C-F12>
-					-- <Fy> where y = x + 24
-					-- <S-Fy> where y = x + 12
-					-- <C-S-Fy> where y = x + 24 + 12
-					-- Tip: In insert mode, press combinations of function keys to get their function codes.
-					-- More info:
-					--		https://github.com/neovim/neovim/issues/4862#issuecomment-282988543
-					--		https://www.reddit.com/r/neovim/comments/1111ixq/there_are_60_f_keys/
-
-					-- I have remapped Ctrl-Enter to Ctrl-F12 and Ctrl-Shift-Enter to Ctrl-Shift-F12 using powertoys.
-					-- Windows terminal sends Ctrl(-Shift)-Enter as Ctrl-J (^Wj) which means it cannot
-					-- distinguish between Ctrl-Enter and Ctrl-Shift-Enter.
-
-					init_selection = "<F36>", -- set to `false` to disable one of the mappings
-					node_incremental = "<F36>",
-					scope_incremental = "grc",
-					node_decremental = "<F48>",
+					init_selection = "<CR>",
+					scope_incremental = "<CR>",
+					node_incremental = "<C-k>",
+					node_decremental = "<C-j>",
 				},
 			},
 			textobjects = {
