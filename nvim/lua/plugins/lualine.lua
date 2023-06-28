@@ -33,11 +33,13 @@ return {
 					disabled_filetypes = { "lazy", "NvimTree", "peekaboo" },
 					globalstatus = true,
 				},
+
 				refresh = {
 					statusline = 1000,
 					tabline = 1000,
 					winbar = 1000,
 				},
+
 				sections = {
 					lualine_a = {
 						{ "mode", separator = { left = "" } },
@@ -102,6 +104,7 @@ return {
 						},
 					},
 				},
+
 				inactive_sections = {
 					lualine_a = {
 						{

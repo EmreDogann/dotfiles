@@ -40,6 +40,8 @@ return {
 				"json",
 				"jsonc",
 				"rust",
+				"bash",
+				"regex",
 			},
 
 			-- Install parsers synchronously (only applied to `ensure_installed`)

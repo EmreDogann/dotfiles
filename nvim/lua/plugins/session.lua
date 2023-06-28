@@ -4,15 +4,10 @@ return {
 		lazy = false,
 		dev = true,
 		dependencies = {
-			"ibhagwan/fzf-lua",
 			{
 				"tiagovla/scope.nvim",
-				dev = true,
-				config = function()
-					require("scope").setup({
-						restore_state = true,
-					})
-				end,
+				lazy = false,
+				config = true,
 			},
 		},
 		-- keys = {
@@ -33,12 +28,12 @@ return {
 				autoswitch = {
 					enable = true,
 				},
-				pre_hook = function()
+				pre_save_hook = function()
 					vim.cmd([[ScopeSaveState]]) -- Scope.nvim integration
 				end,
-				-- post_hook = function()
-				-- 	vim.cmd([[ScopeLoadState]]) -- Scope.nvim integration
-				-- end,
+				post_load_hook = function()
+					vim.cmd([[ScopeLoadState]]) -- Scope.nvim integration
+				end,
 
 				fzf_winopts = {
 					height = 0.4,

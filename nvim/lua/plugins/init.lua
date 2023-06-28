@@ -187,9 +187,9 @@ return {
 					"dashboard",
 					"packer",
 					"neogitstatus",
-					"NvimTree",
+					"nvimtree",
 					"neo-tree",
-					"Trouble",
+					"trouble",
 				},
 			})
 		end,

@@ -183,4 +183,16 @@ function _G.Statusline_MacroRecording()
 	end
 end
 
+function _G.logFile(message)
+	local log_file_path = vim.env.MYNEOVIMDIR .. "/output.log"
+	local log_file = io.open(log_file_path, "a")
+	if log_file == nil then
+		return
+	end
+
+	io.output(log_file)
+	io.write(message .. "\n")
+	io.close(log_file)
+end
+
 return M

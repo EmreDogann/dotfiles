@@ -236,6 +236,13 @@ return {
 						-- vim.lsp.buf.code_action,
 						{ buffer = ev.buf, desc = "Perform Code Action" }
 					)
+
+					vim.keymap.set(
+						"n",
+						"<leader>sh",
+						":ClangdSwitchSourceHeader<CR>",
+						{ buffer = ev.buf, desc = "Cpp - Switch between Source/Header" }
+					)
 				end,
 			})
 		end,

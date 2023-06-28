@@ -1,7 +1,6 @@
 return {
 	"ibhagwan/fzf-lua",
 	event = "VeryLazy",
-	-- module = true,
 	dependencies = { "nvim-tree/nvim-web-devicons" },
 	config = function()
 		local actions = require("fzf-lua.actions")
@@ -84,6 +83,7 @@ return {
 				prompt = "Tabs❯ ",
 				tab_title = "Tab",
 				tab_marker = "<<",
+				show_unlisted = true,
 				file_icons = true, -- show file icons?
 				color_icons = true, -- colorize file|git icons
 				actions = {

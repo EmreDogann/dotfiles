@@ -44,16 +44,27 @@ end
 return {
 	{
 		"luukvbaal/statuscol.nvim",
-		event = { "BufReadPre", "BufNewFile" },
+		event = { "BufReadPre", "BufNewFile", "TabLeave" },
 		config = function()
 			local builtin = require("statuscol.builtin")
 			require("statuscol").setup({
 				relculright = true,
 				segments = {
+					-- {
+					-- 	text = { builtin.foldfunc, " " },
+					-- 	condition = { true, builtin.not_empty },
+					-- 	-- click = "v:lua.ScFa",
+					-- },
 					{
-						text = { builtin.foldfunc, " " },
+						text = { " " },
 						condition = { true, builtin.not_empty },
-						-- click = "v:lua.ScFa",
+					},
+					{
+						condition = { true, builtin.not_empty },
+						-- click = "v:lua.ScSa",
+						sign = {
+							name = { "Diagnostic" },
+						},
 					},
 					{
 						text = { builtin.lnumfunc, " " },
@@ -61,10 +72,42 @@ return {
 						-- click = "v:lua.ScLa",
 					},
 					{
-						text = { "%s" },
+						-- text = { "%#SignColumn#▏" },
+						click = "v:lua.ScSa",
 						condition = { true, builtin.not_empty },
-						-- click = "v:lua.ScSa",
+						sign = {
+							name = { "GitSign*" }, -- table of lua patterns to match the sign name against
+							-- namespace = { "gitsign*" }, -- table of lua patterns to match the extmark sign namespace against
+							colwidth = 1,
+							-- fillchar = "▏",
+						},
 					},
+				},
+			})
+		end,
+	},
+
+	-- Gitsigns
+	{
+		"lewis6991/gitsigns.nvim",
+		lazy = false,
+		config = function()
+			require("gitsigns").setup({
+				signs = {
+					add = { text = "▏" },
+					change = { text = "▏" },
+					delete = { text = "▏" },
+					topdelete = { text = "▏" },
+					changedelete = { text = "▏" },
+					untracked = { text = "┆" },
+				},
+				signcolumn = true,
+				preview_config = {
+					border = "single",
+					style = "minimal",
+					relative = "cursor",
+					row = 0,
+					col = 1,
 				},
 			})
 		end,
@@ -74,10 +117,7 @@ return {
 	{
 		"kevinhwang91/nvim-ufo",
 		dependencies = "kevinhwang91/promise-async",
-		event = {
-			"BufReadPost",
-			"BufNewFile",
-		},
+		event = { "BufReadPost", "BufNewFile" },
 		keys = {
 			{
 				"zR",
@@ -113,7 +153,6 @@ return {
 	-- nvim-hlslens
 	{
 		"kevinhwang91/nvim-hlslens",
-		event = "BufReadPre",
 		keys = {
 			{
 				"n",

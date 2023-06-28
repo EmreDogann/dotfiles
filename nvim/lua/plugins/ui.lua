@@ -5,7 +5,7 @@ return {
 			require("notify").setup({
 				-- stages = "fade",
 				top_down = true,
-				timeout = 2000,
+				timeout = 3000,
 				fps = 60,
 			})
 
@@ -35,6 +35,11 @@ return {
 				},
 				cmdline = {
 					view = "cmdline_popup",
+					opts = {
+						win_options = {
+							winblend = 0,
+						},
+					},
 					format = {
 						cmdline = { icon = ":" },
 					},
