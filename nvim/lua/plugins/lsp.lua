@@ -1,6 +1,6 @@
 local function GetCapabilities()
 	local lspCapabilities = vim.lsp.protocol.make_client_capabilities()
-	lspCapabilities.offsetEncoding = { "utf-8", "utf-16" } -- Fixes some weird bugs
+	lspCapabilities.offsetEncoding = { "utf-16" } -- Fixes some weird bugs
 
 	-- Add additional capabilities supported by nvim-cmp
 	local cmpCapabilities = require("cmp_nvim_lsp").default_capabilities()

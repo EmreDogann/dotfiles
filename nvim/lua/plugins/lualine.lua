@@ -251,6 +251,7 @@ return {
 								return require("nvim-possession").status() ~= nil
 							end,
 						},
+
 						-- {
 						-- 	require("tabline").tabline_tabs,
 						-- 	padding = {
@@ -279,7 +280,7 @@ return {
 						},
 					},
 				},
-				extensions = { "fugitive", "fzf", "lazy", "man", "nvim-dap-ui", "nvim-tree", "quickfix" },
+				extensions = { "fugitive", "fzf", "lazy", "man", "nvim-dap-ui", "nvim-tree", "quickfix", "toggleterm" },
 			})
 		end,
 	},

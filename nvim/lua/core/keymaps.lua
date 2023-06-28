@@ -7,8 +7,11 @@ local functions = require("functions")
 keymap("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
 
--- Fast quiting - Close window then delete the previous buffer (the buffer in the deleted window)
+-- Fast closing - Close window then delete the previous buffer (the buffer in the deleted window)
 keymap("n", "<S-q>", "<cmd>bd<CR>", { silent = true })
+
+-- Fast quitting - Save all and then exit.
+keymap("n", "<M-z><M-z>", "<cmd>wa<CR><cmd>qa!<CR>", { silent = true })
 
 -- Fast saving
 keymap("n", "<C-s>", function()

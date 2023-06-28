@@ -89,8 +89,8 @@ return {
 						sign = {
 							name = { "GitSign*" }, -- table of lua patterns to match the sign name against
 							-- namespace = { "gitsign*" }, -- table of lua patterns to match the extmark sign namespace against
-							colwidth = 1,
-							-- fillchar = "▏",
+							-- maxwidth = 2,
+							colwidth = 2,
 						},
 					},
 				},
@@ -106,11 +106,11 @@ return {
 		config = function()
 			require("gitsigns").setup({
 				signs = {
-					add = { text = "▏" },
-					change = { text = "▏" },
-					delete = { text = "▏" },
-					topdelete = { text = "▏" },
-					changedelete = { text = "▏" },
+					add = { text = "│" },
+					change = { text = "│" },
+					delete = { text = "│" },
+					topdelete = { text = "│" },
+					changedelete = { text = "│" },
 					untracked = { text = "┆" },
 				},
 				signcolumn = true,
@@ -238,5 +238,51 @@ return {
 			-- 	desc = "Delete the current buffer forcefully",
 			-- },
 		},
+	},
+
+	{
+		"akinsho/toggleterm.nvim",
+		keys = {
+			"<C-\\>",
+		},
+		cmd = {
+			"ToggleTerm",
+			"ToggleTermToggleAll",
+			"TermExec",
+			"TermSelect",
+			"ToggleTermSendCurrentLine",
+			"ToggleTermSendVisualLines",
+			"ToggleTermSendVisualSelection",
+			"ToggleTermSetName",
+		},
+		version = "*",
+		config = function()
+			require("toggleterm").setup({
+				open_mapping = [[<c-\>]],
+				size = 20,
+				hide_numbers = true,
+				shade_ftletypes = {},
+				shade_terminals = true,
+				shading_factor = 2,
+				start_in_insert = true,
+				insert_mapptngs = true,
+				persist_size = true,
+				direction = "horizontal",
+				close_on_exit = true,
+				shell = vim.o.shell,
+			})
+
+			function _G.set_terminal_keymaps()
+				local opts = { buffer = 0 }
+				vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
+				vim.keymap.set("t", "<C-h>", [[<Cmd>wincmd h<CR>]], opts)
+				vim.keymap.set("t", "<C-j>", [[<Cmd>wincmd j<CR>]], opts)
+				vim.keymap.set("t", "<C-k>", [[<Cmd>wincmd k<CR>]], opts)
+				vim.keymap.set("t", "<C-l>", [[<Cmd>wincmd l<CR>]], opts)
+			end
+
+			-- if you only want these mappings for toggle term use term://*toggleterm#* instead
+			vim.cmd("autocmd! TermOpen term://* lua set_terminal_keymaps()")
+		end,
 	},
 }
