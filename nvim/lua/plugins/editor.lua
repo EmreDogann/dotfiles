@@ -61,9 +61,20 @@ return {
 					},
 					{
 						condition = { true, builtin.not_empty },
+						click = "v:lua.ScSa",
+						sign = {
+							name = { "Dap*" },
+							maxwidth = 1,
+							colwidth = 2,
+							auto = true,
+							fillchar = " ",
+						},
+					},
+					{
+						condition = { true, builtin.not_empty },
 						-- click = "v:lua.ScSa",
 						sign = {
-							name = { "Diagnostic" },
+							name = { "Diagnostic*" },
 						},
 					},
 					{
@@ -91,6 +102,7 @@ return {
 	{
 		"lewis6991/gitsigns.nvim",
 		lazy = false,
+		event = { "BufReadPre", "BufNewFile" },
 		config = function()
 			require("gitsigns").setup({
 				signs = {

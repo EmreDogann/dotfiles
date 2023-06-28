@@ -14,6 +14,7 @@ return {
 			end, { silent = true })
 		end,
 	},
+
 	{
 		"folke/noice.nvim",
 		event = "VeryLazy",
@@ -154,6 +155,98 @@ return {
 						opts = { format = "details" },
 					},
 				},
+			})
+		end,
+	},
+
+	{
+		"b0o/incline.nvim",
+		event = { "BufReadPre", "BufNewFile" },
+		config = function()
+			local function get_diagnostic_label(props)
+				local diagnosticIconUtil = require("utils.icons").diagnostics_outline
+				local icons = {
+					error = diagnosticIconUtil.Error,
+					warn = diagnosticIconUtil.Warning,
+					info = diagnosticIconUtil.Information,
+					hint = diagnosticIconUtil.Hint,
+				}
+
+				local label = {}
+				for severity, icon in pairs(icons) do
+					local n =
+						#vim.diagnostic.get(props.buf, { severity = vim.diagnostic.severity[string.upper(severity)] })
+					if n > 0 then
+						table.insert(label, { icon .. " " .. n .. " ", group = "DiagnosticSign" .. severity })
+					end
+				end
+
+				return label
+			end
+
+			require("incline").setup({
+				debounce_threshold = { rising = 50, falling = 100 },
+				window = {
+					padding = { left = 0, right = 1 },
+					margin = { horizontal = 0, vertical = 0 },
+					zindex = 40,
+				},
+				render = function(props)
+					local bufname = vim.api.nvim_buf_get_name(props.buf)
+					local filename = (bufname ~= "" and vim.fn.fnamemodify(bufname, ":t") or "[No Name]")
+					local diagnostics = get_diagnostic_label(props)
+					---@diagnostic disable-next-line: redundant-parameter
+					local modified = vim.api.nvim_buf_get_option(props.buf, "modified") and "bold" or "None"
+					---@diagnostic disable-next-line: redundant-parameter
+					local modified_icon = vim.api.nvim_buf_get_option(props.buf, "modified") and " ● " or " "
+					local filetype_icon, color = require("nvim-web-devicons").get_icon_color(filename)
+
+					local is_searching = vim.fn.getcmdtype()
+					if is_searching ~= "/" and is_searching ~= "?" then
+						is_searching = ""
+					end
+
+					local bufferInfo = {
+						{ filetype_icon, guifg = color },
+						{ " " },
+						{ filename, gui = modified },
+						{ modified_icon },
+					}
+
+					local label = {
+						{ " ", guifg = "#8caaee", gui = "None" },
+					}
+
+					if #diagnostics > 0 then
+						table.insert(diagnostics, { "| ", guifg = "Gray" })
+					end
+
+					if props.focused and is_searching ~= "" then
+						local count = vim.fn.searchcount({ recompute = 1, maxcount = -1 })
+						-- local contents = vim.fn.getcmdline()
+						local contents = vim.fn.getcmdline()
+						table.insert(label, {
+							is_searching .. " ",
+							group = "Conceal",
+						})
+						table.insert(label, {
+							(" %s "):format(contents),
+							group = "IncSearch",
+						})
+						table.insert(label, {
+							(" %d/%d "):format(count.current, count.total),
+							group = "Conceal",
+						})
+						table.insert(label, { "| ", guifg = "grey" })
+					else
+						table.insert(label, diagnostics)
+					end
+
+					for _, buffer_ in ipairs(bufferInfo) do
+						table.insert(label, buffer_)
+					end
+					return label
+				end,
 			})
 		end,
 	},

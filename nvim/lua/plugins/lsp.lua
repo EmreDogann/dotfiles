@@ -449,6 +449,7 @@ return {
 					return ":IncRename " .. vim.fn.expand("<cword>")
 				end,
 				expr = true,
+				silent = true,
 				desc = "Rename Signature",
 			},
 		},
@@ -462,7 +463,7 @@ return {
 		"ThePrimeagen/refactoring.nvim",
 		keys = {
 			{
-				mode = "v",
+				mode = { "n", "v" },
 				"<leader>rr",
 			},
 			{
@@ -507,6 +508,12 @@ return {
 			})
 
 			-- prompt for a refactor to apply when the remap is triggered
+			vim.api.nvim_set_keymap(
+				"n",
+				"<leader>rr",
+				":normal! v<CR>:lua require('refactoring').select_refactor()<CR>",
+				{ noremap = true, silent = true, expr = false }
+			)
 			vim.api.nvim_set_keymap(
 				"v",
 				"<leader>rr",

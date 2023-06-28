@@ -165,14 +165,12 @@ return {
 	},
 	{
 		"lukas-reineke/indent-blankline.nvim",
-		event = {
-			"BufReadPre",
-		},
+		event = { "BufReadPost" },
 		config = function()
 			vim.cmd([[highlight! link IndentBlanklineContextChar Comment]])
 
 			require("indent_blankline").setup({
-				use_treesitter = true,
+				use_treesitter = false, -- Causes indent guides on blank lines and in other incorrect places.
 				show_first_indent_level = false,
 				show_trailing_blankline_indent = false,
 				show_current_context = false,
