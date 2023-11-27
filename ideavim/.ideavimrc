@@ -1,0 +1,289 @@
+"=====================================  Configuration  ====================================
+set number relativenumber
+set ideajoin
+set idearefactormode=keep
+set ideamarks
+set timeoutlen=5000
+set nostartofline 
+set noideadelaymacro
+set clipboard+=unnamedplus,ideaput
+set scrolloff=6
+set sidescrolloff=6
+set history=100000   " overrides the 200 in defaults.vim
+set incsearch
+set hlsearch
+set smartcase
+
+set autoindent
+set noexpandtab
+set tabstop=4
+set shiftwidth=4
+
+set showcmd
+set visualbell
+set ideastrictmode
+
+"=====================================  Plugins  ==========================================
+Plug 'machakann/vim-highlightedyank'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-surround'
+Plug 'vim-scripts/ReplaceWithRegister'
+set which-key
+set quickscope
+set NERDTree
+set argtextobj
+set exchange
+set textobj-entire
+set textobj-indent
+set vim-paragraph-motion
+set matchit
+
+"=====================================  Plugin Settings  ==================================
+let g:argtextobj_pairs="[:],(:),<:>"
+
+let g:qs_highlight_on_keys=['f', 'F', 't', 'T']
+
+let g:WhichKey_DefaultDelay=1000
+
+let g:NERDTreeMapActivateNode='l'
+let g:NERDTreeMapJumpParent='h'
+
+"=====================================  Keymaps  ==========================================
+
+"---------------------  General  ---------------------
+let mapleader=" "
+
+map <Space> <Nop>
+map <CR> <nop>
+
+noremap <C-s> :write<CR>
+nnoremap \e :e C:/Users/Emre/.ideavimrc<CR>
+nnoremap \r :action IdeaVim.ReloadVimRc.reload<CR>
+nnoremap <leader>= :action ReformatCode<CR>
+
+nnoremap <silent> <C-M-l> :let @/ = ""<CR>
+
+" Easy visual indentation
+vnoremap < <gv
+vnoremap > >gv
+vnoremap = =gv
+
+" Reselect pasted text
+nnoremap gV `[v`]
+
+map zc :action CollapseRegion<CR>
+map zo :action ExpandRegion<CR>
+map za :action ExpandCollapseToggleAction<cr>
+
+
+"---------------------  Jumping  ---------------------
+nnoremap <C-o> :action Back<CR>
+nnoremap <C-i> :action Forward<CR>
+
+noremap <CR> :action EditorSelectWord<CR>
+noremap <S-CR> :action EditorUnSelectWord<CR>
+
+nnoremap [m :action MethodUp<CR>
+nnoremap ]m :action MethodDown<CR>
+nnoremap [c :action ReSharperGotoContainingDeclaration<CR>
+
+nnoremap gs :action GotoSuperMethod<CR>
+nnoremap gd :action GotoDeclaration<CR>
+nnoremap K :action QuickJavaDoc<CR>
+nnoremap gp :action ParameterInfo<CR>
+nnoremap gy :action ShowErrorDescription<CR>
+nnoremap gD :action GotoTypeDeclaration<CR>
+nnoremap gi :action GotoImplementation<CR>
+nnoremap gI :action QuickImplementations<CR>
+nnoremap gu :action ShowUsages<CR>
+nnoremap gU :action FindUsages<CR>
+nnoremap gn :action ShowNavBar<CR>
+nnoremap gh :action ShowHoverInfo<CR>
+nnoremap gf :action FileStructurePopup<CR>
+
+nnoremap ]d :action GotoNextError<CR>
+nnoremap [d :action GotoPreviousError<CR>
+
+
+"---------------------  Fuzzy Finding  ---------------------
+map <C-p><C-p> :action SearchEverywhere<CR>
+map <C-p><C-[> :action GotoFile<CR>
+map <C-p><C-c> :action GotoClass<CR>
+map <C-p><C-a> :action GotoAction<CR>
+map <C-p><C-o> :action RecentFiles<CR>
+map <C-p><C-m> :action RecentLocations<CR>
+map <C-p><C-s> :action GotoSymbol<CR>
+map <C-p><C-l> :action TextSearchAction<CR>
+map <C-p><C-r> :action ReplaceInPath<CR>
+map <C-p><C-x> :action PasteMultiple<CR>
+
+nnoremap <leader>/ :action Find<CR>
+nnoremap <leader>re :action Replace<CR>
+
+
+"---------------------  Refactoring  ---------------------
+nnoremap <leader>rn :action ReSharperNavigateTo<CR>
+nnoremap <leader>rq :action Refactorings.QuickListPopupAction<CR>
+nnoremap <leader>rf :action RenameFile<CR>
+nnoremap <leader>rs :action ChangeSignature<CR>
+
+nnoremap <leader>sr :action SurroundWith<CR>
+vnoremap <leader>sr :action SurroundWith<CR>
+
+
+"---------------------  Debugging  ---------------------
+nnoremap <C-F5> :action Run<CR>
+" nnoremap <C-F5> :action TriggerPlayInUnity<CR>
+nnoremap <F5> :action Debug<CR>
+nnoremap <F6> :action Pause<CR>
+" nnoremap <F6> :action TriggerPauseInUnityEditor<CR>
+nnoremap <leader>dq :action Stop<CR>
+
+nnoremap <leader>db :action ToggleLineBreakpoint<CR>
+nnoremap <C-p><C-b> :action ViewBreakpoints<CR>
+nnoremap <leader>dB :action EditBreakpoint<CR>
+map <leader>dx :action QuickEvaluateExpression<CR>
+map <leader>dX :action EvaluateExpression<CR>
+map <leader>dw :action Debugger.AddToWatch<CR>
+
+nnoremap <leader>do :action StepOver<CR>
+nnoremap <leader>di :action StepInto<CR>
+nnoremap <leader>du :action StepOut<CR>
+nnoremap <leader>dc :action ForceRunToCursor<CR>
+
+nnoremap <leader>dr :action Resume<CR>
+
+"---------------------  Window Navigation  ---------------------
+sethandler <C-s-h> a:vim
+sethandler <C-s-j> a:vim
+sethandler <C-s-k> a:vim
+sethandler <C-s-l> a:vim
+
+nnoremap ;v :action SplitVertically<CR>
+nnoremap ;s :action SplitHorizontally<CR>
+nnoremap ;V :action MoveTabRight<CR>
+nnoremap ;S :action MoveTabDown<CR>
+nnoremap ;m :action MoveEditorToOppositeTabGroup<CR>
+nnoremap ;_ :action TabShiftActions.ToggleMaximizeRestore<CR>
+nnoremap ;= :action tabshifter.Actions.EqualSizeSplit<CR>
+nnoremap ;x :action HideAllWindows<CR>
+nnoremap ;r :action ChangeSplitOrientation<CR>
+
+nnoremap ;h <C-w>h
+nnoremap ;j <C-w>j
+nnoremap ;k <C-w>k
+nnoremap ;l <C-w>l
+nnoremap ;; <C-w><C-w>
+
+nnoremap <C-S-h> :action TabShiftActions.ShiftLeft<CR>
+nnoremap <C-S-j> :action TabShiftActions.ShiftDown<CR>
+nnoremap <C-S-k> :action TabShiftActions.ShiftUp<CR>
+nnoremap <C-S-l> :action TabShiftActions.ShiftRight<CR>
+
+nnoremap <C-Down> :action StretchSplitToBottom<CR>
+nnoremap <C-Left> :action StretchSplitToLeft<CR>
+nnoremap <C-Right> :action StretchSplitToRight<CR>
+nnoremap <C-Up> :action StretchSplitToTop<CR>
+
+nnoremap <S-TAB> :action PreviousTab<CR>
+nnoremap <TAB> :action NextTab<CR>
+
+nnoremap <leader>q :action CloseContent<CR>
+nnoremap <S-q> :action CloseAllEditors<CR>
+
+nnoremap ;e :NERDTreeToggle<CR>
+nnoremap ;wg :action ActivateVersionControlToolWindow<CR>
+nnoremap ;wc :action ActivateCommitToolWindow<CR>
+nnoremap ;z :action ToggleDistractionFreeMode<CR>
+
+" Mapped in settings -> keymaps
+"map <C-CR> :action ShowPopupMenu<CR>
+
+
+"---------------------  Copy/Paste/Delete  ---------------------
+" Remaps default vim delete functionality (cut) to normal delete (not cut).
+nnoremap X "_X
+nnoremap x "_x
+
+nnoremap d "_d
+nnoremap D "_D
+vnoremap d "_d
+
+nnoremap s "_s
+nnoremap S "_S
+vnoremap s "_s
+
+nnoremap c "_c
+nnoremap C "_C
+vnoremap c "_c
+
+nnoremap <leader>d "+d
+nnoremap <leader>D "+D
+vnoremap <leader>d "+d
+
+" Makes Y behave like C and D - working from cursor to end of line.
+nnoremap Y y$
+
+
+"---------------------  Text Objects  ---------------------
+" val - Select whole line
+" vil - Select entire contents of line (no indents/whitespace).
+vnoremap <silent> al :<c-u>norm!1v$h<cr>
+vnoremap <silent> il :<c-u>norm!^vg_<cr>
+onoremap <silent> al :norm val<cr>
+onoremap <silent> il :norm vil<cr>
+" <leader>vf - Select function (cursor must be placed at function definition) (open curly brace must be on new line)
+nnoremap <leader>vf Vj%
+nnoremap <leader>vd :action ReSharperSelectContainingDeclaration<CR>
+vnoremap <leader>vd :action ReSharperSelectContainingDeclaration<CR>
+
+" CamelCaseMotion approximation (obsolete with proper CamelCaseMotion plugin)
+" Missing inner word motions e.g. i<leader>w
+nmap <M-w> [w
+nmap <M-b> [b
+nmap <M-e> ]w
+nmap <M-g><M-e> ]b
+
+
+"---------------------  Moving  ---------------------
+nnoremap <leader>bb :action Bookmarks<CR>
+nnoremap <leader>bs :action ShowBookmarks<CR>
+nnoremap <leader>bt :action ToggleBookmark<CR>
+
+map <M-j> :action MoveLineDown<CR>
+map <M-k> :action MoveLineUp<CR>
+map <M-S-j> :action EditorDuplicate<CR>
+
+nnoremap <C-d> <C-d>zz
+nnoremap <C-u> <C-u>zz
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+
+"---------------------  Other  ---------------------
+function! Invert(calledFromVisual)
+  let antonyms = ['true', 'false', 'after', 'before', 'start', 'end', 'left', 'right', 'up', 'down', 'first', 'last', 'front', 'back', 'forward', 'backward', 'enable', 'disable',
+                 \'True', 'False', 'After', 'Before', 'Start', 'End', 'Left', 'Right', 'Up', 'Down', 'First', 'Last', 'Front', 'Back', 'Forward', 'Backward', 'Enable', 'Disable']
+
+  if a:calledFromVisual
+    normal gv"wy
+  else
+    normal "wyiw
+  endif
+  let wordUnderCaret = @w
+
+  let eraseWord = a:calledFromVisual ? 'gvc' : 'ciw'
+  let eraseWord = 'ciw'
+  let count = 0
+  while (count < len(antonyms)-1)
+    if (antonyms[count] ==# wordUnderCaret)
+      let antonym = (count % 2 ==? 0) ? antonyms[count + 1] : antonyms[count - 1]
+      execute 'normal ' .. eraseWord .. antonym
+      break
+    endif
+    let count += 1
+  endwhile
+endfunction
+
+nnoremap ! :call Invert(0)<CR>
+vnoremap ! :<C-u>call Invert(1)<CR>
