@@ -4,7 +4,7 @@ set ideajoin
 set idearefactormode=keep
 set ideamarks
 set timeoutlen=5000
-set nostartofline 
+set nostartofline
 set noideadelaymacro
 set clipboard+=unnamedplus,ideaput
 set scrolloff=6
@@ -114,6 +114,7 @@ map <C-p><C-o> :action RecentFiles<CR>
 map <C-p><C-m> :action RecentLocations<CR>
 map <C-p><C-s> :action GotoSymbol<CR>
 map <C-p><C-l> :action TextSearchAction<CR>
+map <C-p><C-f> :action FindInPath<CR>
 map <C-p><C-r> :action ReplaceInPath<CR>
 map <C-p><C-x> :action PasteMultiple<CR>
 
@@ -242,7 +243,7 @@ vnoremap <leader>vd :action ReSharperSelectContainingDeclaration<CR>
 nmap <M-w> [w
 nmap <M-b> [b
 nmap <M-e> ]w
-nmap <M-g><M-e> ]b
+nmap <M-S-b> ]b
 
 
 "---------------------  Moving  ---------------------
